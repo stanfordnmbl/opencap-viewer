@@ -1,0 +1,55 @@
+.w-50 {
+  width: 50%;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.scroll-y {
+  overflow-y: auto;
+}
+
+.sub-header {
+  font-size: 1.25rem;
+  color: white;
+  font-weight: 500;
+  line-height: 2;
+}
+
+.image-container, .image-container-w-100 {
+  background-color: white;
+  border-radius: 8px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover
+  }
+}
+
+.image-container {
+  height: 200px;
+}
+
+.image-container-round {
+  border-radius: 4px;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.toasted {
+  font-family: Roboto, sans-serif;
+}
+
+.justify-content-evenly {
+  justify-content: space-evenly;
+}
+
+html {
+  overflow-y: hidden;
+}

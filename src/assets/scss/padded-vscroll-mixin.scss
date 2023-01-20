@@ -1,0 +1,18 @@
+@mixin padded-vscroll-bar($width: 16px, $color: rgba(235,235,235,1)) {
+  // Firefox
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,.5) $color;
+
+  // All other browsers
+  &::-webkit-scrollbar {
+    width: $width;
+    height: 16px;
+    background: inherit;
+  }
+  &::-webkit-scrollbar-track:vertical {
+    border-right: 8px solid $color;
+  }
+  &::-webkit-scrollbar-thumb:vertical {
+    border-right: 8px solid rgba(0,0,0,.5);
+  }  
+}
