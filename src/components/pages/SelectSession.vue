@@ -29,11 +29,21 @@
       class="sessions-table mx-2 mb-4 flex-grow-1"
       @item-selected="onSelect"
       @click:row="onRowClick"/>
+      
+    <div class="d-flex table-info-footer">
+      <v-btn
+        class="ml-2"
+        @click="onLoadAllSessions">
+        Load all sessions
+      </v-btn>
+    </div>
+    
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
+import { apiError } from '@/util/ErrorMessage.js'
 
 export default {
   name: 'SelectSession',
@@ -67,11 +77,20 @@ export default {
     }
   },
   methods: {
+    ...mapActions('data', ['loadExistingSessions']),
     onSelect ({ item, value }) {
       this.selected = value ? item : null
     },
     onRowClick (item, params) {
       params.select(!params.isSelected)
+    },
+    async onLoadAllSessions(){
+      try {
+        await this.loadExistingSessions({reroute: true, quantity:20})           
+      } catch (error) {
+        apiError(error)
+        this.$router.push({ name: 'Step1' })
+      }
     }
   }
 }
@@ -79,12 +98,12 @@ export default {
 
 <style lang="scss">
 .select-session {
-  height: calc(100vh - 64px);
+  height: calc(98vh - 64px);
 
   .sessions-table {
     .v-data-table__wrapper {
       overflow-y: auto;
-      height: calc(100vh - 128px);
+      height: calc(94vh - 128px);
       position: relative;
 
       table {
@@ -96,6 +115,9 @@ export default {
         }
       }
     }    
+  }
+  .table-info-footer {
+    margin-left: auto;
   }
 }
 
