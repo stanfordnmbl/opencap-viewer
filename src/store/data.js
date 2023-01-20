@@ -30,6 +30,7 @@ export default {
     gender: 'woman',
     data_sharing: '',
     pose_model: 'openpose',
+    framerate: 60,
 
     // step 5
     trialName: ''
