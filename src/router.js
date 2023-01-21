@@ -69,7 +69,7 @@ var router = new Router({
       component: Step5
     },
     {
-      path: '/dashboard',
+      path: '/dashboard/:id',
       name: 'Dashboard',
       component: Dashboard
     },
@@ -91,14 +91,14 @@ const routesWithOutAuth = [
   'Register',
   'Session',
   'ResetPassword',
-  'NewPassword'
+  'NewPassword',
+  'Dashboard'
 ]
 
 const routesRequireSession = [
   'Step2',
   'Step3',
-  'Step4',
-  'Dashboard'
+  'Step4'
 ]
 
 const acceptedRoutes = [

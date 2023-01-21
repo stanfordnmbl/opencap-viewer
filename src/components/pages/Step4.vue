@@ -156,43 +156,15 @@
           </ValidationObserver>
         </v-card-text>
       </v-card>
-      
-      <v-card class="mb-4">
-        <div class="d-flex justify-center">
-          <v-card-title class="justify-center data-title">
-            Select human pose estimation model
-          </v-card-title>
-          <v-tooltip bottom="">
-            <template v-slot:activator="{ on }">
-              <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
-            </template>
-            OpenCap supports two human pose estimation models: OpenPose and HRNet. We recommend using OpenPose for computation speed, but both models provide similar accuracy.
-            OpenPose is restricted to academic or non-profit organization non-commercial research use (consult the license at https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/LICENSE).
-            HRNet, as implemented by Open-MMLab, has a permissive Apache 2.0 license (consult the license at https://github.com/open-mmlab/mmpose/blob/master/LICENSE).
-            Please ensure that you have the rights to use the model you select. The OpenCap authors deny any responsibility regarding license infringement.
-          </v-tooltip>
-        </div>
+ 
+       <div class="d-flex justify-center">
+        <v-btn
+          class="mt-4 mb-4 ml-4 mr-4"
+          @click="openAdvancedSettings">
+          Advanced Settings
+        </v-btn>
+      </div>
 
-        <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
-          <ValidationObserver
-            tag="div"
-            class="d-flex flex-column checkbox-box"
-            ref="observer"
-            v-slot="{ }"
-          >
-            <v-radio-group v-model="pose_model">
-              <v-radio
-                label="OpenPose (recommended, non-commercial research use only)"
-                value="openpose"
-              ></v-radio>
-              <v-radio
-                label="HRNet"
-                value="hrnet"
-              ></v-radio>
-            </v-radio-group>
-          </ValidationObserver>
-        </v-card-text>
-      </v-card>
     </div>
 
     <v-card class="step-4-2 ml-4 d-flex images-box">
@@ -287,6 +259,61 @@
         </div>
       </v-card-text>
     </v-card>
+    
+    
+    <div id="overlay-panel" class="overlay-panel" v-on:click="closeAdvancedSettings"></div>
+
+    <v-card id="advanced-settings-menu" class="centered-settings">
+      <div class="pt-4 pr-4 text-right">
+        <v-btn
+          @click="closeAdvancedSettings">
+                ✖
+        </v-btn>
+      </div>
+      <div class="d-flex justify-center">
+        <v-card-title class="justify-center data-title">
+          Select human pose estimation model
+        </v-card-title>
+        <v-tooltip bottom="">
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+          </template>
+          OpenCap supports two human pose estimation models: OpenPose and HRNet. We recommend using OpenPose for computation speed, but both models provide similar accuracy.
+          OpenPose is restricted to academic or non-profit organization non-commercial research use (consult the license at https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/LICENSE).
+          HRNet, as implemented by Open-MMLab, has a permissive Apache 2.0 license (consult the license at https://github.com/open-mmlab/mmpose/blob/master/LICENSE).
+          Please ensure that you have the rights to use the model you select. The OpenCap authors deny any responsibility regarding license infringement.
+        </v-tooltip>
+      </div>
+
+      <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+
+        <v-select
+            v-model="pose_model"
+            label="Human pose estimation model"
+            v-bind:items="pose_models"
+          />
+
+      </v-card-text>
+
+      <div class="d-flex justify-center">
+        <v-card-title class="justify-center data-title">
+          Select framerate
+        </v-card-title>
+      </div>
+
+
+      <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+
+        <v-select
+            v-model="framerate"
+            label="Framerate"
+            v-bind:items="framerates_available"
+          />
+
+      </v-card-text>
+    </v-card>
+
+    
   </MainLayout>
 </template>
 
@@ -337,7 +364,15 @@ export default {
         "Share processed data",
         "Share no data",
       ],
-      pose_model: 'openpose',
+      pose_model: 'OpenPose (recommended, non-commercial research use only)',
+      pose_models: [
+        {"text": "OpenPose (recommended, non-commercial research use only)", "value": "openpose"},
+        {"text": "HRNet", "value": "hrnet"},
+      ],
+      framerate: 60,
+      framerates_available: [
+        {"text": "60fps (max recording time: 60s, default)", "value": 60},
+      ],
       busy: false,
       disabledNextButton: true,
       imgs: null,
@@ -451,6 +486,7 @@ export default {
             gender: this.gender,
             data_sharing: this.data_sharing,
             pose_model: this.pose_model,
+            framerate: this.framerate
           });
           try {
             const resUpdate = await axios.get(
@@ -464,6 +500,7 @@ export default {
                   subject_gender: this.gender,
                   subject_data_sharing: this.data_sharing,
                   subject_pose_model: this.pose_model,
+                  settings_framerate: this.framerate
                 },
               }
             );
@@ -545,6 +582,36 @@ export default {
         apiError(error);
       }
     },
+    openAdvancedSettings() {
+      document.getElementById("overlay-panel").style.display = "inline-block";
+      document.getElementById("advanced-settings-menu").style.display = "inline-block";
+      this.getAvailableFramerates()
+    },
+    closeAdvancedSettings() {
+      document.getElementById("overlay-panel").style.display = "none";
+      document.getElementById("advanced-settings-menu").style.display = "none";
+    },
+    async getAvailableFramerates() {
+      const session_settings = await axios.get(`/sessions/${this.session.id}/get_session_settings/`)
+      // If the session has framerates...
+      if('data' in session_settings && 'framerates' in session_settings.data) {
+        this.framerates_available = []
+        // Push them to available framerates
+        session_settings.data.framerates.forEach(element => {
+          if(element == 60) {
+            this.framerates_available.push({"text": "60fps (max recording time: 60s, default)", "value": 60})
+          } else if(element == 120) {
+            this.framerates_available.push({"text": "120fps (max recording time: 30s)", "value": 120})
+          } else if(element == 240) {
+            this.framerates_available.push({"text": "240fps (max recording time: 15s)", "value": 240})
+          }
+        });
+      }
+      // If not, or we did not recognize them (different to 60, 120 or 240), set 60 as default.
+      if(this.framerates_available.length == 0) {
+        this.framerates_available.push({"text": "60fps (max recording time: 60s, default)", "value": 60})
+      }
+    }
   },
 };
 </script>
@@ -599,6 +666,26 @@ export default {
 
 .checkbox-box > div {
   margin-top: 0;
+}
+
+.centered-settings {
+    position: fixed;
+    width: 50%;
+    text-align: center;
+    top: 25%;
+    left: 50%;
+    padding: 20px;
+    transform: translate(-50%, 0);
+    display: none;
+}
+
+.overlay-panel {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0.6;
+    display: none;
 }
 
 //.data-title {

@@ -24,10 +24,12 @@
           <v-text-field
             v-model="password"
             label="Password (20+ characters)"
-            type="password"
             dark
             :error="errors.length > 0"
             :error-messages="errors[0]"
+            :append-icon="show_password ? 'mdi-eye' : 'mdi-eye-off'"
+            :type="show_password ? 'text' : 'password'"
+            @click:append="show_password = !show_password"
           />
         </ValidationProvider>
 
@@ -39,10 +41,12 @@
           <v-text-field
             v-model="confirmPassword"
             label="Confirm password"
-            type="password"
             dark
             :error="errors.length > 0"
             :error-messages="errors[0]"
+            :append-icon="show_confirm_password ? 'mdi-eye' : 'mdi-eye-off'"
+            :type="show_confirm_password ? 'text' : 'password'"
+            @click:append="show_confirm_password = !show_confirm_password"
           />
         </ValidationProvider>
         <v-btn
@@ -72,7 +76,9 @@ export default {
       loading: false,
       submitted: false,
       password: "",
-      confirmPassword: ""
+      confirmPassword: "",
+      show_password: false,
+      show_confirm_password: false,
     };
   },
   methods: {

@@ -5,121 +5,84 @@
     <div class="content-chart">
       <GChart :type="chart_type" :data="chart_data" :options="chart_options" :resizeDebounce="500" @ready="onChartReady" style="width: 100%; height: 100%;"/>
     </div>
-    
+
     <!-- Left floating button. -->
     <div id="button-left" class="pa-2 fixed-button fixed-button-to-left">
-      <v-btn 
-        @click="leftMenu">
+      <v-btn @click="leftMenu">
         Data
       </v-btn>
     </div>
-        
+
     <!-- Right floating button. -->
     <div id="button-right" class="pa-2 fixed-button fixed-button-to-right">
-      <v-btn 
-        @click="rightMenu">
+      <v-btn @click="rightMenu">
         Options
       </v-btn>
     </div>
-  
+
     <!-- Left sidebar. -->
     <v-card class="sidebar left-sidebar">
       <div class="pa-4 left-menu-close-button">
-        <v-btn 
-          @click="leftMenu">
-                 ✖
+        <v-btn @click="leftMenu">
+          ✖
         </v-btn>
       </div>
       <v-card-text height="100%">
         <v-toolbar-title class="text-center">Data Menu</v-toolbar-title>
         <v-subheader class="subheader-bold"></v-subheader>
         <div class="left d-flex flex-column pa-2">
-          <v-select
-            v-model="session_selected"
-            v-bind:items="sessionsIds"
-            label="Select session"
-            outlined
-            dense
-            v-on:change="onSessionSelected"
-          ></v-select>
+          <div v-if="session_owned">
+            <v-select v-model="session_selected" v-bind:items="sessionsIds" label="Select session" outlined dense
+              v-on:change="onSessionSelected"></v-select>
+          </div>
+          
+          <v-select v-model="trial_selected" v-bind:items="trial_names" label="Select trial" outlined dense
+            v-on:change="onTrialSelected"></v-select>
 
-          <v-select
-            v-model="trial_selected"
-            v-bind:items="trial_names"
-            label="Select trial"
-            outlined
-            dense
-            v-on:change="onTrialSelected"
-          ></v-select>
+          <v-select v-bind:items="x_quantities" label="X Quantity" outlined dense
+            v-on:change="onXQuantitySelected"></v-select>
 
-          <v-select
-            v-bind:items="x_quantities"
-            label="X Quantity"
-            outlined
-            dense
-            v-on:change="onXQuantitySelected"
-          ></v-select>
-
-          <v-select
-            v-bind:items="y_quantities"
-            label="Y Quantities"
-            multiple
-            outlined
-            dense
-            v-on:change="onYQuantitySelected"
-          ></v-select>
+          <v-select v-bind:items="y_quantities" label="Y Quantities" multiple outlined dense
+            v-on:change="onYQuantitySelected"></v-select>
         </div>
       </v-card-text>
 
       <div class="left d-flex flex-column pa-2">
-        <v-btn 
-          class="mt-4"
-          @click="drawChart">
+        <v-btn class="mt-4" @click="drawChart">
           Generate Chart
         </v-btn>
 
-        <v-btn
-          class="mt-4"
-          @click="onChartDownload">
+        <v-btn class="mt-4" @click="onChartDownload">
           Download Chart
         </v-btn>
 
-        <v-btn
-          class="mt-4"
-          @click="$router.push({ name: 'Session', params: { id: current_session_id }})">
+        <v-btn class="mt-4" @click="$router.push({ name: 'Session', params: { id: current_session_id } })">
           Go to Visualizer
         </v-btn>
 
-        <v-btn
-          class="mt-4"
-          :to="{ name: 'SelectSession' }">Back to session list
-        </v-btn>
-      </div>     
-      
+        <div v-if="loggedIn" class="left d-flex flex-column">
+          <v-btn class="mt-4" :to="{ name: 'SelectSession' }">Back to session list
+          </v-btn>
+        </div>
+      </div>
+
     </v-card>
-  
-  <!-- Right sidebar. -->
+
+    <!-- Right sidebar. -->
     <v-card class="sidebar right-sidebar">
       <div class="pa-4 right-menu-close-button">
-        <v-btn 
-          @click="rightMenu">
-                 ✖
+        <v-btn @click="rightMenu">
+          ✖
         </v-btn>
       </div>
       <v-card-text>
-      
+
         <v-toolbar-title class="text-center">Options Menu</v-toolbar-title>
-        
+
         <v-subheader class="subheader-bold"></v-subheader>
-        
+
         <div class="left d-flex flex-column pa-2">
-          <v-select
-            v-model="chart_type"
-            v-bind:items="chart_type_options"
-            label="Chart Type"
-            outlined
-            dense
-          ></v-select>
+          <v-select v-model="chart_type" v-bind:items="chart_type_options" label="Chart Type" outlined dense></v-select>
 
           <v-text-field v-model="chart_options.title" label="Title" outlined dense></v-text-field>
 
@@ -127,48 +90,31 @@
 
           <v-text-field v-model="chart_options.vAxis.title" label="V. Axis Title" outlined dense></v-text-field>
 
-          <v-select
-            v-model="chart_options.legend.position"
-            v-bind:items="chart_legend_position"
-            label="Legend Position"
-            outlined
-            dense
-            v-on:change="placeholderFunction"
-          ></v-select>
+          <v-select v-model="chart_options.legend.position" v-bind:items="chart_legend_position" label="Legend Position"
+            outlined dense v-on:change="placeholderFunction"></v-select>
 
-          <v-select
-            v-model="chart_options.legend.alignment"
-            v-bind:items="chart_legend_alignment"
-            label="Legend Alignment"
-            outlined
-            dense
-            v-on:change="placeholderFunction"
-          ></v-select>
+          <v-select v-model="chart_options.legend.alignment" v-bind:items="chart_legend_alignment"
+            label="Legend Alignment" outlined dense v-on:change="placeholderFunction"></v-select>
 
-          <v-select
-            v-model="chart_download_format_selected"
-            v-bind:items="chart_download_format"
-            label="Download Format"
-            outlined
-            dense
-            v-on:change="placeholderFunction"
-          ></v-select>
+          <v-select v-model="chart_download_format_selected" v-bind:items="chart_download_format"
+            label="Download Format" outlined dense v-on:change="placeholderFunction"></v-select>
         </div>
       </v-card-text>
     </v-card>
-    
-  
+
+
   </div>
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import axios from 'axios'
-import { apiError} from '@/util/ErrorMessage.js'
+import { apiError } from '@/util/ErrorMessage.js'
 import Vue from 'vue'
 import VueGoogleCharts from "vue3-googl-chart"
 import { jsPDF } from 'jspdf'
 import 'svg2pdf.js'
+import store from '@/store/store.js'
 
 Vue.use(VueGoogleCharts);
 
@@ -176,18 +122,26 @@ export default {
   name: 'ChartPage',
   // This function is executed once the page has been loaded.
   created: function () {
-      // If a session id has been passed as a parameter, set it as the default session.
-      this.sessionsIds.forEach(sessionId => {
-          if(sessionId.includes(this.$route.params.session_id)) {
+      // Indicates if the current logged in user owns the session.
+      this.session_owned = false
+      
+      // If the user is logged in, select session from list of sessions.
+      if(this.loggedIn) {
+        // If a session id has been passed as a parameter, set it as the default session.
+        this.sessionsIds.forEach(sessionId => {
+          if (sessionId.includes(this.$route.params.id)) {
             this.session_selected = sessionId;
             this.onSessionSelected(this.session_selected);
+            this.session_owned = true
           }
-        }
-      );
-      
-      this.current_session_id = this.$route.params.session_id;
+        });
+      }
+
+    // Set session as current session.
+    this.current_session_id = this.$route.params.id;
   },
   methods: {
+    ...mapActions('data', ['loadSession']),
     // Open and close left menu.
     leftMenu() {
       if (document.getElementById("body").classList.contains("left-menu-closed")) {
@@ -212,88 +166,88 @@ export default {
     async drawChart() {
       var index = this.trial_names.indexOf(this.trial_selected);
       var id = this.trial_ids[index];
-      
+
       try {
         const { data } = await axios.get(`/trials/${id}/`);
-        
+
         this.trial = data
 
         // load JSON
-        const json = data.results.filter(element => element.tag == "ik_results" )
+        const json = data.results.filter(element => element.tag == "ik_results")
 
-  if (json && json.length > 0) {
-            let data
-            const url = json[0].media
+        if (json && json.length > 0) {
+          let data
+          const url = json[0].media
 
-            if (url.startsWith(axios.defaults.baseURL)) {
-              const res = await axios.get(url)
-              data = res.data
-            } else {
-              let axiosClean = axios.create()
+          if (url.startsWith(axios.defaults.baseURL)) {
+            const res = await axios.get(url)
+            data = res.data
+          } else {
+            let axiosClean = axios.create()
 
-              const res = await axiosClean.get(url, {
-                // Deleting Authorization header, because we have one as global Axios
-                // Do not pass out user token to 3rd party sites
-                transformRequest: [(data, headers) => {
-                  delete headers.common.Authorization
-                  return data
-                }]
-              })
+            const res = await axiosClean.get(url, {
+              // Deleting Authorization header, because we have one as global Axios
+              // Do not pass out user token to 3rd party sites
+              transformRequest: [(data, headers) => {
+                delete headers.common.Authorization
+                return data
+              }]
+            })
 
-              data = res.data
-            }
-            
-            // Get indexes where requested data is.
-            var indexes = [this.x_quantities.indexOf(this.x_quantity_selected)];
-            var i = 0;
-            for(i = 0; i < this.y_quantities_selected.length; i++) {
-              indexes.push(this.y_quantities.indexOf(this.y_quantities_selected[i])+1);
-            }
-            
-            // Split file in lines.
-            var lines = data.split("\n");
-            
-            // Proccess line by line. First obtain number of rows and number of columns.
-            var nRows = 0;
-            var nColumns = 0;
-            i = 0;
-            while(lines[i].trim() !== "endheader") {
-              var splitted = lines[i].trim().split("=");
-              if(splitted[0] == "nRows") {
-                nRows = parseInt(splitted[1]);
-              } else if (splitted[0] == "nColumns") {
-                nColumns = parseInt(splitted[1]);
-              }
-              i++;
-            }
-            
-            // Skip endHeader and possible blank lines.
-            do {
-              i++;
-            } while(lines[i].trim() === "");
-            
-            // Get column names.
-            var columnNames = []
-            columnNames.push(this.x_quantity_selected);
-            columnNames.push(...this.y_quantities_selected);
-            i++;
-            
-            // First, add headers to chart_data, and then add information from rows.
-            var rows = [];
-            this.chart_data = [];
-            this.chart_data.push([this.x_quantity_selected]);
-            this.chart_data[0].push(...this.y_quantities_selected);
-            var j = 0;
-            var k = 0;
-            for(j = 0; j < nRows; j++) {
-              var lineArray = lines[j+i].trim().split("\t");
-              var row = [];
-              for(k = 0; k < indexes.length; k++) {
-                row.push(parseFloat(lineArray[indexes[k]].trim()));
-              }
-              this.chart_data.push(row);
-            }
+            data = res.data
           }
+
+          // Get indexes where requested data is.
+          var indexes = [this.x_quantities.indexOf(this.x_quantity_selected)];
+          var i = 0;
+          for (i = 0; i < this.y_quantities_selected.length; i++) {
+            indexes.push(this.y_quantities.indexOf(this.y_quantities_selected[i]) + 1);
+          }
+
+          // Split file in lines.
+          var lines = data.split("\n");
+
+          // Proccess line by line. First obtain number of rows and number of columns.
+          var nRows = 0;
+          var nColumns = 0;
+          i = 0;
+          while (lines[i].trim() !== "endheader") {
+            var splitted = lines[i].trim().split("=");
+            if (splitted[0] == "nRows") {
+              nRows = parseInt(splitted[1]);
+            } else if (splitted[0] == "nColumns") {
+              nColumns = parseInt(splitted[1]);
+            }
+            i++;
+          }
+
+          // Skip endHeader and possible blank lines.
+          do {
+            i++;
+          } while (lines[i].trim() === "");
+
+          // Get column names.
+          var columnNames = []
+          columnNames.push(this.x_quantity_selected);
+          columnNames.push(...this.y_quantities_selected);
+          i++;
+
+          // First, add headers to chart_data, and then add information from rows.
+          var rows = [];
+          this.chart_data = [];
+          this.chart_data.push([this.x_quantity_selected]);
+          this.chart_data[0].push(...this.y_quantities_selected);
+          var j = 0;
+          var k = 0;
+          for (j = 0; j < nRows; j++) {
+            var lineArray = lines[j + i].trim().split("\t");
+            var row = [];
+            for (k = 0; k < indexes.length; k++) {
+              row.push(parseFloat(lineArray[indexes[k]].trim()));
+            }
+            this.chart_data.push(row);
+          }
+        }
 
       } catch (error) {
         apiError(error)
@@ -303,15 +257,15 @@ export default {
     },
     // Get trials and update trials select when a sessin is selected.
     onSessionSelected(sessionName) {
-    
+
       // Get value between parentheses (session id).
       var sessionIdSelected = sessionName.match(/\((.*)\)/);
-      if(sessionIdSelected !== null) {
+      if (sessionIdSelected !== null) {
         sessionIdSelected = sessionIdSelected.pop();
-                                            
+
         this.current_session_id = sessionIdSelected;
-    
-      
+
+
         var session = this.sessions.filter(function (obj) {
           if (obj.id === sessionIdSelected) {
             return obj.name;
@@ -321,13 +275,15 @@ export default {
         // Filter trials by name.
         trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
         this.trial_names = [];
-        trials.forEach(element => {this.trial_names.push(element.name);
-                                   this.trial_ids.push(element.id)});
+        trials.forEach(element => {
+          this.trial_names.push(element.name);
+          this.trial_ids.push(element.id)
+        });
         this.trial_selected = this.trial_names[0];
-        
+
         // Load data from this trial.
         this.onTrialSelected(this.trial_selected);
-        
+
       }
     },
     // Get x-quantities and y-quantities and update respective selects when a trial is selected.
@@ -338,151 +294,151 @@ export default {
       this.trial_selected = trialName;
       var index = this.trial_names.indexOf(this.trial_selected);
       var id = this.trial_ids[index];
-      
+
       try {
         const { data } = await axios.get(`/trials/${id}/`);
-        
+
         this.trial = data
 
         // load JSON
-        const json = data.results.filter(element => element.tag == "ik_results" )
+        const json = data.results.filter(element => element.tag == "ik_results")
 
-  if (json && json.length > 0) {
-            let data
-            const url = json[0].media
+        if (json && json.length > 0) {
+          let data
+          const url = json[0].media
 
-            if (url.startsWith(axios.defaults.baseURL)) {
-              const res = await axios.get(url)
-              data = res.data
-            } else {
-              let axiosClean = axios.create()
+          if (url.startsWith(axios.defaults.baseURL)) {
+            const res = await axios.get(url)
+            data = res.data
+          } else {
+            let axiosClean = axios.create()
 
-              const res = await axiosClean.get(url, {
-                // Deleting Authorization header, because we have one as global Axios
-                // Do not pass out user token to 3rd party sites
-                transformRequest: [(data, headers) => {
-                  delete headers.common.Authorization
-                  return data
-                }]
-              })
+            const res = await axiosClean.get(url, {
+              // Deleting Authorization header, because we have one as global Axios
+              // Do not pass out user token to 3rd party sites
+              transformRequest: [(data, headers) => {
+                delete headers.common.Authorization
+                return data
+              }]
+            })
 
-              data = res.data
-            }
-            
-            // Split file in lines.
-            var lines = data.split("\n");
-            
-            // Proccess line by line. First obtain number of rows and number of columns.
-            var i = 0;
-            while(lines[i].trim() !== "endheader") {
-              i++;
-            }
-            
-            // Skip endHeader and possible blank lines.
-            do {
-              i++;
-            } while(lines[i].trim() === "");
-            
-            // Get column names.
-            this.x_quantities = lines[i].trim().split("\t");
-            // Create copy for y_quantities and remove time.
-            this.y_quantities = this.x_quantities.slice();
-            this.y_quantities.shift();
-            
+            data = res.data
           }
+
+          // Split file in lines.
+          var lines = data.split("\n");
+
+          // Proccess line by line. First obtain number of rows and number of columns.
+          var i = 0;
+          while (lines[i].trim() !== "endheader") {
+            i++;
+          }
+
+          // Skip endHeader and possible blank lines.
+          do {
+            i++;
+          } while (lines[i].trim() === "");
+
+          // Get column names.
+          this.x_quantities = lines[i].trim().split("\t");
+          // Create copy for y_quantities and remove time.
+          this.y_quantities = this.x_quantities.slice();
+          this.y_quantities.shift();
+
+        }
 
       } catch (error) {
         apiError(error)
         this.trialLoading = false
       }
     },
-    onXQuantitySelected (xQuantitySelected) {
+    onXQuantitySelected(xQuantitySelected) {
       this.x_quantity_selected = xQuantitySelected;
       this.chart_options.hAxis.title = xQuantitySelected;
     },
-    onYQuantitySelected (yQuantitySelected) {
+    onYQuantitySelected(yQuantitySelected) {
       this.y_quantities_selected = yQuantitySelected;
     },
     onChartDownload() {
-      if(this.chart_download_format_selected === 'png') {
+      if (this.chart_download_format_selected === 'png') {
         // Get image URI from Google Charts object.
         var imgUri = this.chart_reference.getImageURI();
-        
+
         // Open image in new window.
         window.open(imgUri);
-        
+
         // Create a link element to download the image.
         var downloadLinkPng = document.createElement("a");
-        
+
         // Set URI of the image.
         downloadLinkPng.href = imgUri;
-        
+
         // Set name of the downloaded file.
         downloadLinkPng.download = "chart.svg";
-        
+
         // Append link element, click it, and remove it.
         document.body.appendChild(downloadLinkPng);
         downloadLinkPng.click();
         document.body.removeChild(downloadLinkPng);
-      
+
       } else if (this.chart_download_format_selected == 'svg') {
         // Get source of the SVG element.
         var svg = document.getElementsByTagName("svg");
         var svgData = svg[0].outerHTML;
         var serializer = new XMLSerializer();
         var source = serializer.serializeToString(svg[0]);
-        
+
         // Add xml declaration to the svg object.
-        var svgBlob = new Blob([source], {type:"image/svg+xml;charset=utf-8"});
+        var svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
         var svgUri = URL.createObjectURL(svgBlob);
-        
+
         // Open image in new window.
         window.open(svgUri);
-        
+
         // Create a link element to download the image.
         var downloadLinkSvg = document.createElement("a");
-        
+
         // Set URI of the image.
         downloadLinkSvg.href = svgUri;
-        
+
         // Set name of the downloaded file.
         downloadLinkSvg.download = "chart.svg";
-        
+
         // Append link element, click it, and remove it.
         document.body.appendChild(downloadLinkSvg);
         downloadLinkSvg.click();
         document.body.removeChild(downloadLinkSvg);
       } else if (this.chart_download_format_selected == 'pdf') {
-      
+
         // Get SVG element.
         var svg_for_pdf = document.getElementsByTagName("svg");
         var element = svg_for_pdf[0];
-      
+
         // Get dimensions of the SVG element.
         element.getBoundingClientRect()
         const width = element.width.baseVal.value
         const height = element.height.baseVal.value
-        
+
         // Create a new PDF file with the required dimensions.
         const doc = new jsPDF(width > height ? 'l' : 'p', 'pt', [width, height])
 
         // Add SVG element to the PDF and download it.
-        doc.svg(element, {width, height})
-        .then(() => {
-          // save the created pdf
-          doc.save('chart.pdf')
-        })
+        doc.svg(element, { width, height })
+          .then(() => {
+            // save the created pdf
+            doc.save('chart.pdf')
+          })
       }
-      
+
     },
     onChartReady(chart, google) {
       this.chart_reference = chart;
     },
     placeholderFunction(selected) {
       console.log(selected);
-    }
+    },
   },
-  data () {
+  data() {
     return {
       current_session_id: "",
       session_selected: "",
@@ -500,18 +456,18 @@ export default {
       chart_download_format_selected: 'png',
       chart_object: undefined,
       chart_data: [['', ''],
-        ['', 0]],
+      ['', 0]],
       chart_type: "LineChart",
       chart_type_options: ["LineChart", "ScatterChart", "AreaChart", "SteppedAreaChart", "ColumnChart"], // "BarChart", "Histogram"
       chart_legend_position: ["none", "top", "right", "bottom"],
       chart_legend_alignment: ["start", "center", "end"],
-      chart_options: { 
+      chart_options: {
         title: "Chart Title",
         is3D: true,
         vAxis: {
           scaleType: 'decimal', // log
           title: 'v-Axis'
-        },   
+        },
         hAxis: {
           scaleType: 'decimal', // log
           title: 'h-Axis'
@@ -527,55 +483,76 @@ export default {
           maxZoomIn: 4.0
         }
       },
+      session_owned: false
     }
   },
   computed: {
     ...mapState({
-      sessions: state => state.data.sessions
+      sessions: state => state.data.sessions,
+      session: state => state.data.session,
+      loggedIn: state => state.auth.verified,
     }),
-    sessionsNames () {
+    sessionsNames() {
       var result_sessions = this.sessions.map(function (obj) {
         // Check that there are valid trials
         var trials = obj['trials'];
         // Filter trials by name and status.
         trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
 
-        if(trials.length > 0) {
+        if (trials.length > 0) {
           return obj.name;
         } else {
           return "";
         }
       })
-      var filtered_sessions = result_sessions.filter(function(value, index, arr){ 
+      var filtered_sessions = result_sessions.filter(function (value, index, arr) {
         return value !== "";
       });
       return filtered_sessions;
-      
+
     },
-    sessionsIds () {
+    sessionsIds() {
       var result_sessions = this.sessions.map(function (obj) {
         // Check that there are valid trials
         var trials = obj['trials'];
         // Filter trials by name and status.
         trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
 
-        if(trials.length > 0) {
+        if (trials.length > 0) {
           return obj.meta.subject.id + " (" + obj.id + ")";
         } else {
           return "";
         }
       })
-      var filtered_sessions = result_sessions.filter(function(value, index, arr){ 
+      var filtered_sessions = result_sessions.filter(function (value, index, arr) {
         return value !== "";
       });
       return filtered_sessions;
-    },
+    }
+  },
+  async mounted () {
+    // If not logged in, load session from params and show trials.
+    if(!this.session_owned) {
+      await this.loadSession(this.$route.params.id)
+
+      var trials = this.session['trials'];
+      // Filter trials by name.
+      trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
+      this.trial_names = [];
+      trials.forEach(element => {
+        this.trial_names.push(element.name);
+        this.trial_ids.push(element.id)
+      });
+      this.trial_selected = this.trial_names[0];
+
+      // Load data from this trial.
+      this.onTrialSelected(this.trial_selected);
+    }
   },
 }
 </script>
 
 <style lang="scss">
-
 #body {
   position: relative;
   display: table-cell;
@@ -585,20 +562,20 @@ export default {
 }
 
 .sidebar {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 300px;
-    transition: transform 0.2s;
-    overflow-y: scroll;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 300px;
+  transition: transform 0.2s;
+  overflow-y: scroll;
 }
 
 .left-sidebar {
-    left: 0;
+  left: 0;
 }
 
 .right-sidebar {
-    right: 0;
+  right: 0;
 }
 
 .content {
@@ -606,26 +583,26 @@ export default {
   transition: padding-left 0.2s;
 }
 
-.left-menu-closed > .left-sidebar {
-    transform: translateX(-300px);
+.left-menu-closed>.left-sidebar {
+  transform: translateX(-300px);
 }
 
-.right-menu-closed > .right-sidebar {
-    transform: translateX(300px);
+.right-menu-closed>.right-sidebar {
+  transform: translateX(300px);
 }
 
-.fixed-button{
+.fixed-button {
   position: fixed;
   bottom: 0px;
   top: 74px;
   display: None;
 }
 
-.fixed-button-to-left{
+.fixed-button-to-left {
   left: 10px;
 }
 
-.fixed-button-to-right{
+.fixed-button-to-right {
   right: 10px;
 }
 

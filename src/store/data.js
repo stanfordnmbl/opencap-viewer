@@ -30,6 +30,7 @@ export default {
     gender: 'woman',
     data_sharing: '',
     pose_model: 'openpose',
+    framerate: 60,
 
     // step 5
     trialName: ''
@@ -115,8 +116,11 @@ export default {
       const res = await axios.get(`/sessions/${sessionId}/`)
       commit('setSession', res.data)
     },
-    async loadExistingSessions ({ state, commit }, reroute) {
-      const res = await axios.get('/sessions/valid/')
+    async loadExistingSessions ({ state, commit }, {reroute, quantity = -1}) {
+      console.log(quantity)
+      const res = await axios.post('/sessions/valid/', {
+        quantity: quantity
+      })
 
       commit('setExistingSessions', res.data)
 

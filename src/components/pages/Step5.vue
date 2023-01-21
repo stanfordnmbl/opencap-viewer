@@ -9,7 +9,7 @@
         v-slot="{ invalid }">
 
         <ValidationProvider
-          rules="required|no_spaces"
+          rules="required|alpha_dash_custom"
           v-slot="{ errors }"
           name="Trial name">
 
@@ -160,7 +160,7 @@
 
       <v-btn
         class="mt-4"
-        @click="$router.push({ name: 'Dashboard', params: { session_id: session.id }})">
+        @click="$router.push({ name: 'Dashboard', params: { id: session.id }})">
         Analysis Dashboard
       </v-btn>
 
@@ -321,7 +321,6 @@ export default {
       recordingStarted: null,
       recordingTimePassed: 0,
       recordingTimer: null,
-      recordingLimit: 60, // seconds, -1 - no limit
 
       trialsPoll: null
     }
@@ -479,7 +478,7 @@ export default {
     recordTimerHandler () {
       this.recordingTimePassed = moment().diff(this.recordingStarted, 'seconds')
 
-      if (this.recordingLimit < 0 || this.recordingTimePassed < this.recordingLimit) {
+      if (this.recordingTimeLimit() < 0 || this.recordingTimePassed < this.recordingTimeLimit()) {
         this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
       } else {
         apiSuccess('Recording finished upon reaching time limit')
@@ -763,10 +762,13 @@ export default {
     animateOneFrame () {        
       let cframe
 
+      let frames = this.frames.length
+      let duration = this.vid0().duration
+      let framerate = frames/duration
       if (this.videos.length > 0) {
         let t = 0
         if (this.vid0()) t = this.vid0().currentTime;
-        cframe = (Math.floor(t*60)) % this.frames.length
+        cframe = (Math.floor(t*framerate)) % this.frames.length
         this.frame = cframe
       } else {
         cframe = this.frame++
@@ -866,6 +868,20 @@ export default {
       })
 
       this.animateOneFrame()
+    },
+    recordingTimeLimit() {
+        // Default value is 60.
+        // Set -1 for no limit.
+        var timelimit = 60
+        
+        // If we know the framerate, we change time limit accordingly.
+        if('meta' in this.session && 'settings' in this.session.meta && 'framerate' in this.session.meta.settings) {
+              var framerate = this.session.meta.settings.framerate
+              if(framerate == 60 || framerate == 120 || framerate == 240)
+                  timelimit = 60/(framerate/60)
+        }
+        
+        return timelimit
     }
   }
 }

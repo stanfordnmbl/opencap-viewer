@@ -13,7 +13,7 @@ registerFilters(Vue)
 
 // vee-validate 3
 import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
-import { required, confirmed, min, email } from "vee-validate/dist/rules";
+import { required, confirmed, min, email, alpha_dash } from "vee-validate/dist/rules";
 
 import VueSocialSharing from 'vue-social-sharing'
 
@@ -24,14 +24,25 @@ extend('required', required)
 extend('confirmed', confirmed)
 extend('min', min)
 extend('email', email)
-// Custom rule
+extend('alpha_dash', alpha_dash)
+
+// Custom rules
 extend('no_spaces', {
   validate (value, args) {
     return value.indexOf(' ') < 0
   },
   message: 'Spaces not allowed'
 })
-
+extend('alpha_dash_custom', {
+  validate (value, args) {
+    var regexp = /^[a-zA-Z0-9-_]+$/;
+    if (value.search(regexp) === -1)
+        return false
+    else
+        return true
+  },
+  message: 'Only alphanumeric, hyphen and underscore characters allowed.'
+})
 Vue.component("ValidationProvider", ValidationProvider);
 Vue.component("ValidationObserver", ValidationObserver);
 
