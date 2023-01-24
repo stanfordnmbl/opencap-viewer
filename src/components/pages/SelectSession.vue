@@ -47,6 +47,9 @@ import { apiError } from '@/util/ErrorMessage.js'
 
 export default {
   name: 'SelectSession',
+  created: function () {
+    apiInfo("To take advantage of new features, make sure you have updated the iOS application to version 1.6 (19).")
+  },
   data () {
     return {
       headers: [
@@ -86,7 +89,7 @@ export default {
     },
     async onLoadAllSessions(){
       try {
-        await this.loadExistingSessions({reroute: true, quantity:20})           
+        await this.loadExistingSessions({reroute: true, quantity:-1})           
       } catch (error) {
         apiError(error)
         this.$router.push({ name: 'Step1' })
