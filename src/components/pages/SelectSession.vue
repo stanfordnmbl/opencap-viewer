@@ -43,7 +43,7 @@
 
 <script>
 import { mapActions, mapState } from 'vuex'
-import { apiError } from '@/util/ErrorMessage.js'
+import { apiInfo, apiError } from '@/util/ErrorMessage.js'
 
 export default {
   name: 'SelectSession',
