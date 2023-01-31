@@ -678,11 +678,11 @@ export default {
             this.playing = value
             if (this.playing) {
                 this.animate()
-                this.videoElement[0].play()
-                this.videoElement[1].play()
+                this.videoElement(0).play()
+                this.videoElement(1).play()
             } else {
-                this.videoElement[0].pause()
-                this.videoElement[1].pause()
+                this.videoElement(0).pause()
+                this.videoElement(1).pause()
             }
         },
         onNavigate(frame) {
