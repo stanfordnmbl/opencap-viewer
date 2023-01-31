@@ -563,8 +563,14 @@ export default {
                                 this.trialLoading = false
                             }
                             this.onResize()
-                            // animate
-                            this.togglePlay(true)
+                            function delay(time) {
+                                return new Promise(resolve => setTimeout(resolve, time));
+                            }
+
+                            delay(1000).then(() => {
+                                // animate after 1 second.
+                                this.togglePlay(true)
+                            });
                         })
                     }
                 } catch (error) {
@@ -672,13 +678,11 @@ export default {
             this.playing = value
             if (this.playing) {
                 this.animate()
-                this.eachVideo(videoElement => {
-                    videoElement.play()
-                })
+                this.videoElement[0].play()
+                this.videoElement[1].play()
             } else {
-                this.eachVideo(videoElement => {
-                    videoElement.pause()
-                })
+                this.videoElement[0].pause()
+                this.videoElement[1].pause()
             }
         },
         onNavigate(frame) {
