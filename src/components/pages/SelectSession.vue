@@ -23,12 +23,41 @@
     <v-data-table        
       :headers="headers"
       :items="sessionsMapped"
+      :item-class="itemClasses"
       disable-pagination
       hide-default-footer
       single-select      
       class="sessions-table mx-2 mb-4 flex-grow-1"
       @item-selected="onSelect"
-      @click:row="onRowClick"/>
+      @click:row="onRowClick">
+      <template v-slot:item.id="{ item }">
+        <div class="float-right">
+          <v-menu offset-y>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                color="primary"
+                dark
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon
+                  large
+                  color="blue"
+                >
+                  mdi-menu
+                </v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item>
+                <v-list-item-title>Remove...</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
+        {{ item.id }}
+      </template>
+    </v-data-table>
       
     <div class="d-flex table-info-footer">
       <v-btn
@@ -75,7 +104,9 @@ export default {
         id: s.id,
         name: s.name,
         trials_count: String(s.trials.length),
-        created_at: s.created_at
+        created_at: s.created_at,
+        trashed: s.trashed,
+        trashed_at: s.trashed_at
       }))
     }
   },
@@ -86,6 +117,9 @@ export default {
     },
     onRowClick (item, params) {
       params.select(!params.isSelected)
+    },
+    itemClasses (item) {
+      return item.trashed ? 'trashed' : '';
     },
     async onLoadAllSessions(){
       try {
@@ -124,4 +158,7 @@ export default {
   }
 }
 
+.trashed {
+  color: gray;
+}
 </style>
