@@ -118,8 +118,10 @@
 
         <div class="right d-flex flex-column">
             <div class="videos flex-grow-1 d-flex flex-column">
-                <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" autoplay muted
-                    playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
+                <video :key="`video-0`" :ref="`video-0`" muted playsinline :src="videos[0].media"
+                    crossorigin="anonymous" @ended="onVideoEnded(0)" />
+                <video :key="`video-1`" :ref="`video-1`" muted playsinline :src="videos[1].media"
+                    crossorigin="anonymous" @ended="onVideoEnded(1)" />
             </div>
 
             <SpeedControl v-model="playSpeed" />
@@ -143,6 +145,7 @@ import * as THREE_OC from '@/orbitControls'
 import VideoNavigation from '@/components/ui/VideoNavigation'
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js'
 import SpeedControl from '@/components/ui/SpeedControl'
+
 let openpose_bones = [
     [20, 21],
     [20, 22],
@@ -152,8 +155,10 @@ let openpose_bones = [
     [44, 48],
     [20, 25],
     [20, 26],
+
     //    [25, 23],
     //    [26, 24],
+
     [25, 29],
     [26, 30],
     [29, 33],
@@ -161,10 +166,13 @@ let openpose_bones = [
     [33, 37],
     [34, 38],
 ]
+
 var a0 = 0;
 var a1 = 1;
 var a2 = 2;
+
 const objLoader = new OBJLoader();
+
 export default {
     name: 'Step5',
     components: {
@@ -186,11 +194,13 @@ export default {
             statusPoll: null,
             downloading: false,
             dialog: null,
+
             trialInProcess: null,
             trial: null,
             videos: [],
             frames: [],
             trialLoading: false,
+
             // objects & arrays
             synced: false,
             camera: null,
@@ -203,22 +213,29 @@ export default {
             frame: 0,
             playing: false,
             playSpeed: 1,
+
             show_controls: 1,
+
             resizeObserver: null,
+
             recordingStarted: null,
             recordingTimePassed: 0,
             recordingTimer: null,
+
             trialsPoll: null
         }
     },
     computed: {
         ...mapState({
             session: state => state.data.session,
+
             user_id: state => state.auth.user_id,
+
             // step 2 data
             rows: state => state.data.rows,
             cols: state => state.data.cols,
             squareSize: state => state.data.squareSize,
+
             // step 4 data
             identifier: state => state.data.identifier,
             weight: state => state.data.weight,
@@ -253,8 +270,11 @@ export default {
         console.log(this.user_id)
         console.log(this.session.user)
         this.show_controls = (this.user_id == this.session.user)
+
         this.startTrialsPoll()
+
         const doneTrials = this.filteredTrials.filter(trial => trial.status === 'done')
+
         if (doneTrials.length > 0) {
             this.loadTrial(doneTrials[0])
         }
@@ -263,6 +283,7 @@ export default {
         this.cancelPoll()
         this.cancelRecordTimer()
         this.cancelTrialsPoll()
+
         if (this.resizeObserver) {
             this.resizeObserver.unobserve(this.$refs.mocap)
         }
@@ -297,41 +318,53 @@ export default {
             switch (this.state) {
                 case 'ready': {
                     this.submitted = true
+
                     if (await this.$refs.observer.validate()) {
                         this.busy = true
+
                         try {
                             // store in vuex
                             this.setStep5(this.trialName)
+
                             // api
                             const res = await axios.get(`/sessions/${this.session.id}/record/`, {
                                 params: {
                                     name: this.trialName
                                 }
                             })
+
                             // add to the list
                             this.trialInProcess = res.data
                             this.addTrial(this.trialInProcess)
+
                             this.recordingStarted = moment()
                             this.recordingTimePassed = 0
                             this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
+
                             this.state = 'recording'
                         } catch (error) {
                             apiError(error)
                         }
+
                         this.busy = false
                     }
+
                     break
                 }
                 case 'recording': {
                     this.cancelRecordTimer()
+
                     try {
                         const res = await axios.get(`/sessions/${this.session.id}/stop/`, {})
+
                         this.trialInProcess.status = res.data.status
                         this.state = 'processing'
+
                         this.startPoll()
                     } catch (error) {
                         apiError(error)
                     }
+
                     break
                 }
                 case 'processing': {
@@ -344,6 +377,7 @@ export default {
         },
         recordTimerHandler() {
             this.recordingTimePassed = moment().diff(this.recordingStarted, 'seconds')
+
             if (this.recordingTimeLimit() < 0 || this.recordingTimePassed < this.recordingTimeLimit()) {
                 this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
             } else {
@@ -359,6 +393,7 @@ export default {
         },
         async onDownloadData() {
             this.downloading = true
+
             try {
                 //console.log(`${axios.defaults.baseURL}sessions/${this.session.id}/download/`)
                 let link = document.createElement('a')
@@ -366,6 +401,7 @@ export default {
                 link.setAttribute('download', 'mobilecap_result.zip')
                 // This method works in all browsers including FireFox
                 link.dispatchEvent(new MouseEvent('click'))
+
                 window.setTimeout(() => {
                     this.downloading = false
                 }, 5000)
@@ -389,11 +425,13 @@ export default {
         startPoll() {
             this.statusPoll = window.setTimeout(async () => {
                 const res = await axios.get(`/sessions/${this.session.id}/status/`)
+
                 if (res.data.status !== 'uploading') {
                     // Show error if any
                     if (res.data.status === 'error') {
                         apiErrorRes(res.data, 'Finished with error')
                     }
+
                     this.state = 'ready'
                 } else {
                     this.startPoll()
@@ -408,17 +446,22 @@ export default {
         async startTrialsPoll() {
             this.trialsPoll = window.setTimeout(async () => {
                 const trials = this.filteredTrials.filter(trial => trial.status === 'stopped' || trial.status === 'processing')
+
                 if (trials.length > 0) {
                     const res = await axios.get(`/sessions/${this.session.id}/status/?ret_session=true`)
+
                     const updatedTrials = res.data.session.trials
+
                     trials.forEach(t => {
                         const updatedT = updatedTrials.find(x => x.id === t.id)
+
                         // Trial found and its status changed
                         if (updatedT && updatedT.status !== t.status) {
                             this.updateTrial(updatedT)
                         }
                     })
                 }
+
                 this.startTrialsPoll()
             }, 5000)
         },
@@ -430,24 +473,31 @@ export default {
         },
         async loadTrial(trial) {
             console.log('loadTrial')
+
             if (!this.trialLoading) {
                 this.frame = 0
                 this.trial = null
                 this.synced = false
                 this.trialLoading = true
+
                 try {
                     const { data } = await axios.get(`/trials/${trial.id}/`)
+
                     this.trial = data
+
                     // load JSON
                     const json = data.results.filter(element => element.tag == "visualizerTransforms-json")
+
                     if (json && json.length > 0) {
                         let data
                         const url = json[0].media
+
                         if (url.startsWith(axios.defaults.baseURL)) {
                             const res = await axios.get(url)
                             data = res.data
                         } else {
                             let axiosClean = axios.create()
+
                             const res = await axiosClean.get(url, {
                                 // Deleting Authorization header, because we have one as global Axios
                                 // Do not pass out user token to 3rd party sites
@@ -456,40 +506,50 @@ export default {
                                     return data
                                 }]
                             })
+
                             data = res.data
                         }
+
                         this.frames = data.time
                         this.animation_json = data
                     } else {
                         this.frames = [] //null
                     }
+
                     this.videos = data.results.filter(element => element.tag == "video-sync")
+
                     if (this.videos.length === 0) {
                         this.frame = 0
                     }
+
                     if (this.frames.length > 0) {
                         this.$nextTick(() => {
                             try {
                                 while (this.$refs.mocap.lastChild) {
                                     this.$refs.mocap.removeChild(this.$refs.mocap.lastChild)
                                 }
+
                                 // setup3d
                                 const container = this.$refs.mocap
+
                                 let ratio = container.clientWidth / container.clientHeight
                                 this.camera = new THREE.PerspectiveCamera(45, ratio, 0.1, 125)
                                 this.camera.position.x = 4.5
                                 this.camera.position.z = -3
                                 this.camera.position.y = 3
+
                                 this.scene = new THREE.Scene()
                                 this.renderer = new THREE.WebGLRenderer({ antialias: true })
                                 this.renderer.shadowMap.enabled = true;
                                 this.onResize()
                                 container.appendChild(this.renderer.domElement)
                                 this.controls = new THREE_OC.OrbitControls(this.camera, this.renderer.domElement)
+
                                 // show3d
                                 // add the plane
                                 {
                                     const planeSize = 5;
+
                                     const loader = new THREE.TextureLoader();
                                     const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
                                     //                  const texture = loader.load('https://www.the3rdsequence.com/texturedb/download/32/texture/jpg/1024/smooth+white+tile-1024x1024.jpg')
@@ -498,6 +558,7 @@ export default {
                                     texture.magFilter = THREE.NearestFilter;
                                     const repeats = planeSize * 2;
                                     texture.repeat.set(repeats, repeats);
+
                                     const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize);
                                     const planeMat = new THREE.MeshPhongMaterial({
                                         map: texture,
@@ -509,6 +570,7 @@ export default {
                                     mesh.receiveShadow = true;
                                     this.scene.add(mesh);
                                 }
+
                                 // add sun
                                 {
                                     const skyColor = 0xB1E1FF;  // light blue
@@ -517,6 +579,7 @@ export default {
                                     const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
                                     this.scene.add(light);
                                 }
+
                                 // add directional light
                                 {
                                     const color = 0xFFFFFF;
@@ -534,11 +597,14 @@ export default {
                                     light.shadow.camera.zoom = 8
                                     this.scene.add(light);
                                     this.scene.add(light.target);
+
                                     // const helper = new THREE.DirectionalLightHelper(light);
                                     // this.scene.add(helper);
+
                                     // const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
                                     // this.scene.add(cameraHelper);
                                 }
+
                                 // add bones
                                 for (let body in this.animation_json.bodies) {
                                     let bd = this.animation_json.bodies[body]
@@ -562,13 +628,15 @@ export default {
                             } finally {
                                 this.trialLoading = false
                             }
+
                             this.onResize()
+                            // animate
+
                             function delay(time) {
                                 return new Promise(resolve => setTimeout(resolve, time));
                             }
 
                             delay(1000).then(() => {
-                                // animate after 1 second.
                                 this.togglePlay(true)
                             });
                         })
@@ -584,6 +652,7 @@ export default {
             if (container && this.renderer) {
                 this.renderer.setSize(container.clientWidth, container.clientHeight)
             }
+
             if (this.renderer) {
                 const canvas = this.renderer.domElement;
                 this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -599,10 +668,12 @@ export default {
         },
         animateOneFrame() {
             let cframe
+
             let frames = this.frames.length
             let duration = this.vid0().duration
             if (!isNaN(this.vid0().duration)) {
                 let framerate = frames / duration
+
                 if (this.videos.length > 0) {
                     let t = 0
                     if (this.vid0()) t = this.vid0().currentTime;
@@ -610,10 +681,12 @@ export default {
                     this.frame = cframe
                 } else {
                     cframe = this.frame++
+
                     if (this.frame >= this.frames.length) {
                         this.frame = 0
                     }
                 }
+
                 // display the frame
                 let json = this.animation_json;
                 for (let body in json.bodies) {
@@ -631,6 +704,7 @@ export default {
                         }
                     })
                 }
+
                 this.renderer.render(this.scene, this.camera)
                 this.syncVideos()
             }
@@ -638,14 +712,17 @@ export default {
         syncVideos() {
             if (this.synced || this.trial == null || this.videos.length == 0)
                 return
+
             // will also reset all videos
             this.playSpeed = 1
+
             /*
             this.videos.forEach((video, index) => {
               const vid_element = this.videoElement(index)
               vid_element.playbackRate = 1
             })
             */
+
             this.synced = true
         },
         onVideoEnded(index) {
@@ -659,8 +736,9 @@ export default {
         },
         videoElement(index) {
             const vid = this.$refs[`video-${index}`]
+
             return vid
-                ? vid[0]
+                ? vid
                 : null
         },
         vid0() {
@@ -676,10 +754,13 @@ export default {
         },
         togglePlay(value) {
             this.playing = value
+
             if (this.playing) {
                 this.animate()
+
                 this.videoElement(0).play()
                 this.videoElement(1).play()
+
             } else {
                 this.videoElement(0).pause()
                 this.videoElement(1).pause()
@@ -689,21 +770,25 @@ export default {
             const vid0 = this.videoElement(0)
             const step = vid0.duration / this.frames.length
             const newPosition = frame * step
+
             this.eachVideo(videoElement => {
                 videoElement.currentTime = newPosition
             })
+
             this.animateOneFrame()
         },
         recordingTimeLimit() {
             // Default value is 60.
             // Set -1 for no limit.
             var timelimit = 60
+
             // If we know the framerate, we change time limit accordingly.
             if ('meta' in this.session && 'settings' in this.session.meta && 'framerate' in this.session.meta.settings) {
                 var framerate = this.session.meta.settings.framerate
                 if (framerate == 60 || framerate == 120 || framerate == 240)
                     timelimit = 60 / (framerate / 60)
             }
+
             return timelimit
         }
     }
@@ -713,13 +798,17 @@ export default {
 <style lang="scss">
 .step-5 {
     height: calc(100vh - 64px);
+
     .left {
         width: 250px;
+
         .trials {
             overflow-y: auto;
+
             .trial {
                 border-radius: 4px;
                 padding: 2px 6px;
+
                 &.selected {
                     background-color: #272727;
                     cursor: default;
@@ -727,19 +816,24 @@ export default {
             }
         }
     }
+
     .viewer {
         height: 100%;
+
         #mocap {
             width: 100%;
             overflow: hidden;
+
             canvas {
                 width: 100% !important;
             }
         }
     }
+
     .right {
         flex: 0 0 200px;
         height: 100%;
+
         .videos {
             overflow-y: auto;
             width: 200px;
@@ -747,3 +841,4 @@ export default {
     }
 }
 </style>
+
