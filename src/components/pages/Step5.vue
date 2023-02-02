@@ -118,8 +118,10 @@
 
         <div class="right d-flex flex-column">
             <div class="videos flex-grow-1 d-flex flex-column">
-              <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
-              playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
+                <video :key="`video-0`" :ref="`video-0`" muted playsinline :src="videos[0].media"
+                    crossorigin="anonymous" @ended="onVideoEnded(0)" />
+                <video :key="`video-1`" :ref="`video-1`" muted playsinline :src="videos[1].media"
+                    crossorigin="anonymous" @ended="onVideoEnded(1)" />
             </div>
 
             <SpeedControl v-model="playSpeed" />
@@ -736,7 +738,7 @@ export default {
             const vid = this.$refs[`video-${index}`]
 
             return vid
-                ? vid[0]
+                ? vid
                 : null
         },
         vid0() {
