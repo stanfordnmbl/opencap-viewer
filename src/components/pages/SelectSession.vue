@@ -35,22 +35,67 @@
           <v-menu offset-y>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
-                color="primary"
+                  icon
                 dark
                 v-bind="attrs"
                 v-on="on"
               >
-                <v-icon
-                  large
-                  color="blue"
-                >
-                  mdi-menu
-                </v-icon>
+                <v-icon>mdi-menu</v-icon>
               </v-btn>
             </template>
             <v-list>
-              <v-list-item>
-                <v-list-item-title>Remove...</v-list-item-title>
+              <v-list-item link v-if="!item.trashed">
+                <v-dialog v-model="remove_dialog" max-width="500">
+                  <template v-slot:activator="{ on }">
+                    <v-list-item-title v-on="on">Remove...</v-list-item-title>
+                  </template>
+                  <v-card>
+                    <v-card-text>
+                      <v-row>
+                        <v-col cols="2">
+                          <v-icon x-large color="red">mdi-close-circle</v-icon>
+                        </v-col>
+                        <v-col cols="10">
+                          <p>
+                            Do you want to remove the session <code>{{item.id}}</code>?
+                            You will be able to recover it for 30 days. After that,
+                            this session will be removed forever.
+                          </p>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn
+                        color="blue darken-1"
+                        text
+                        @click="remove_dialog = false"
+                      >
+                        No
+                      </v-btn>
+                      <v-btn
+                        color="red darken-1"
+                        text
+                        @click="remove_dialog = false"
+                      >
+                        Yes
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-list-item>
+              <v-list-item link v-else>
+                <v-list-item-title>Restore...</v-list-item-title>
+              </v-list-item>
+              <v-list-item link>
+                <v-list-item-title
+                    @click="$router.push({ name: 'Session', params: { id: item.id }})"
+                    >Load...</v-list-item-title>
+              </v-list-item>
+              <v-list-item link>
+                <v-list-item-title
+                  @click="$router.push({ name: 'Dashboard' })"
+                  >Dashboard...</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
@@ -81,6 +126,7 @@ export default {
   },
   data () {
     return {
+      remove_dialog: false,
       headers: [
         {
           text: 'ID',
