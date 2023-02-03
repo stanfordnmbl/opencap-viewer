@@ -299,8 +299,11 @@ export default {
 .container {
   overflow-y: scroll;
   max-height: calc(100vh - 90px);
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  -ms-overflow-style: none; // /hide in Internet Explorer.
+  scrollbar-width: none; // Hide in Firefox.
+}
+.container::-webkit-scrollbar{
+  display: none; // Hide in chrome, safari and edge.
 }
 button {
   width: 200px;
