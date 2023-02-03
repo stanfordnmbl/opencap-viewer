@@ -18,6 +18,8 @@
         @click="$router.push({ name: 'Dashboard' })">
         Analysis Dashboard
       </v-btn>
+
+      <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed sessions"></v-checkbox>
     </div>
 
     <v-data-table        
@@ -32,7 +34,9 @@
       @click:row="onRowClick">
       <template v-slot:item.id="{ item }">
         <div class="float-right">
-          <v-menu offset-y>
+          <v-menu
+              offset-y
+            >
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                   icon
@@ -76,7 +80,7 @@
                       <v-btn
                         color="red darken-1"
                         text
-                        @click="remove_dialog = false"
+                        @click="remove_dialog = false; trashSession(item.id)"
                       >
                         Yes
                       </v-btn>
@@ -85,7 +89,42 @@
                 </v-dialog>
               </v-list-item>
               <v-list-item link v-else>
-                <v-list-item-title>Restore...</v-list-item-title>
+                <v-dialog v-model="remove_dialog" max-width="500">
+                  <template v-slot:activator="{ on }">
+                    <v-list-item-title v-on="on">Restore...</v-list-item-title>
+                  </template>
+                  <v-card>
+                    <v-card-text>
+                      <v-row>
+                        <v-col cols="2">
+                          <v-icon x-large color="red">mdi-close-circle</v-icon>
+                        </v-col>
+                        <v-col cols="10">
+                          <p>
+                            Do you want to recover the session <code>{{item.id}}</code>?
+                          </p>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn
+                        color="blue darken-1"
+                        text
+                        @click="remove_dialog = false"
+                      >
+                        No
+                      </v-btn>
+                      <v-btn
+                        color="green darken-1"
+                        text
+                        @click="remove_dialog = false; restoreSession(item.id)"
+                      >
+                        Yes
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
               </v-list-item>
               <v-list-item link>
                 <v-list-item-title
@@ -127,6 +166,7 @@ export default {
   data () {
     return {
       remove_dialog: false,
+      show_trashed: true,
       headers: [
         {
           text: 'ID',
@@ -153,11 +193,11 @@ export default {
         created_at: s.created_at,
         trashed: s.trashed,
         trashed_at: s.trashed_at
-      }))
+      })).filter(s => this.show_trashed || !s.trashed)
     }
   },
   methods: {
-    ...mapActions('data', ['loadExistingSessions']),
+    ...mapActions('data', ['loadExistingSessions', 'trashExistingSession', 'restoreTrashedSession']),
     onSelect ({ item, value }) {
       this.selected = value ? item : null
     },
@@ -173,6 +213,20 @@ export default {
       } catch (error) {
         apiError(error)
         this.$router.push({ name: 'Step1' })
+      }
+    },
+    async trashSession (id) {
+      try {
+        await this.trashExistingSession(id)
+      } catch (error) {
+        apiError(error)
+      }
+    },
+    async restoreSession (id) {
+      try {
+        await this.restoreTrashedSession(id)
+      } catch (error) {
+        apiError(error)
       }
     }
   }

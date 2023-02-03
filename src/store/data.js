@@ -99,6 +99,14 @@ export default {
       if (index >= 0) {
         Vue.set(state.session.trials, index, trial)
       }
+    },
+    updateSession (state, session) {
+      const index = state.sessions.findIndex(t => t.id === session.id);
+      // console.log(state.sessions);
+      // console.log(index);
+      if (index >= 0) {
+        Vue.set(state.sessions, index, session);
+      }
     }
   },
   actions: {
@@ -115,6 +123,18 @@ export default {
 
       const res = await axios.get(`/sessions/${sessionId}/`)
       commit('setSession', res.data)
+    },
+    async trashExistingSession ({ state, commit }, id) {
+      const sessionId = id || state.session.id
+
+      const res = await axios.post(`/sessions/${sessionId}/trash/`)
+      commit('updateSession', res.data)
+    },
+    async restoreTrashedSession ({ state, commit }, id) {
+      const sessionId = id || state.session.id
+
+      const res = await axios.post(`/sessions/${sessionId}/restore/`)
+      commit('updateSession', res.data)
     },
     async loadExistingSessions ({ state, commit }, {reroute, quantity = -1}) {
       console.log(quantity)
