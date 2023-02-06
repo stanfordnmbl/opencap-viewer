@@ -19,6 +19,12 @@
         Analysis Dashboard
       </v-btn>
 
+      <v-btn
+        class="ml-2"
+        @click="$router.push({ name: 'RecycleBin' })">
+        Recycle Bin
+      </v-btn>
+
       <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed sessions"></v-checkbox>
     </div>
 
@@ -166,7 +172,7 @@ export default {
   data () {
     return {
       remove_dialog: false,
-      show_trashed: true,
+      show_trashed: false,
       headers: [
         {
           text: 'ID',

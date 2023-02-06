@@ -283,7 +283,7 @@ export default {
                 processing: 'Cancel trial'
             },
             remove_dialog: false,
-            show_trashed: true,
+            show_trashed: false,
             busy: false,
             state: 'ready',
             submitted: false,
@@ -538,7 +538,7 @@ export default {
         },
         async updateTrialWithData(trial, data) {
             const index = this.session.trials.findIndex(x => x.id === trial.id)
-            console.log(index, data);
+            // console.log(index, data);
             if (index >= 0) {
                 Vue.set(this.session.trials, index, data);
             }
@@ -559,7 +559,6 @@ export default {
             apiError(error)
           }
         },
-
         async loadTrial(trial) {
             console.log('loadTrial')
             if (!this.trialLoading) {

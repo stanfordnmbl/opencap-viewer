@@ -131,6 +131,12 @@ export default {
     //   commit('updateSession', res.data)
     // },
 
+    async permanentRemoveExistingSession ({ state, commit }, id) {
+      const sessionId = id || state.session.id
+      const index = state.sessions.findIndex(t => t.id === sessionId);
+      const res = await axios.post(`/sessions/${sessionId}/permanent_remove/`)
+      state.sessions.splice(index, 1);
+    },
     async trashExistingSession ({ state, commit }, id) {
       const sessionId = id || state.session.id
 
