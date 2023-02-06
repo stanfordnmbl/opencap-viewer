@@ -1,160 +1,232 @@
 <template>
-  <v-layout
-    class="login-main"
-    ma-0
-    pa-3
-    row
-    justify-center
-    align-center
-    fill-height
-  >
-    <v-flex
-      xs12
-      sm6
-      md4
-      lg3
-      xl2
-      pa-3
-      class="wrapper-box d-flex flex-column align-stretch scroll-y"
-    >
-      <h1 class="white--text text-center">Register</h1>
+  
+      <div id="container" class="container d-flex justify-content-center text-center">
+        <div class="w-50 p-3 mx-auto">
+          <h1 class="white--text text-center col-md-12">Register</h1>
 
-      <ValidationObserver
-        tag="div"
-        class="d-flex flex-column"
-        ref="observer"
-        v-slot="{ invalid }"
-      >
-        <ValidationProvider rules="required" v-slot="{ errors }" name="Login">
-          <v-text-field
-            label="Username"
-            v-model="username"
-            dark
-            :error="errors.length > 0"
-            :error-messages="errors[0]"
-          />
-        </ValidationProvider>
+            <ValidationObserver
+              tag="div"
+              class="d-flex flex-column"
+              ref="observer"
+              v-slot="{ invalid }">
 
-        <ValidationProvider
-          rules="required"
-          v-slot="{ errors }"
-          name="First name"
-        >
-          <v-text-field
-            label="First name"
-            v-model="first_name"
-            dark
-            :error="errors.length > 0"
-            :error-messages="errors[0]"
-          />
-        </ValidationProvider>
+              <div class="row">
 
-        <ValidationProvider
-          rules="required"
-          v-slot="{ errors }"
-          name="Last name"
-        >
-          <v-text-field
-            label="Last name"
-            v-model="last_name"
-            dark
-            :error="errors.length > 0"
-            :error-messages="errors[0]"
-          />
-        </ValidationProvider>
+                <div class="col-md-12">
+                  <div class="form-outline">
+                      <ValidationProvider rules="required" v-slot="{ errors }" name="Login">
+                        <v-text-field
+                          label="Username"
+                          v-model="username"
+                          class="ma-0"
+                          dark
+                          :error="errors.length > 0"
+                          :error-messages="errors[0]"
+                        />
+                      </ValidationProvider>
+                  </div>
+                </div>
 
-        <ValidationProvider
-          rules="required|email"
-          v-slot="{ errors }"
-          name="Email"
-        >
-          <v-text-field
-            label="Email (will be used for two-factor authentication)"
-            v-model="email"
-            dark
-            :error="errors.length > 0"
-            :error-messages="errors[0]"
-          />
-        </ValidationProvider>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-outline">
+                    <ValidationProvider
+                      rules="required"
+                      v-slot="{ errors }"
+                      name="First name">
+                      <v-text-field
+                        label="First name"
+                        v-model="first_name"
+                        class="ma-0"
+                        dark
+                        :error="errors.length > 0"
+                        :error-messages="errors[0]"/>
+                    </ValidationProvider>
+                  </div>
+                </div>
 
-        <ValidationProvider
-          rules="required"
-          v-slot="{ errors }"
-          name="Institution"
-        >
-          <v-text-field
-            label="Institution"
-            v-model="institution"
-            dark
-            :error="errors.length > 0"
-            :error-messages="errors[0]"
-          />
-        </ValidationProvider>
+                <div class="col-md-6">
 
-        <ValidationProvider rules="required" v-slot="{ errors }" name="Reason">
-          <v-text-field
-            label="Reason for use"
-            v-model="reason"
-            dark
-            :error="errors.length > 0"
-            :error-messages="errors[0]"
-          />
-        </ValidationProvider>
+                  <div class="form-outline">
+                    <ValidationProvider
+                      rules="required"
+                      v-slot="{ errors }"
+                      name="Last name">
+                      <v-text-field
+                        label="Last name"
+                        v-model="last_name"
+                        class="ma-0"
+                        dark
+                        :error="errors.length > 0"
+                        :error-messages="errors[0]"/>
+                    </ValidationProvider>
 
-        <ValidationProvider
-          rules="required|min:20"
-          v-slot="{ errors }"
-          name="Password"
-          vid="password"
-        >
-          <v-text-field
-            v-model="password"
-            label="Password (20+ characters)"
-            dark
-            :error="errors.length > 0"
-            :error-messages="errors[0]"
-            :append-icon="show_password ? 'mdi-eye' : 'mdi-eye-off'"
-            :type="show_password ? 'text' : 'password'"
-            @click:append="show_password = !show_password"
-          />
-        </ValidationProvider>
+                  </div>
 
-        <ValidationProvider
-          rules="required|confirmed:password"
-          v-slot="{ errors }"
-          name="Confirm password"
-        >
-          <v-text-field
-            v-model="confirmPassword"
-            label="Confirm password"
-            dark
-            :error="errors.length > 0"
-            :error-messages="errors[0]"
-            :append-icon="show_confirm_password ? 'mdi-eye' : 'mdi-eye-off'"
-            :type="show_confirm_password ? 'text' : 'password'"
-            @click:append="show_confirm_password = !show_confirm_password"
-          />
-        </ValidationProvider>
+                </div>
+              </div>
 
-        <v-checkbox
-          v-model="newsletter"
-          label="Sign up to receive our newsletter"
-        ></v-checkbox>
+              <div class="row">
+                <div class="col-md-6 d-flex align-items-center">
+                  <div class="form-outline datepicker w-100">
+                    <ValidationProvider
+                      rules="required|email"
+                      v-slot="{ errors }"
+                      name="Email">
+                      <v-text-field
+                        label="Email (will be used for two-factor authentication)"
+                        v-model="email"
+                        class="ma-0"
+                        dark
+                        :error="errors.length > 0"
+                        :error-messages="errors[0]"/>
+                    </ValidationProvider>
+                  </div>
 
-        <v-btn
-          type="submit"
-          class="white--text mx-0 align-self-center"
-          :disabled="(submitted && invalid) || loading"
-          @click="onRegister()"
-          >Register</v-btn
-        >
-      </ValidationObserver>
+                </div>
+                <div class="col-md-6">
+                  <ValidationProvider
+                    rules="required"
+                    v-slot="{ errors }"
+                    name="Country">
+                    <v-text-field
+                      label="Country"
+                      v-model="country"
+                      class="ma-0"
+                      dark
+                      :error="errors.length > 0"
+                      :error-messages="errors[0]"/>
+                  </ValidationProvider>
+                </div>
+              </div>
 
-      <router-link class="mt-4 text-center" :to="{ name: 'Login' }"
-        >Back to Login</router-link
-      >
-    </v-flex>
-  </v-layout>
+              <div class="row">
+                <div class="col-md-6 pb-2">
+
+                  <div class="form-outline">
+                    <ValidationProvider
+                      rules="required"
+                      v-slot="{ errors }"
+                      name="Institution">
+                      <v-text-field
+                        label="Institution"
+                        v-model="institution"
+                        class="ma-0"
+                        dark
+                        :error="errors.length > 0"
+                        :error-messages="errors[0]"/>
+                    </ValidationProvider>
+                  </div>
+
+                </div>
+                <div class="col-md-6 pb-2">
+
+                  <div class="form-outline">
+                    <ValidationProvider
+                      rules="required"
+                      v-slot="{ errors }"
+                      name="Profession">
+                      <v-text-field
+                        label="Profession"
+                        v-model="profession"
+                        class="ma-0"
+                        dark
+                        :error="errors.length > 0"
+                        :error-messages="errors[0]"/>
+                    </ValidationProvider>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-12">
+                  <ValidationProvider rules="required" v-slot="{ errors }" name="Reason">
+                  <v-text-field
+                    label="Reason for use"
+                    v-model="reason"
+                    class="ma-0"
+                    dark
+                    :error="errors.length > 0"
+                    :error-messages="errors[0]"/>
+                </ValidationProvider>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 pb-2">
+
+                  <div class="form-outline">
+                    <ValidationProvider
+                      rules="required|min:20"
+                      v-slot="{ errors }"
+                      name="Password"
+                      vid="password"
+                    >
+                      <v-text-field
+                        v-model="password"
+                        label="Password (20+ characters)"
+                        class="ma-0"
+                        dark
+                        :error="errors.length > 0"
+                        :error-messages="errors[0]"
+                        :append-icon="show_password ? 'mdi-eye' : 'mdi-eye-off'"
+                        :type="show_password ? 'text' : 'password'"
+                        @click:append="show_password = !show_password"/>
+                    </ValidationProvider>
+                  </div>
+
+                </div>
+                <div class="col-md-6 pb-2">
+
+                  <div class="form-outline">
+                    <ValidationProvider
+                      rules="required|confirmed:password"
+                      v-slot="{ errors }"
+                      name="Confirm password">
+                      <v-text-field
+                        v-model="confirmPassword"
+                        label="Confirm password"
+                        class="ma-0"
+                        dark
+                        :error="errors.length > 0"
+                        :error-messages="errors[0]"
+                        :append-icon="show_confirm_password ? 'mdi-eye' : 'mdi-eye-off'"
+                        :type="show_confirm_password ? 'text' : 'password'"
+                        @click:append="show_confirm_password = !show_confirm_password"/>
+                    </ValidationProvider>
+                  </div>
+
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-12">
+                  <v-checkbox
+                    v-model="newsletter"
+                    label="Sign up to receive our newsletter"
+                  ></v-checkbox>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <v-btn
+                  type="submit"
+                  class="white--text mx-0 align-self-center mb-6"
+                  :disabled="(submitted && invalid) || loading"
+                  @click="onRegister()"
+                  >Register</v-btn
+                >
+              </div>
+            </ValidationObserver>
+
+            <router-link class="text-center mt-6" :to="{ name: 'Login' }"
+              >Back to Login</router-link
+            >
+        </div>
+      </div>
+
 </template>
 
 <script>
@@ -170,8 +242,10 @@ export default {
       username: "",
       first_name: "",
       last_name: "",
+      country: "",
       email: "",
       institution: "",
+      profession: "",
       reason: "",
       password: "",
       confirmPassword: "",
@@ -203,6 +277,8 @@ export default {
             first_name: this.first_name,
             last_name: this.last_name,
             newsletter: this.newsletter,
+            country: this.country,
+            profession: this.profession
           });
 
           apiSuccess("New user successfully created");
@@ -220,18 +296,13 @@ export default {
 </script>
 
 <style lang="scss">
-.login-main {
-  button {
-    width: 200px;
-  }
-  .wrapper-box {
-    max-height: calc(100vh - 90px);
-    overflow-y: scroll;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
+.container {
+  overflow-y: scroll;
+  max-height: calc(100vh - 90px);
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+button {
+  width: 200px;
 }
 </style>
