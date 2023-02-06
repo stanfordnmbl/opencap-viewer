@@ -124,6 +124,13 @@ export default {
       const res = await axios.get(`/sessions/${sessionId}/`)
       commit('setSession', res.data)
     },
+    // async trashExistingTrial ({ state, commit }, trial) {
+    //   const sessionId = id || state.session.id
+    //
+    //   const res = await axios.post(`/sessions/${sessionId}/trash/`)
+    //   commit('updateSession', res.data)
+    // },
+
     async trashExistingSession ({ state, commit }, id) {
       const sessionId = id || state.session.id
 

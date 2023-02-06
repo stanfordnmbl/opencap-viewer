@@ -16,11 +16,113 @@
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
-                <div v-for="(t, index) in filteredTrials" :key="`trial-${index}`" class="my-1 trial"
+                <div v-for="(t, index) in filteredTrials" :key="`trial-${index}`" class="my-1 trial d-flex justify-content-between"
                     :class="{ selected: isSelected(t) }">
-                    <Status :value="t" class="mr-2" @click="loadTrial(t)" />
+                    <Status :value="t" :class="trialClasses(t)" @click="loadTrial(t)" />
+                    <div class="">
+                      <v-menu
+                          offset-y
+                        >
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-btn
+                              icon
+                            dark
+                            v-bind="attrs"
+                            v-on="on"
+                          >
+                            <v-icon>mdi-menu</v-icon>
+                          </v-btn>
+                        </template>
+                        <v-list>
+                          <v-list-item link v-if="!t.trashed">
+                            <v-dialog v-model="remove_dialog" max-width="500">
+                              <template v-slot:activator="{ on }">
+                                <v-list-item-title v-on="on">Remove...</v-list-item-title>
+                              </template>
+                              <v-card>
+                                <v-card-text>
+                                  <v-row>
+                                    <v-col cols="2">
+                                      <v-icon x-large color="red">mdi-close-circle</v-icon>
+                                    </v-col>
+                                    <v-col cols="10">
+                                      <p>
+                                        Do you want to remove the trial <code>{{t.id}}</code>?
+                                        You will be able to recover it for 30 days. After that,
+                                        this trial will be removed forever.
+                                      </p>
+                                    </v-col>
+                                  </v-row>
+                                </v-card-text>
+                                <v-card-actions>
+                                  <v-spacer></v-spacer>
+                                  <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    @click="remove_dialog = false"
+                                  >
+                                    No
+                                  </v-btn>
+                                  <v-btn
+                                    color="red darken-1"
+                                    text
+                                    @click="remove_dialog = false; trashTrial(t)"
+                                  >
+                                    Yes
+                                  </v-btn>
+                                </v-card-actions>
+                              </v-card>
+                            </v-dialog>
+                          </v-list-item>
+                          <v-list-item link v-else>
+                            <v-dialog v-model="remove_dialog" max-width="500">
+                              <template v-slot:activator="{ on }">
+                                <v-list-item-title v-on="on">Restore...</v-list-item-title>
+                              </template>
+                              <v-card>
+                                <v-card-text>
+                                  <v-row>
+                                    <v-col cols="2">
+                                      <v-icon x-large color="red">mdi-close-circle</v-icon>
+                                    </v-col>
+                                    <v-col cols="10">
+                                      <p>
+                                        Do you want to recover this trial?
+                                      </p>
+                                    </v-col>
+                                  </v-row>
+                                </v-card-text>
+                                <v-card-actions>
+                                  <v-spacer></v-spacer>
+                                  <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    @click="remove_dialog = false"
+                                  >
+                                    No
+                                  </v-btn>
+                                  <v-btn
+                                    color="green darken-1"
+                                    text
+                                    @click="remove_dialog = false; restoreTrial(t)"
+                                  >
+                                    Yes
+                                  </v-btn>
+                                </v-card-actions>
+                              </v-card>
+                            </v-dialog>
+                          </v-list-item>
+                        </v-list>
+                      </v-menu>
+                    </div>
+
+
                 </div>
             </div>
+
+           <div>
+             <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed trials"></v-checkbox>
+           </div>
 
             <v-btn v-show="show_controls" class="mt-4" :disabled="busy || state !== 'ready'"
                 @click="newSessionSameSetup">New session, same setup
@@ -133,6 +235,7 @@
 
 <script>
 import moment from 'moment'
+import Vue from 'vue'
 import momentDurationFormatSetup from 'moment-duration-format'
 import axios from 'axios'
 import { mapState, mapMutations, mapActions } from 'vuex'
@@ -179,6 +282,8 @@ export default {
                 recording: 'Stop recording',
                 processing: 'Cancel trial'
             },
+            remove_dialog: false,
+            show_trashed: true,
             busy: false,
             state: 'ready',
             submitted: false,
@@ -229,7 +334,7 @@ export default {
             return "https://app.opencap.ai/session/" + this.session.id;
         },
         filteredTrials() {
-            return this.session.trials.filter(trial => trial.name !== 'calibration' && !(trial.name === 'neutral' && trial.status === 'error'))
+            return this.session.trials.filter(trial => trial.name !== 'calibration' && !(trial.name === 'neutral' && trial.status === 'error')).filter(t => this.show_trashed || !t.trashed)
         },
         videoControlsDisabled() {
             return !this.trial || this.frames.length === 0
@@ -428,6 +533,33 @@ export default {
                 this.trialsPoll = null
             }
         },
+        trialClasses (trial) {
+          return trial.trashed ? 'trashed' : '';
+        },
+        async updateTrialWithData(trial, data) {
+            const index = this.session.trials.findIndex(x => x.id === trial.id)
+            console.log(index, data);
+            if (index >= 0) {
+                Vue.set(this.session.trials, index, data);
+            }
+        },
+        async trashTrial(trial) {
+          try {
+            const { data } = await axios.post(`/trials/${trial.id}/trash/`);
+            await this.updateTrialWithData(trial, data);
+          } catch (error) {
+            apiError(error)
+          }
+        },
+        async restoreTrial(trial) {
+          try {
+            const { data } = await axios.post(`/trials/${trial.id}/restore/`);
+            await this.updateTrialWithData(trial, data);
+          } catch (error) {
+            apiError(error)
+          }
+        },
+
         async loadTrial(trial) {
             console.log('loadTrial')
             if (!this.trialLoading) {
@@ -711,6 +843,10 @@ export default {
 </script>
 
 <style lang="scss">
+.trashed {
+  color: gray !important;
+}
+
 .step-5 {
     height: calc(100vh - 64px);
     .left {
