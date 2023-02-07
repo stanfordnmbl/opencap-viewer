@@ -67,9 +67,9 @@
                         </v-col>
                         <v-col cols="10">
                           <p>
-                            Do you want to remove the session <code>{{item.id}}</code>?
-                            You will be able to recover it for 30 days. After that,
-                            this session will be removed forever.
+                            Do you want to remove session <code>{{item.id}}</code>?
+                            You will be able to restore it for 30 days. After that,
+                            this session will be permanently removed.
                           </p>
                         </v-col>
                       </v-row>
@@ -107,7 +107,7 @@
                         </v-col>
                         <v-col cols="10">
                           <p>
-                            Do you want to recover the session <code>{{item.id}}</code>?
+                            Do you want to restore session <code>{{item.id}}</code>?
                           </p>
                         </v-col>
                       </v-row>

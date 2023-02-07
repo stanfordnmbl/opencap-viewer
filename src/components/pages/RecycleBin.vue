@@ -55,7 +55,7 @@
                                 </v-col>
                                 <v-col cols="10">
                                   <p>
-                                    Do you want to recover the session <code>{{item.id}}</code>?
+                                    Do you want to restore session <code>{{item.id}}</code>?
                                   </p>
                                 </v-col>
                               </v-row>
@@ -93,7 +93,7 @@
                                 </v-col>
                                 <v-col cols="10">
                                   <p>
-                                    Do you want to <strong>permanently</strong> remove the session
+                                    Do you want to <strong>permanently</strong> remove session
                                     <code>{{item.id}}</code>?
                                   </p>
                                 </v-col>
@@ -178,7 +178,7 @@
                                     </v-col>
                                     <v-col cols="10">
                                       <p>
-                                        Do you want to recover the trial <code>{{trial.id}}</code>?
+                                        Do you want to restore trial <code>{{trial.id}}</code>?
                                       </p>
                                     </v-col>
                                   </v-row>
@@ -216,7 +216,7 @@
                                     </v-col>
                                     <v-col cols="10">
                                       <p>
-                                        Do you want to <strong>permanently</strong> remove the
+                                        Do you want to <strong>permanently</strong> remove
                                         trial <code>{{trial.id}}</code>?
                                       </p>
                                     </v-col>
@@ -267,7 +267,7 @@
             </v-col>
             <v-col cols="10">
               <p>
-                Do you want to <strong>permanently</strong> clean the Recycle Bin?
+                Do you want to <strong>permanently</strong> empty the Recycle Bin?
               </p>
             </v-col>
           </v-row>

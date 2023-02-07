@@ -47,9 +47,9 @@
                                     </v-col>
                                     <v-col cols="10">
                                       <p>
-                                        Do you want to remove the trial <code>{{t.id}}</code>?
-                                        You will be able to recover it for 30 days. After that,
-                                        this trial will be removed forever.
+                                        Do you want to remove trial <code>{{t.id}}</code>?
+                                        You will be able to restore it for 30 days. After that,
+                                        this trial will be permanently removed.
                                       </p>
                                     </v-col>
                                   </v-row>
@@ -87,7 +87,7 @@
                                     </v-col>
                                     <v-col cols="10">
                                       <p>
-                                        Do you want to recover the trial <code>{{t.id}}</code>?
+                                        Do you want to restore trial <code>{{t.id}}</code>?
                                       </p>
                                     </v-col>
                                   </v-row>
