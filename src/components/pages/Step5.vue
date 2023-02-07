@@ -677,7 +677,7 @@ export default {
                 if (this.videos.length > 0) {
                     let t = 0
                     if (this.vid0()) t = this.vid0().currentTime;
-                    cframe = (Math.round(t * framerate)) % this.frames.length
+                    cframe = (Math.floor(t * framerate)) % this.frames.length
                     this.frame = cframe
                 } else {
                     cframe = this.frame++
