@@ -216,7 +216,7 @@ export default {
     },
     async onLoadAllSessions(){
       try {
-        await this.loadExistingSessions({reroute: true, quantity:20})           
+        await this.loadExistingSessions({reroute: true, quantity:-1})           
       } catch (error) {
         apiError(error)
         this.$router.push({ name: 'Step1' })
