@@ -1,10 +1,14 @@
 <template>
   <div>
     <div class="d-flex flex-column">
-      <div class="pa-2 d-flex">
+      <div class="pa-2 d-flex justify-content-between">
         <v-btn
           @click="$router.push({ name: 'SelectSession' })">
           Go back to sessions list
+        </v-btn>
+        <v-btn
+          @click="empty_bin_dialog = true">
+          Empty Recycle Bin
         </v-btn>
       </div>
     </div>
@@ -44,14 +48,14 @@
                             <v-list-item-title v-on="on">Restore...</v-list-item-title>
                           </template>
                           <v-card>
-                            <v-card-text>
-                              <v-row>
+                            <v-card-text class="pt-4">
+                              <v-row class="m-0">
                                 <v-col cols="2">
-                                  <v-icon x-large color="red">mdi-close-circle</v-icon>
+                                  <v-icon x-large color="green">mdi-undo-variant</v-icon>
                                 </v-col>
                                 <v-col cols="10">
                                   <p>
-                                    Do you want to recover this session?
+                                    Do you want to recover the session <code>{{item.id}}</code>?
                                   </p>
                                 </v-col>
                               </v-row>
@@ -82,14 +86,15 @@
                             <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
                           </template>
                           <v-card>
-                            <v-card-text>
-                              <v-row>
+                            <v-card-text class="pt-4">
+                              <v-row class="m-0">
                                 <v-col cols="2">
                                   <v-icon x-large color="red">mdi-close-circle</v-icon>
                                 </v-col>
                                 <v-col cols="10">
                                   <p>
-                                    Do you want to <strong>permanently</strong> remove this session?
+                                    Do you want to <strong>permanently</strong> remove the session
+                                    <code>{{item.id}}</code>?
                                   </p>
                                 </v-col>
                               </v-row>
@@ -117,7 +122,7 @@
                     </v-list>
                   </v-menu>
                 </div>
-                {{ item.id }}
+                <div class="cursor-pointer mt-2">{{ item.id }}</div>
               </template>
             </v-data-table>
 
@@ -166,14 +171,14 @@
                                 <v-list-item-title v-on="on">Restore...</v-list-item-title>
                               </template>
                               <v-card>
-                                <v-card-text>
-                                  <v-row>
+                                <v-card-text class="pt-4">
+                                  <v-row class="m-0">
                                     <v-col cols="2">
-                                      <v-icon x-large color="red">mdi-close-circle</v-icon>
+                                      <v-icon x-large color="green">mdi-undo-variant</v-icon>
                                     </v-col>
                                     <v-col cols="10">
                                       <p>
-                                        Do you want to recover this trial?
+                                        Do you want to recover the trial <code>{{trial.id}}</code>?
                                       </p>
                                     </v-col>
                                   </v-row>
@@ -204,14 +209,15 @@
                                 <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
                               </template>
                               <v-card>
-                                <v-card-text>
-                                  <v-row>
+                                <v-card-text class="pt-4">
+                                  <v-row class="m-0">
                                     <v-col cols="2">
                                       <v-icon x-large color="red">mdi-close-circle</v-icon>
                                     </v-col>
                                     <v-col cols="10">
                                       <p>
-                                        Do you want to <strong>permanently</strong> remove this trial?
+                                        Do you want to <strong>permanently</strong> remove the
+                                        trial <code>{{trial.id}}</code>?
                                       </p>
                                     </v-col>
                                   </v-row>
@@ -240,7 +246,7 @@
                       </v-menu>
                     </div>
 
-                    {{ trial.name }}
+                    <div class="mt-2">{{ trial.name }}</div>
                   </td>
                   <td>{{ trial.status }}</td>
                 </tr>
@@ -251,6 +257,41 @@
 
       </v-col>
     </v-row>
+
+    <v-dialog v-model="empty_bin_dialog" max-width="500">
+      <v-card>
+        <v-card-text class="pt-4">
+          <v-row class="m-0">
+            <v-col cols="2">
+              <v-icon x-large color="red">mdi-close-circle</v-icon>
+            </v-col>
+            <v-col cols="10">
+              <p>
+                Do you want to <strong>permanently</strong> clean the Recycle Bin?
+              </p>
+            </v-col>
+          </v-row>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="empty_bin_dialog = false"
+          >
+            No
+          </v-btn>
+          <v-btn
+            color="red darken-1"
+            text
+            @click="empty_bin_dialog = false; emptyBin()"
+          >
+            Yes
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
 </div>
 </template>
 
@@ -268,6 +309,7 @@ export default {
       remove_session_dialog: false,
       restore_trial_dialog: false,
       remove_trial_dialog: false,
+      empty_bin_dialog: false,
       headers: [
         {
           text: 'ID',
@@ -334,9 +376,16 @@ export default {
     },
     async permanentRemoveTrial(trial) {
       try {
-        const index = this.selected.trials.findIndex(x => x.id === trial.id)
-        const res = await axios.post(`/trials/${trial.id}/permanent_remove/`);
-        this.selected.trials.splice(index, 1);
+        if(this.selected) {
+          const index = this.selected.trials.findIndex(x => x.id === trial.id)
+          const res = await axios.post(`/trials/${trial.id}/permanent_remove/`);
+          this.selected.trials.splice(index, 1);
+        } else {
+          const session_index = this.sessions.findIndex(x => x.id === trial.session);
+          const index = this.sessions[session_index].trials.findIndex(x => x.id === trial.id)
+          const res = await axios.post(`/trials/${trial.id}/permanent_remove/`);
+          this.sessions[session_index].trials.splice(index, 1);
+        }
       } catch (error) {
         apiError(error)
       }
@@ -348,8 +397,31 @@ export default {
       } catch (error) {
         apiError(error)
       }
-    }
+    },
+    async emptyBin() {
+      let trials = [];
+      let sessions_ids = [];
 
+      this.sessionsMapped.forEach(s => {
+        if (s.trashed) {
+          sessions_ids.push(s.id)
+        } else {
+          s.trials.forEach(t => {
+            if (t.trashed) {
+              trials.push(t)
+            }
+          })
+        }
+      })
+
+      for await (const t of trials) {
+        await this.permanentRemoveTrial(t)
+      }
+      for await (const id of sessions_ids) {
+        await this.permanentRemoveSession(id)
+      }
+
+    }
   }
 }
 </script>

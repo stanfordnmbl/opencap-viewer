@@ -40,8 +40,8 @@
                                 <v-list-item-title v-on="on">Remove...</v-list-item-title>
                               </template>
                               <v-card>
-                                <v-card-text>
-                                  <v-row>
+                                <v-card-text class="pt-4">
+                                  <v-row class="m-0">
                                     <v-col cols="2">
                                       <v-icon x-large color="red">mdi-close-circle</v-icon>
                                     </v-col>
@@ -80,14 +80,14 @@
                                 <v-list-item-title v-on="on">Restore...</v-list-item-title>
                               </template>
                               <v-card>
-                                <v-card-text>
-                                  <v-row>
+                                <v-card-text class="pt-4">
+                                  <v-row class="m-0">
                                     <v-col cols="2">
-                                      <v-icon x-large color="red">mdi-close-circle</v-icon>
+                                      <v-icon x-large color="green">mdi-undo-variant</v-icon>
                                     </v-col>
                                     <v-col cols="10">
                                       <p>
-                                        Do you want to recover this trial?
+                                        Do you want to recover the trial <code>{{t.id}}</code>?
                                       </p>
                                     </v-col>
                                   </v-row>
@@ -283,6 +283,7 @@ export default {
                 processing: 'Cancel trial'
             },
             remove_dialog: false,
+            restore_dialog: false,
             show_trashed: false,
             busy: false,
             state: 'ready',
@@ -534,7 +535,7 @@ export default {
             }
         },
         trialClasses (trial) {
-          return trial.trashed ? 'trashed' : '';
+          return trial.trashed ? 'trashed' : 'cursor-pointer';
         },
         async updateTrialWithData(trial, data) {
             const index = this.session.trials.findIndex(x => x.id === trial.id)

@@ -60,8 +60,8 @@
                     <v-list-item-title v-on="on">Remove...</v-list-item-title>
                   </template>
                   <v-card>
-                    <v-card-text>
-                      <v-row>
+                    <v-card-text class="pt-4">
+                      <v-row class="m-0">
                         <v-col cols="2">
                           <v-icon x-large color="red">mdi-close-circle</v-icon>
                         </v-col>
@@ -95,15 +95,15 @@
                 </v-dialog>
               </v-list-item>
               <v-list-item link v-else>
-                <v-dialog v-model="remove_dialog" max-width="500">
+                <v-dialog v-model="restore_dialog" max-width="500">
                   <template v-slot:activator="{ on }">
                     <v-list-item-title v-on="on">Restore...</v-list-item-title>
                   </template>
                   <v-card>
-                    <v-card-text>
-                      <v-row>
+                    <v-card-text class="pt-4">
+                      <v-row class="m-0">
                         <v-col cols="2">
-                          <v-icon x-large color="red">mdi-close-circle</v-icon>
+                          <v-icon x-large color="green">mdi-undo-variant</v-icon>
                         </v-col>
                         <v-col cols="10">
                           <p>
@@ -117,14 +117,14 @@
                       <v-btn
                         color="blue darken-1"
                         text
-                        @click="remove_dialog = false"
+                        @click="restore_dialog = false"
                       >
                         No
                       </v-btn>
                       <v-btn
                         color="green darken-1"
                         text
-                        @click="remove_dialog = false; restoreSession(item.id)"
+                        @click="restore_dialog = false; restoreSession(item.id)"
                       >
                         Yes
                       </v-btn>
@@ -145,7 +145,7 @@
             </v-list>
           </v-menu>
         </div>
-        {{ item.id }}
+        <div class="cursor-pointer mt-2">{{ item.id }}</div>
       </template>
     </v-data-table>
       
@@ -172,6 +172,7 @@ export default {
   data () {
     return {
       remove_dialog: false,
+      restore_dialog: false,
       show_trashed: false,
       headers: [
         {
