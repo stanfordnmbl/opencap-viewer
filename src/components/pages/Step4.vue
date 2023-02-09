@@ -364,7 +364,7 @@ export default {
         "Share processed data",
         "Share no data",
       ],
-      pose_model: 'OpenPose (recommended, non-commercial research use only)',
+      pose_model: 'openpose',
       pose_models: [
         {"text": "OpenPose (recommended, non-commercial research use only)", "value": "openpose"},
         {"text": "HRNet", "value": "hrnet"},
