@@ -230,13 +230,9 @@
 <script>
 import { mapActions, mapState } from "vuex";
 import { apiSuccess, apiError } from "@/util/ErrorMessage.js";
-import VueCountryDropdown from 'vue-country-dropdown'
 
 export default {
   name: "Register",
-  components: {
-    VueCountryDropdown
-  },
   data() {
     return {
       loading: false,
@@ -293,9 +289,6 @@ export default {
 
       this.loading = false;
     },
-    onSelectCountry({name, iso2, dialCode}) {
-      this.country = name;
-    },
   },
 };
 </script>
@@ -312,47 +305,5 @@ export default {
 }
 button {
   width: 200px;
-}
-
-.vue-country-select .country-name {
-  color: hsla(0,0%,100%,.7) !important;
-}
-div.dropdown.open {
-  background-color: black !important;
-}
-.vue-country-select .country-name:hover {
-  color: hsla(0,0%,100%,.7) !important;
-}
-.dropdown:hover {
-  background-color: black !important;
-}
-li.dropdown-item {
-  background-color: black !important;
-}
-li.dropdown-item:hover {
-  background-color: rgb(46, 46, 46) !important;
-}
-li.dropdown-item > strong {
-  font-weight: normal !important;
-  color: hsla(0,0%,100%,.7);
-}
-.vue-country-select {
-  width: 100%;
-  border-color: hsla(0,0%,100%,.7) !important;
-}
-.vue-country-select:hover {
-  width: 100%;
-  border-color: white !important;
-}
-.vue-country-select:focus {
-  width: 100%;
-  border-color: white !important;
-}
-.vue-country-select:active {
-  width: 100%;
-  border-color: white !important;
-}
-li.dropdown-item > span {
-  display: none;
 }
 </style>
