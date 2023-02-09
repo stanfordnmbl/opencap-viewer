@@ -86,20 +86,16 @@
 
                 </div>
                 <div class="col-md-6">
-                  <ValidationProvider
-                    rules="required"
-                    name="Country">
-                    <vue-country-dropdown
-                      ref="vcd"
-                      @onSelect="onSelectCountry"
-                      :preferredCountries="['US']"
-                      :defaultCountry="US"
-                      :immediateCallSelectEvent="true"
-                      :enabledFlags="true"
-                      :enabledCountryCode="false"
-                      :showNameInput="true">
-                    </vue-country-dropdown>
-                  </ValidationProvider>
+                  <vue-country-dropdown
+                    ref="vcd"
+                    @onSelect="onSelectCountry"
+                    :preferredCountries="['US']"
+                    :defaultCountry="'US'"
+                    :immediateCallSelectEvent="true"
+                    :enabledFlags="true"
+                    :enabledCountryCode="false"
+                    :showNameInput="true">
+                  </vue-country-dropdown>
                 </div>
               </div>
 
