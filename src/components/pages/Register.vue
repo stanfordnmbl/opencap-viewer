@@ -293,9 +293,9 @@ export default {
 
       this.loading = false;
     },
-  },
-  onSelectCountry({name, iso2, dialCode}) {
-      this.country = name;
+    onSelectCountry({name, iso2, dialCode}) {
+        this.country = name;
+    },
   },
 };
 </script>
