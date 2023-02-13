@@ -86,18 +86,16 @@
 
                 </div>
                 <div class="col-md-6">
-                  <ValidationProvider
-                    rules="required"
-                    v-slot="{ errors }"
-                    name="Country">
-                    <v-text-field
-                      label="Country"
-                      v-model="country"
-                      class="ma-0"
-                      dark
-                      :error="errors.length > 0"
-                      :error-messages="errors[0]"/>
-                  </ValidationProvider>
+                 <vue-country-dropdown
+                    ref="vcd"
+                    @onSelect="onSelectCountry"
+                    :preferredCountries="['US']"
+                    :defaultCountry="'US'"
+                    :immediateCallSelectEvent="true"
+                    :enabledFlags="true"
+                    :enabledCountryCode="false"
+                    :showNameInput="true">
+                  </vue-country-dropdown>
                 </div>
               </div>
 
