@@ -19,6 +19,7 @@
     "three": "^0.111.0",
     "vee-validate": "^3.4.14",
     "vue": "^2.6.11",
+    "vue-country-dropdown": "^2.0.8",
     "vue-gl": "^0.22.1",
     "vue-router": "^3.5.2",
     "vue-social-sharing": "^3.0.9",
