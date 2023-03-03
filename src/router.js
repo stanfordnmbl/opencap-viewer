@@ -15,6 +15,7 @@ import HelloWorld from '@/components/HelloWorld'
 import Dashboard from '@/components/pages/Dashboard'
 import ResetPassword from '@/components/pages/ResetPassword'
 import NewPassword from '@/components/pages/NewPassword'
+import RecycleBin from "@/components/pages/RecycleBin.vue";
 
 Vue.use(Router)
 
@@ -82,7 +83,12 @@ var router = new Router({
       path: '/new-password/:token',
       name: 'NewPassword',
       component: NewPassword
-    }  
+    },
+    {
+      path: '/recycle-bin',
+      name: 'RecycleBin',
+      component: RecycleBin
+    }
   ]
 })
 
@@ -113,7 +119,8 @@ const acceptedRoutes = [
   'Session',
   'Dashboard',
   'ResetPassword',
-  'NewPassword'
+  'NewPassword',
+  'RecycleBin'
 ]
 
 router.beforeEach((to, from, next) => {
