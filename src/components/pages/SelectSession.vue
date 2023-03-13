@@ -167,7 +167,7 @@ import { apiInfo, apiError } from '@/util/ErrorMessage.js'
 export default {
   name: 'SelectSession',
   created: function () {
-    apiInfo("To take advantage of new features, make sure you have updated the iOS application to version 1.6 (19).")
+  
   },
   data () {
     return {
