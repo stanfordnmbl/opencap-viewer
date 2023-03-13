@@ -178,7 +178,7 @@
                                     </v-col>
                                     <v-col cols="10">
                                       <p>
-                                        Do you want to restore trial <code>{{trial.name}}</code>?
+                                        Do you want to restore trial {{trial.name}}?
                                       </p>
                                     </v-col>
                                   </v-row>
@@ -217,7 +217,7 @@
                                     <v-col cols="10">
                                       <p>
                                         Do you want to <strong>permanently</strong> remove
-                                        trial <code>{{trial.name}}</code>?
+                                        trial {{trial.name}}?
                                       </p>
                                     </v-col>
                                   </v-row>
