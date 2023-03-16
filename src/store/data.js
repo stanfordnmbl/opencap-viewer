@@ -1,6 +1,7 @@
 import axios from 'axios'
 import router from '@/router'
 import Vue from 'vue'
+import { formatDate } from '@/util/DateFormat.js'
 
 export default {
   namespaced: true,
@@ -45,7 +46,14 @@ export default {
       }
     },
     setExistingSessions (state, sessions) {
+      // Dates to human readable format.
+      let i = 0
+      for (i = 0; i < sessions.length; i++) {
+        sessions[i].created_at = formatDate(sessions[i].created_at);
+      }
+
       state.sessions = sessions
+
     },
     setStep1 (state, { cameras }) {
       state.cameras = cameras
@@ -111,7 +119,7 @@ export default {
   },
   actions: {
     async initSession ({ state, commit }) {
-      const res = await axios.get('/sessions/new/')      
+      const res = await axios.get('/sessions/new/')
       commit('setSession', res.data[0])
     },
     async initSessionSameSetup ({ state, commit }) {
@@ -154,7 +162,6 @@ export default {
       const res = await axios.post('/sessions/valid/', {
         quantity: quantity
       })
-
       commit('setExistingSessions', res.data)
 
       if (reroute) {
