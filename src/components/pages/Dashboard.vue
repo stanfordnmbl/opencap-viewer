@@ -23,7 +23,7 @@
     <!-- Left sidebar. -->
     <v-card class="sidebar left-sidebar">
       <div class="pa-4 left-menu-close-button">
-        <v-btn @click="leftMenu">
+        <v-btn width="64px" @click="leftMenu">
           ✖
         </v-btn>
       </div>
@@ -48,20 +48,20 @@
       </v-card-text>
 
       <div class="left d-flex flex-column pa-2">
-        <v-btn class="mt-4" @click="drawChart">
+        <v-btn class="w-100 mt-4" @click="drawChart">
           Generate Chart
         </v-btn>
 
-        <v-btn class="mt-4" @click="onChartDownload">
+        <v-btn class="w-100 mt-4" @click="onChartDownload">
           Download Chart
         </v-btn>
 
-        <v-btn class="mt-4" @click="$router.push({ name: 'Session', params: { id: current_session_id } })">
+        <v-btn class="w-100 mt-4" @click="$router.push({ name: 'Session', params: { id: current_session_id } })">
           Go to Visualizer
         </v-btn>
 
         <div v-if="loggedIn" class="left d-flex flex-column">
-          <v-btn class="mt-4" :to="{ name: 'SelectSession' }">Back to session list
+          <v-btn class="w-100 mt-4" :to="{ name: 'SelectSession' }">Back to session list
           </v-btn>
         </div>
       </div>
@@ -71,7 +71,7 @@
     <!-- Right sidebar. -->
     <v-card class="sidebar right-sidebar">
       <div class="pa-4 right-menu-close-button">
-        <v-btn @click="rightMenu">
+        <v-btn width="64px" @click="rightMenu">
           ✖
         </v-btn>
       </div>

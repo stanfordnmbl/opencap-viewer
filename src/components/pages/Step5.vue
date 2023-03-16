@@ -124,18 +124,18 @@
              <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed trials"></v-checkbox>
            </div>
 
-            <v-btn v-show="show_controls" class="mt-4" :disabled="busy || state !== 'ready'"
+            <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'"
                 @click="newSessionSameSetup">New session, same setup
             </v-btn>
 
-            <v-btn v-show="show_controls" class="mt-4" :disabled="busy || state !== 'ready'" @click="newSession">New
+            <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'" @click="newSession">New
                 session
             </v-btn>
 
             <v-dialog v-model="dialog" width="500">
                 <template v-slot:activator="{ on, attrs }">
 
-                    <v-btn v-bind="attrs" v-on="on" v-show="show_controls" class="mt-4">Share on <v-icon
+                    <v-btn class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="show_controls">Share on <v-icon
                             aria-hidden="false">
                             mdi-facebook
                         </v-icon> <v-icon aria-hidden="false">
@@ -187,18 +187,19 @@
             </v-dialog>
 
 
-            <v-btn class="mt-4" :disabled="downloading" @click="onDownloadData">
+            <v-btn class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
                 <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
 
                 Download data
             </v-btn>
 
-            <v-btn class="mt-4" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
+            <v-btn class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
                 Analysis Dashboard
             </v-btn>
 
-            <v-btn v-show="show_controls" class="mt-4" :disabled="busy || state !== 'ready'"
-                :to="{ name: 'SelectSession' }">Back to session list
+            <v-btn class="mt-4 w-100" v-show="show_controls" @click="$router.push({ name: 'SelectSession'})"
+                  :disabled="busy || state !== 'ready'">
+                Back to session list
             </v-btn>
         </div>
 
