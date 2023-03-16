@@ -3,6 +3,7 @@
     <div class="d-flex flex-column">
       <div class="pa-2 d-flex justify-content-between">
         <v-btn
+          width="16em"
           @click="$router.push({ name: 'SelectSession' })">
           Go back to sessions list
         </v-btn>
