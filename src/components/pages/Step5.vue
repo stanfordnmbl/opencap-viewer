@@ -75,7 +75,7 @@
                             </v-dialog>
                           </v-list-item>
                           <v-list-item link v-else>
-                            <v-dialog v-model="remove_dialog" max-width="500">
+                            <v-dialog v-model="restore_dialog" max-width="500">
                               <template v-slot:activator="{ on }">
                                 <v-list-item-title v-on="on">Restore...</v-list-item-title>
                               </template>
@@ -97,14 +97,14 @@
                                   <v-btn
                                     color="blue darken-1"
                                     text
-                                    @click="remove_dialog = false"
+                                    @click="restore_dialog = false"
                                   >
                                     No
                                   </v-btn>
                                   <v-btn
                                     color="green darken-1"
                                     text
-                                    @click="remove_dialog = false; restoreTrial(t)"
+                                    @click="restore_dialog = false; restoreTrial(t)"
                                   >
                                     Yes
                                   </v-btn>
@@ -590,7 +590,6 @@ export default {
             }
         },
         async trashTrial(trial) {
-          this.remove_dialog = false;
           try {
             const { data } = await axios.post(`/trials/${trial.id}/trash/`);
             await this.updateTrialWithData(trial, data);
@@ -599,7 +598,6 @@ export default {
           }
         },
         async restoreTrial(trial) {
-          this.restore_dialog = false;
           try {
             const { data } = await axios.post(`/trials/${trial.id}/restore/`);
             await this.updateTrialWithData(trial, data);
