@@ -333,6 +333,7 @@ export default {
     computed: {
         ...mapState({
             session: state => state.data.session,
+            sessions: state => state.data.sessions,
 
             user_id: state => state.auth.user_id,
 
@@ -581,12 +582,17 @@ export default {
         },
         async updateTrialWithData(trial, data) {
             const index = this.session.trials.findIndex(x => x.id === trial.id)
-            // console.log(index, data);
+            console.log(index, data);
             if (index >= 0) {
                 Vue.set(this.session.trials, index, data);
+                const session_index = this.sessions.findIndex(x => x.id === trial.session);
+                const idx = this.sessions[session_index].trials.findIndex(x => x.id === trial.id)
+                Vue.set(this.sessions[session_index].trials, idx, data);
             }
+            console.log(this.session.trials);
         },
         async trashTrial(trial) {
+          this.remove_dialog = false;
           try {
             const { data } = await axios.post(`/trials/${trial.id}/trash/`);
             await this.updateTrialWithData(trial, data);
@@ -595,6 +601,7 @@ export default {
           }
         },
         async restoreTrial(trial) {
+          this.restore_dialog = false;
           try {
             const { data } = await axios.post(`/trials/${trial.id}/restore/`);
             await this.updateTrialWithData(trial, data);
