@@ -332,9 +332,7 @@ export default {
       sessions: state => state.data.sessions
     }),
     sessionsMapped () {
-      console.log('sessionsMapped');
-      console.log(this.sessions);
-      let d = this.sessions.map(s => ({
+      return this.sessions.map(s => ({
         id: s.id,
         name: s.name,
         trials_count: String(s.trials.length),
@@ -344,8 +342,6 @@ export default {
         trashed: s.trashed,
         trashed_at: s.trashed_at
       })).filter(s => s.trashed || s.trashed_trials_count > 0)
-      console.log(d);
-      return d;
     }
   },
   methods: {
@@ -379,11 +375,9 @@ export default {
         const index = this.selected.trials.findIndex(x => x.id === trial.id)
         if (index >= 0) {
             Vue.set(this.selected.trials, index, data);
-            console.log('updated trial', index, trial, data)
             const session_index = this.sessions.findIndex(x => x.id === trial.session);
             const idx = this.sessions[session_index].trials.findIndex(x => x.id === trial.id)
             Vue.set(this.sessions[session_index].trials, idx, data);
-            console.log(this.sessions);
         }
     },
     async permanentRemoveTrial(trial) {
