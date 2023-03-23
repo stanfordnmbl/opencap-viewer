@@ -82,7 +82,7 @@
                         </v-dialog>
                       </v-list-item>
                       <v-list-item link>
-                        <v-dialog v-model="remove_session_dialog" max-width="500">
+                        <v-dialog v-model="remove_permanently_session_dialog" max-width="500">
                           <template v-slot:activator="{ on }">
                             <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
                           </template>
@@ -105,14 +105,14 @@
                               <v-btn
                                 color="blue darken-1"
                                 text
-                                @click="remove_session_dialog = false"
+                                @click="remove_permanently_session_dialog = false"
                               >
                                 No
                               </v-btn>
                               <v-btn
                                 color="red darken-1"
                                 text
-                                @click="remove_session_dialog = false; permanentRemoveSession(item.id)"
+                                @click="remove_permanently_session_dialog = false; permanentRemoveSession(item.id)"
                               >
                                 Yes
                               </v-btn>
@@ -205,7 +205,7 @@
                             </v-dialog>
                           </v-list-item>
                           <v-list-item link>
-                            <v-dialog v-model="remove_trial_dialog" max-width="500">
+                            <v-dialog v-model="remove_permanently_trial_dialog" max-width="500">
                               <template v-slot:activator="{ on }">
                                 <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
                               </template>
@@ -228,14 +228,14 @@
                                   <v-btn
                                     color="blue darken-1"
                                     text
-                                    @click="remove_trial_dialog = false"
+                                    @click="remove_permanently_trial_dialog = false"
                                   >
                                     No
                                   </v-btn>
                                   <v-btn
                                     color="red darken-1"
                                     text
-                                    @click="remove_trial_dialog = false; permanentRemoveTrial(trial)"
+                                    @click="remove_permanently_trial_dialog = false; permanentRemoveTrial(trial)"
                                   >
                                     Yes
                                   </v-btn>
@@ -308,8 +308,10 @@ export default {
     return {
       restore_session_dialog: false,
       remove_session_dialog: false,
+      remove_permanently_session_dialog: false,
       restore_trial_dialog: false,
       remove_trial_dialog: false,
+      remove_permanently_trial_dialog: false,
       empty_bin_dialog: false,
       headers: [
         {
@@ -373,6 +375,9 @@ export default {
         const index = this.selected.trials.findIndex(x => x.id === trial.id)
         if (index >= 0) {
             Vue.set(this.selected.trials, index, data);
+            const session_index = this.sessions.findIndex(x => x.id === trial.session);
+            const idx = this.sessions[session_index].trials.findIndex(x => x.id === trial.id)
+            Vue.set(this.sessions[session_index].trials, idx, data);
         }
     },
     async permanentRemoveTrial(trial) {

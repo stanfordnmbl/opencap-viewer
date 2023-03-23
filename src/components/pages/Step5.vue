@@ -75,7 +75,7 @@
                             </v-dialog>
                           </v-list-item>
                           <v-list-item link v-else>
-                            <v-dialog v-model="remove_dialog" max-width="500">
+                            <v-dialog v-model="restore_dialog" max-width="500">
                               <template v-slot:activator="{ on }">
                                 <v-list-item-title v-on="on">Restore...</v-list-item-title>
                               </template>
@@ -97,14 +97,14 @@
                                   <v-btn
                                     color="blue darken-1"
                                     text
-                                    @click="remove_dialog = false"
+                                    @click="restore_dialog = false"
                                   >
                                     No
                                   </v-btn>
                                   <v-btn
                                     color="green darken-1"
                                     text
-                                    @click="remove_dialog = false; restoreTrial(t)"
+                                    @click="restore_dialog = false; restoreTrial(t)"
                                   >
                                     Yes
                                   </v-btn>
@@ -333,6 +333,7 @@ export default {
     computed: {
         ...mapState({
             session: state => state.data.session,
+            sessions: state => state.data.sessions,
 
             user_id: state => state.auth.user_id,
 
@@ -581,9 +582,11 @@ export default {
         },
         async updateTrialWithData(trial, data) {
             const index = this.session.trials.findIndex(x => x.id === trial.id)
-            // console.log(index, data);
             if (index >= 0) {
                 Vue.set(this.session.trials, index, data);
+                const session_index = this.sessions.findIndex(x => x.id === trial.session);
+                const idx = this.sessions[session_index].trials.findIndex(x => x.id === trial.id)
+                Vue.set(this.sessions[session_index].trials, idx, data);
             }
         },
         async trashTrial(trial) {
