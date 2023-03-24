@@ -41,6 +41,7 @@
       <template v-slot:item.id="{ item }">
         <div class="float-right">
           <v-menu
+              v-model="item.isMenuOpen"
               offset-y
             >
             <template v-slot:activator="{ on, attrs }">
@@ -79,14 +80,14 @@
                       <v-btn
                         color="blue darken-1"
                         text
-                        @click="remove_dialog = false"
+                        @click="item.isMenuOpen = false; remove_dialog = false"
                       >
                         No
                       </v-btn>
                       <v-btn
                         color="red darken-1"
                         text
-                        @click="remove_dialog = false; trashSession(item.id)"
+                        @click="item.isMenuOpen = false; remove_dialog = false; trashSession(item.id)"
                       >
                         Yes
                       </v-btn>
@@ -117,14 +118,14 @@
                       <v-btn
                         color="blue darken-1"
                         text
-                        @click="restore_dialog = false"
+                        @click="item.isMenuOpen = false; restore_dialog = false"
                       >
                         No
                       </v-btn>
                       <v-btn
                         color="green darken-1"
                         text
-                        @click="restore_dialog = false; restoreSession(item.id)"
+                        @click="item.isMenuOpen = false; restore_dialog = false; restoreSession(item.id)"
                       >
                         Yes
                       </v-btn>
@@ -199,7 +200,8 @@ export default {
         trials_count: String(s.trials.length),
         created_at: s.created_at,
         trashed: s.trashed,
-        trashed_at: s.trashed_at
+        trashed_at: s.trashed_at,
+        isMenuOpen: false
       })).filter(s => this.show_trashed || !s.trashed)
     }
   },

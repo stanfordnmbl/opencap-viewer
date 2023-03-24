@@ -16,11 +16,12 @@
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
-                <div v-for="(t, index) in filteredTrials" :key="`trial-${index}`" class="my-1 trial d-flex justify-content-between"
+                <div v-for="(t, index) in filteredTrialsWithMenu" :key="`trial-${index}`" class="my-1 trial d-flex justify-content-between"
                     :class="{ selected: isSelected(t) }">
                     <Status :value="t" :class="trialClasses(t)" @click="loadTrial(t)" />
                     <div class="">
                       <v-menu
+                          v-model="t.isMenuOpen"
                           offset-y
                         >
                         <template v-slot:activator="{ on, attrs }">
@@ -59,14 +60,14 @@
                                   <v-btn
                                     color="blue darken-1"
                                     text
-                                    @click="remove_dialog = false"
+                                    @click="t.isMenuOpen = false; remove_dialog = false"
                                   >
                                     No
                                   </v-btn>
                                   <v-btn
                                     color="red darken-1"
                                     text
-                                    @click="remove_dialog = false; trashTrial(t)"
+                                    @click="t.isMenuOpen = false; remove_dialog = false; trashTrial(t)"
                                   >
                                     Yes
                                   </v-btn>
@@ -97,14 +98,14 @@
                                   <v-btn
                                     color="blue darken-1"
                                     text
-                                    @click="restore_dialog = false"
+                                    @click="t.isMenuOpen = false; restore_dialog = false"
                                   >
                                     No
                                   </v-btn>
                                   <v-btn
                                     color="green darken-1"
                                     text
-                                    @click="restore_dialog = false; restoreTrial(t)"
+                                    @click="t.isMenuOpen = false; restore_dialog = false; restoreTrial(t)"
                                   >
                                     Yes
                                   </v-btn>
@@ -292,6 +293,7 @@ export default {
             remove_dialog: false,
             restore_dialog: false,
             show_trashed: false,
+            menu: [],
             busy: false,
             state: 'ready',
             submitted: false,
@@ -350,6 +352,9 @@ export default {
         }),
         sessionUrl() {
             return "https://app.opencap.ai/session/" + this.session.id;
+        },
+        filteredTrialsWithMenu() {
+            return this.filteredTrials.map(trial => ({...trial, isMenuOpen: false}));
         },
         filteredTrials() {
             return this.session.trials.filter(trial => trial.name !== 'calibration' && !(trial.name === 'neutral' && trial.status === 'error')).filter(t => this.show_trashed || !t.trashed)
