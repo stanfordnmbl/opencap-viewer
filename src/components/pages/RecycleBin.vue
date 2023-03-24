@@ -29,6 +29,7 @@
               <template v-slot:item.id="{ item }">
                 <div class="float-right">
                   <v-menu
+                      v-model="item.isMenuOpen"
                       offset-y
                       v-if="item.trashed"
                     >
@@ -66,14 +67,14 @@
                               <v-btn
                                 color="blue darken-1"
                                 text
-                                @click="restore_session_dialog = false"
+                                @click="item.isMenuOpen = false; restore_session_dialog = false"
                               >
                                 No
                               </v-btn>
                               <v-btn
                                 color="green darken-1"
                                 text
-                                @click="restore_session_dialog = false; restoreSession(item.id)"
+                                @click="item.isMenuOpen = false; restore_session_dialog = false; restoreSession(item.id)"
                               >
                                 Yes
                               </v-btn>
@@ -105,14 +106,14 @@
                               <v-btn
                                 color="blue darken-1"
                                 text
-                                @click="remove_permanently_session_dialog = false"
+                                @click="item.isMenuOpen = false; remove_permanently_session_dialog = false"
                               >
                                 No
                               </v-btn>
                               <v-btn
                                 color="red darken-1"
                                 text
-                                @click="remove_permanently_session_dialog = false; permanentRemoveSession(item.id)"
+                                @click="item.isMenuOpen = false; remove_permanently_session_dialog = false; permanentRemoveSession(item.id)"
                               >
                                 Yes
                               </v-btn>
@@ -146,12 +147,13 @@
               </thead>
               <tbody>
                 <tr
-                  v-for="trial in selected.trials.filter(t => t.trashed || selected.trashed)"
+                  v-for="trial in selected.trials.filter(t => t.trashed || selected.trashed).map(t => ({...t, isMenuOpen: false}))"
                   :key="trial.id"
                 >
                   <td>
                     <div class="float-right">
                       <v-menu
+                          v-model="trial.isMenuOpen"
                           offset-y
                           v-if="trial.trashed"
                         >
@@ -189,14 +191,14 @@
                                   <v-btn
                                     color="blue darken-1"
                                     text
-                                    @click="restore_trial_dialog = false"
+                                    @click="trial.isMenuOpen = false; restore_trial_dialog = false"
                                   >
                                     No
                                   </v-btn>
                                   <v-btn
                                     color="green darken-1"
                                     text
-                                    @click="restore_trial_dialog = false; restoreTrial(trial)"
+                                    @click="trial.isMenuOpen = false; restore_trial_dialog = false; restoreTrial(trial)"
                                   >
                                     Yes
                                   </v-btn>
@@ -228,14 +230,14 @@
                                   <v-btn
                                     color="blue darken-1"
                                     text
-                                    @click="remove_permanently_trial_dialog = false"
+                                    @click="trial.isMenuOpen = false; remove_permanently_trial_dialog = false"
                                   >
                                     No
                                   </v-btn>
                                   <v-btn
                                     color="red darken-1"
                                     text
-                                    @click="remove_permanently_trial_dialog = false; permanentRemoveTrial(trial)"
+                                    @click="trial.isMenuOpen = false; remove_permanently_trial_dialog = false; permanentRemoveTrial(trial)"
                                   >
                                     Yes
                                   </v-btn>
@@ -340,7 +342,8 @@ export default {
         trials: s.trials,
         created_at: s.created_at,
         trashed: s.trashed,
-        trashed_at: s.trashed_at
+        trashed_at: s.trashed_at,
+        isMenuOpen: false
       })).filter(s => s.trashed || s.trashed_trials_count > 0)
     }
   },
