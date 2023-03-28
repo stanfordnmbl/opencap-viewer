@@ -897,12 +897,18 @@ export default {
             if (this.playing) {
                 this.animate()
 
-                this.videoElement(0).play()
-                this.videoElement(1).play()
+                this.videos.forEach((video, index) => {
+                    const vid_element = this.videoElement(index)
+                    vid_element.currentTime = 0
+                    vid_element.play()
+                })
 
             } else {
-                this.videoElement(0).pause()
-                this.videoElement(1).pause()
+                this.videos.forEach((video, index) => {
+                    const vid_element = this.videoElement(index)
+                    vid_element.currentTime = 0
+                    vid_element.play()
+                })
             }
         },
         onNavigate(frame) {
