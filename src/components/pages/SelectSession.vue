@@ -198,7 +198,9 @@ export default {
       return this.sessions.map(s => ({
         id: s.id,
         name: s.name,
-        trials_count: String(s.trials.length),
+        trials_count: s.trials.filter(function (trial, i){
+                return trial.name !== 'calibration';
+            }).length,
         created_at: s.created_at,
         trashed: s.trashed,
         trashed_at: s.trashed_at,
