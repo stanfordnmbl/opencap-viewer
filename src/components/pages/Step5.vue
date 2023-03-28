@@ -899,15 +899,13 @@ export default {
 
                 this.videos.forEach((video, index) => {
                     const vid_element = this.videoElement(index)
-                    vid_element.currentTime = 0
                     vid_element.play()
                 })
 
             } else {
                 this.videos.forEach((video, index) => {
                     const vid_element = this.videoElement(index)
-                    vid_element.currentTime = 0
-                    vid_element.play()
+                    vid_element.pause()
                 })
             }
         },
