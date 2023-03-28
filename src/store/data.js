@@ -41,11 +41,13 @@ export default {
       state.session = session
     },
     setSessionId (state, id) {
+
       state.session = {
         id
       }
     },
     setExistingSessions (state, sessions) {
+
       // Dates to human readable format.
       let i = 0
       for (i = 0; i < sessions.length; i++) {
@@ -110,8 +112,7 @@ export default {
     },
     updateSession (state, session) {
       const index = state.sessions.findIndex(t => t.id === session.id);
-      // console.log(state.sessions);
-      // console.log(index);
+
       if (index >= 0) {
         Vue.set(state.sessions, index, session);
       }
@@ -130,6 +131,7 @@ export default {
       const sessionId = id || state.session.id
 
       const res = await axios.get(`/sessions/${sessionId}/`)
+
       commit('setSession', res.data)
     },
     // async trashExistingTrial ({ state, commit }, trial) {
@@ -149,12 +151,19 @@ export default {
       const sessionId = id || state.session.id
 
       const res = await axios.post(`/sessions/${sessionId}/trash/`)
+
+      res.data.created_at = formatDate(res.data.created_at);
+
       commit('updateSession', res.data)
     },
     async restoreTrashedSession ({ state, commit }, id) {
       const sessionId = id || state.session.id
 
       const res = await axios.post(`/sessions/${sessionId}/restore/`)
+
+      // Dates to human readable format.
+      res.data.created_at = formatDate(res.data.created_at);
+
       commit('updateSession', res.data)
     },
     async loadExistingSessions ({ state, commit }, {reroute, quantity = -1}) {

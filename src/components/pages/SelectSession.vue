@@ -164,6 +164,7 @@
 <script>
 import { mapActions, mapState } from 'vuex'
 import { apiInfo, apiError } from '@/util/ErrorMessage.js'
+import { formatDate } from '@/util/DateFormat.js'
 
 export default {
   name: 'SelectSession',
