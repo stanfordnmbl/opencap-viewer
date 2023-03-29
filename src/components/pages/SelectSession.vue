@@ -18,17 +18,137 @@
         @click="$router.push({ name: 'Dashboard' })">
         Analysis Dashboard
       </v-btn>
+
+      <v-btn
+        class="ml-2"
+        @click="$router.push({ name: 'RecycleBin' })">
+        Recycle Bin
+      </v-btn>
+
+      <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed sessions"></v-checkbox>
     </div>
 
     <v-data-table        
       :headers="headers"
       :items="sessionsMapped"
+      :item-class="itemClasses"
       disable-pagination
       hide-default-footer
       single-select      
       class="sessions-table mx-2 mb-4 flex-grow-1"
       @item-selected="onSelect"
-      @click:row="onRowClick"/>
+      @click:row="onRowClick">
+      <template v-slot:item.id="{ item }">
+        <div class="float-right">
+          <v-menu
+              v-model="item.isMenuOpen"
+              offset-y
+            >
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                  icon
+                dark
+                v-bind="attrs"
+                v-on="on"
+              >
+                <v-icon>mdi-menu</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item link v-if="!item.trashed">
+                <v-dialog v-model="remove_dialog" max-width="500">
+                  <template v-slot:activator="{ on }">
+                    <v-list-item-title v-on="on">Remove...</v-list-item-title>
+                  </template>
+                  <v-card>
+                    <v-card-text class="pt-4">
+                      <v-row class="m-0">
+                        <v-col cols="2">
+                          <v-icon x-large color="red">mdi-close-circle</v-icon>
+                        </v-col>
+                        <v-col cols="10">
+                          <p>
+                            Do you want to remove session <code>{{item.id}}</code>?
+                            You will be able to restore it for 30 days. After that,
+                            this session will be permanently removed.
+                          </p>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn
+                        color="blue darken-1"
+                        text
+                        @click="item.isMenuOpen = false; remove_dialog = false"
+                      >
+                        No
+                      </v-btn>
+                      <v-btn
+                        color="red darken-1"
+                        text
+                        @click="item.isMenuOpen = false; remove_dialog = false; trashSession(item.id)"
+                      >
+                        Yes
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-list-item>
+              <v-list-item link v-else>
+                <v-dialog v-model="restore_dialog" max-width="500">
+                  <template v-slot:activator="{ on }">
+                    <v-list-item-title v-on="on">Restore...</v-list-item-title>
+                  </template>
+                  <v-card>
+                    <v-card-text class="pt-4">
+                      <v-row class="m-0">
+                        <v-col cols="2">
+                          <v-icon x-large color="green">mdi-undo-variant</v-icon>
+                        </v-col>
+                        <v-col cols="10">
+                          <p>
+                            Do you want to restore session <code>{{item.id}}</code>?
+                          </p>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                    <v-card-actions>
+                      <v-spacer></v-spacer>
+                      <v-btn
+                        color="blue darken-1"
+                        text
+                        @click="item.isMenuOpen = false; restore_dialog = false"
+                      >
+                        No
+                      </v-btn>
+                      <v-btn
+                        color="green darken-1"
+                        text
+                        @click="item.isMenuOpen = false; restore_dialog = false; restoreSession(item.id)"
+                      >
+                        Yes
+                      </v-btn>
+                    </v-card-actions>
+                  </v-card>
+                </v-dialog>
+              </v-list-item>
+              <v-list-item link>
+                <v-list-item-title
+                    @click="$router.push({ name: 'Session', params: { id: item.id }})"
+                    >Load...</v-list-item-title>
+              </v-list-item>
+              <v-list-item link>
+                <v-list-item-title
+                  @click="$router.push({ name: 'Dashboard' })"
+                  >Dashboard...</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </div>
+        <div class="cursor-pointer mt-2">{{ item.id }}</div>
+      </template>
+    </v-data-table>
       
     <div class="d-flex table-info-footer">
       <v-btn
@@ -44,14 +164,18 @@
 <script>
 import { mapActions, mapState } from 'vuex'
 import { apiInfo, apiError } from '@/util/ErrorMessage.js'
+import { formatDate } from '@/util/DateFormat.js'
 
 export default {
   name: 'SelectSession',
   created: function () {
-
+  
   },
   data () {
     return {
+      remove_dialog: false,
+      restore_dialog: false,
+      show_trashed: false,
       headers: [
         {
           text: 'ID',
@@ -74,18 +198,26 @@ export default {
       return this.sessions.map(s => ({
         id: s.id,
         name: s.name,
-        trials_count: String(s.trials.length),
-        created_at: s.created_at
-      }))
+        trials_count: s.trials.filter(function (trial, i){
+                return trial.name !== 'calibration';
+            }).length,
+        created_at: s.created_at,
+        trashed: s.trashed,
+        trashed_at: s.trashed_at,
+        isMenuOpen: false
+      })).filter(s => this.show_trashed || !s.trashed)
     }
   },
   methods: {
-    ...mapActions('data', ['loadExistingSessions']),
+    ...mapActions('data', ['loadExistingSessions', 'trashExistingSession', 'restoreTrashedSession']),
     onSelect ({ item, value }) {
       this.selected = value ? item : null
     },
     onRowClick (item, params) {
       params.select(!params.isSelected)
+    },
+    itemClasses (item) {
+      return item.trashed ? 'trashed' : '';
     },
     async onLoadAllSessions(){
       try {
@@ -93,6 +225,20 @@ export default {
       } catch (error) {
         apiError(error)
         this.$router.push({ name: 'Step1' })
+      }
+    },
+    async trashSession (id) {
+      try {
+        await this.trashExistingSession(id)
+      } catch (error) {
+        apiError(error)
+      }
+    },
+    async restoreSession (id) {
+      try {
+        await this.restoreTrashedSession(id)
+      } catch (error) {
+        apiError(error)
       }
     }
   }
@@ -124,4 +270,7 @@ export default {
   }
 }
 
+.trashed {
+  color: gray;
+}
 </style>

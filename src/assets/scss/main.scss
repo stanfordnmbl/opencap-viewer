@@ -50,6 +50,18 @@
   justify-content: space-evenly;
 }
 
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.m-0 {
+  margin: 0 !important;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
 html {
   overflow-y: hidden;
 }

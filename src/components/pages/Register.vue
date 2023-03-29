@@ -153,6 +153,20 @@
               </div>
 
               <div class="row">
+                <div class="col-12">
+                  <ValidationProvider rules="required" v-slot="{ errors }" name="Website">
+                  <v-text-field
+                    label="Website"
+                    v-model="website"
+                    class="ma-0"
+                    dark
+                    :error="errors.length > 0"
+                    :error-messages="errors[0]"/>
+                </ValidationProvider>
+                </div>
+              </div>
+
+              <div class="row">
                 <div class="col-md-6 pb-2">
 
                   <div class="form-outline">
@@ -249,6 +263,7 @@ export default {
       institution: "",
       profession: "",
       reason: "",
+      website: "",
       password: "",
       confirmPassword: "",
       newsletter: true,
@@ -276,6 +291,7 @@ export default {
             password: this.password,
             institution: this.institution,
             reason: this.reason,
+            website: this.website,
             first_name: this.first_name,
             last_name: this.last_name,
             newsletter: this.newsletter,

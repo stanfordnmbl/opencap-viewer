@@ -1,6 +1,7 @@
 import axios from 'axios'
 import router from '@/router'
 import Vue from 'vue'
+import { formatDate } from '@/util/DateFormat.js'
 
 export default {
   namespaced: true,
@@ -40,12 +41,21 @@ export default {
       state.session = session
     },
     setSessionId (state, id) {
+
       state.session = {
         id
       }
     },
     setExistingSessions (state, sessions) {
+
+      // Dates to human readable format.
+      let i = 0
+      for (i = 0; i < sessions.length; i++) {
+        sessions[i].created_at = formatDate(sessions[i].created_at);
+      }
+
       state.sessions = sessions
+
     },
     setStep1 (state, { cameras }) {
       state.cameras = cameras
@@ -99,11 +109,18 @@ export default {
       if (index >= 0) {
         Vue.set(state.session.trials, index, trial)
       }
+    },
+    updateSession (state, session) {
+      const index = state.sessions.findIndex(t => t.id === session.id);
+
+      if (index >= 0) {
+        Vue.set(state.sessions, index, session);
+      }
     }
   },
   actions: {
     async initSession ({ state, commit }) {
-      const res = await axios.get('/sessions/new/')      
+      const res = await axios.get('/sessions/new/')
       commit('setSession', res.data[0])
     },
     async initSessionSameSetup ({ state, commit }) {
@@ -114,14 +131,46 @@ export default {
       const sessionId = id || state.session.id
 
       const res = await axios.get(`/sessions/${sessionId}/`)
+
       commit('setSession', res.data)
+    },
+    // async trashExistingTrial ({ state, commit }, trial) {
+    //   const sessionId = id || state.session.id
+    //
+    //   const res = await axios.post(`/sessions/${sessionId}/trash/`)
+    //   commit('updateSession', res.data)
+    // },
+
+    async permanentRemoveExistingSession ({ state, commit }, id) {
+      const sessionId = id || state.session.id
+      const index = state.sessions.findIndex(t => t.id === sessionId);
+      const res = await axios.post(`/sessions/${sessionId}/permanent_remove/`)
+      state.sessions.splice(index, 1);
+    },
+    async trashExistingSession ({ state, commit }, id) {
+      const sessionId = id || state.session.id
+
+      const res = await axios.post(`/sessions/${sessionId}/trash/`)
+
+      res.data.created_at = formatDate(res.data.created_at);
+
+      commit('updateSession', res.data)
+    },
+    async restoreTrashedSession ({ state, commit }, id) {
+      const sessionId = id || state.session.id
+
+      const res = await axios.post(`/sessions/${sessionId}/restore/`)
+
+      // Dates to human readable format.
+      res.data.created_at = formatDate(res.data.created_at);
+
+      commit('updateSession', res.data)
     },
     async loadExistingSessions ({ state, commit }, {reroute, quantity = -1}) {
       console.log(quantity)
       const res = await axios.post('/sessions/valid/', {
         quantity: quantity
       })
-
       commit('setExistingSessions', res.data)
 
       if (reroute) {
