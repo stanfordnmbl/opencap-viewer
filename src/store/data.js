@@ -34,7 +34,25 @@ export default {
     framerate: 60,
 
     // step 5
-    trialName: ''
+    trialName: '',
+
+    subjects: [],
+    sexes: {
+      "": "",
+      "woman": "Woman",
+      "man": "Man",
+      "intersect": "Intersex",
+      "not-listed": "Not Listed",
+      "prefer-not-respond": "Prefer not to respond"
+    },
+    genders: {
+      "": "",
+      "woman": "Woman",
+      "man": "Man",
+      "transgender": "Transgender",
+      "non-binary": "Non-Binary/Non-Conforming",
+      "prefer-not-respond": "Prefer not to respond",
+    }
   },
   mutations: {
     setSession (state, session) {
@@ -56,6 +74,13 @@ export default {
 
       state.sessions = sessions
 
+    },
+    setSubjects (state, subjects) {
+      for (let i = 0; i < subjects.length; i++) {
+        subjects[i].created_at = formatDate(subjects[i].created_at);
+      }
+      state.subjects = subjects
+      console.log(state.subjects)
     },
     setStep1 (state, { cameras }) {
       state.cameras = cameras
@@ -115,6 +140,13 @@ export default {
 
       if (index >= 0) {
         Vue.set(state.sessions, index, session);
+      }
+    },
+    updateSubject (state, subject) {
+      const index = state.subjects.findIndex(t => t.id === subject.id);
+
+      if (index >= 0) {
+        Vue.set(state.subjects, index, subject);
       }
     }
   },
@@ -180,6 +212,29 @@ export default {
           router.push({ name: 'Step1' })
         }  
       }
+    },
+    async loadSubjects ({ state, commit }) {
+      const res = await axios.get('/subjects/')
+      commit('setSubjects', res.data)
+    },
+    async trashExistingSubject ({ state, commit }, id) {
+      const subjectId = id
+
+      const res = await axios.post(`/subjects/${subjectId}/trash/`)
+
+      res.data.created_at = formatDate(res.data.created_at);
+
+      commit('updateSubject', res.data)
+    },
+    async restoreTrashedSubject ({ state, commit }, id) {
+      const subjectId = id
+
+      const res = await axios.post(`/subjects/${subjectId}/restore/`)
+
+      res.data.created_at = formatDate(res.data.created_at);
+
+      commit('updateSubject', res.data)
     }
+
   }
 }

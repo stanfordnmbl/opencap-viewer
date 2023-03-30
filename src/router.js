@@ -16,6 +16,7 @@ import Dashboard from '@/components/pages/Dashboard'
 import ResetPassword from '@/components/pages/ResetPassword'
 import NewPassword from '@/components/pages/NewPassword'
 import RecycleBin from "@/components/pages/RecycleBin.vue";
+import Subjects from "@/components/pages/Subjects.vue";
 
 Vue.use(Router)
 
@@ -88,6 +89,11 @@ var router = new Router({
       path: '/recycle-bin',
       name: 'RecycleBin',
       component: RecycleBin
+    },
+    {
+      path: '/subjects',
+      name: 'Subjects',
+      component: Subjects
     }
   ]
 })
@@ -120,7 +126,8 @@ const acceptedRoutes = [
   'Dashboard',
   'ResetPassword',
   'NewPassword',
-  'RecycleBin'
+  'RecycleBin',
+  'Subjects'
 ]
 
 router.beforeEach((to, from, next) => {

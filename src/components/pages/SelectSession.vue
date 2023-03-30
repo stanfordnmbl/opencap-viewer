@@ -21,6 +21,12 @@
 
       <v-btn
         class="ml-2"
+        @click="$router.push({ name: 'Subjects' })">
+        Subjects
+      </v-btn>
+
+      <v-btn
+        class="ml-2"
         @click="$router.push({ name: 'RecycleBin' })">
         Recycle Bin
       </v-btn>
