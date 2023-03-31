@@ -16,7 +16,7 @@
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
-                <div v-for="(t, index) in filteredTrialsWithMenu" :key="`trial-${index}`" class="my-1 trial d-flex justify-content-between"
+                <div v-for="(t, index) in filteredTrialsWithMenu" :key="`trial-${index}`" :ref="`trial-${index}`" class="my-1 trial d-flex justify-content-between"
                     :class="{ selected: isSelected(t) }">
                     <Status :value="t" :class="trialClasses(t)" @click="loadTrial(t)" />
                     <div class="">
@@ -35,11 +35,12 @@
                           </v-btn>
                         </template>
                         <v-list>
-                          <v-list-item link>
+                          <v-list-item link v-if="t.name !== 'neutral'">
                             <v-dialog v-model="rename_dialog" max-width="500">
                               <template v-slot:activator="{ on }">
                                 <v-list-item-title v-on="on">Rename...</v-list-item-title>
                               </template>
+
                               <v-card>
                                 <v-card-text class="pt-4">
                                   <v-row class="m-0">
@@ -59,8 +60,8 @@
 
                                         <v-spacer></v-spacer>
 
-                                        <v-btn class="text-right" :disabled="invalid" @click="renameTrial">
-                                            Rename Trial...
+                                        <v-btn class="text-right" :disabled="invalid" @click="t.isMenuOpen = false; remove_dialog = false; renameTrial(t, index, trialNewName);">
+                                            Rename Trial
                                         </v-btn>
                                       </ValidationObserver>
                                     </v-col>
@@ -68,6 +69,7 @@
                                 </v-card-text>
                               </v-card>
                             </v-dialog>
+
                           </v-list-item>
                           <v-list-item link v-if="!t.trashed">
                             <v-dialog v-model="remove_dialog" max-width="500">
@@ -460,9 +462,6 @@ export default {
             'updateTrial'
         ]),
         ...mapActions('data', ['loadSession', 'initSessionSameSetup']),
-        async renameTrial() {
-          console.log(this.trialNewName);
-        },
         async changeState() {
             switch (this.state) {
                 case 'ready': {
@@ -622,6 +621,16 @@ export default {
         },
         trialClasses (trial) {
           return trial.trashed ? 'trashed' : 'cursor-pointer';
+        },
+        async renameTrial(trial, index, trialNewName) {
+          try {
+            let oldName = trial.name
+            console.log(trial.name + " will be renamed to " + trialNewName);
+            const { data } = await axios.post(`/trials/${trial.id}/rename/`, {trialNewName});
+            await this.updateTrialWithData(trial, data.data);
+          } catch (error) {
+            apiError(error)
+          }
         },
         async updateTrialWithData(trial, data) {
             const index = this.session.trials.findIndex(x => x.id === trial.id)
