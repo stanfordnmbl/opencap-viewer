@@ -139,6 +139,35 @@
 
       </v-col>
       <v-col cols="4">
+        <v-simple-table
+            v-if="selected"
+            class="mx-2">
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th class="text-left">
+                    Session ID
+                  </th>
+                  <th class="text-left">
+                    Trials
+                  </th>
+                  <th class="text-left">
+                    Date
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="session in selectedSessions" :key="session.id">
+                  <td>{{ session.id }}</td>
+                  <td>{{ session.trials.length }}</td>
+                  <td>{{ session.created_at }}</td>
+                </tr>
+                <tr v-if="selectedSessions.length === 0">
+                  <td colspan="3" class="v-data-table__empty-wrapper text-center">No related sessions</td>
+                </tr>
+              </tbody>
+            </template>
+        </v-simple-table>
       </v-col>
     </v-row>
     <v-dialog v-model="edit_dialog" width="500">
@@ -248,6 +277,7 @@ export default {
   },
     computed: {
     ...mapState({
+      sessions: state => state.data.sessions,
       subjects: state => state.data.subjects,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
@@ -277,6 +307,9 @@ export default {
     },
     gendersOptions () {
       return Object.entries(this.genders).map((s) => ({ text: s[1], value: s[0] }))
+    },
+    selectedSessions () {
+      return this.sessions.filter(s => s.subject === this.selected.id)
     }
   },
   methods: {

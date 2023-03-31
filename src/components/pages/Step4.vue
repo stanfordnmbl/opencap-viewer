@@ -31,6 +31,22 @@
     <div v-else class="step-4-1 d-flex flex-column">
       <v-card class="mb-4">
         <v-card-title class="justify-center subject-title">
+          Select Subject
+        </v-card-title>
+        <v-card-text>
+          <v-select
+              required
+              v-model="subject"
+              item-title="name"
+              item-value="id"
+              label="Subject"
+              :items="subjectsMapped"
+          ></v-select>
+        </v-card-text>
+      </v-card>
+
+      <v-card class="mb-4">
+        <v-card-title class="justify-center subject-title">
           Provide subject's details
         </v-card-title>
 
@@ -337,6 +353,7 @@ export default {
         height: null,
         data_sharing_agreement: null,
       },
+      subject: null,
       identifier: "",
       weight: 70,
       height: 1.8,
@@ -399,9 +416,27 @@ export default {
   },
   computed: {
     ...mapState({
+      subjects: (state) => state.data.subjects,
       session: (state) => state.data.session,
       trialId: (state) => state.data.trialId,
     }),
+    subjectsMapped () {
+      return this.subjects.map(s => ({
+        id: s.id,
+        name: s.name,
+        age: s.age,
+        characteristics: s.characteristics,
+        gender: s.gender,
+        // gender_display: this.genders[s.gender],
+        sex_at_birth: s.sex_at_birth,
+        // sex_display: this.sexes[s.sex_at_birth],
+        height: s.height,
+        weight: s.weight,
+        created_at: s.created_at,
+        trashed: s.trashed,
+        trashed_at: s.trashed_at,
+      })).filter(s => this.show_trashed || !s.trashed)
+    },
     rightButtonCaption() {
       return this.imgs
         ? "Confirm"
