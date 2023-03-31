@@ -22,6 +22,7 @@
             <v-data-table
               :headers="headers"
               :items="subjectsMapped"
+              :item-class="itemClasses"
               disable-pagination
               hide-default-footer
               single-select
@@ -143,8 +144,8 @@
     <v-dialog v-model="edit_dialog" width="500">
       <v-form>
       <v-card>
-        <v-card-title class="headline" v-if="edited_subject">Edit subject "{{ edited_subject.name }}"</v-card-title>
-        <v-card-title class="headline" v-else>Add subject</v-card-title>
+        <v-card-title class="headline" v-if="edited_subject.id">Edit subject "{{ edited_subject.name }}"</v-card-title>
+        <v-card-title class="headline" v-else>Create new subject</v-card-title>
         <v-card-text class="pt-4">
           <v-text-field
             v-model="edited_subject.name"
@@ -154,28 +155,36 @@
           <v-text-field
             v-model="edited_subject.weight"
             label="Weight (kg)"
+            type="number"
+            hide-spin-buttons
             required
           ></v-text-field>
           <v-text-field
             v-model="edited_subject.height"
             label="Height (m)"
+            type="number"
+            hide-spin-buttons
             required
           ></v-text-field>
           <v-text-field
             v-model="edited_subject.age"
             label="Age (y)"
+            type="number"
+            hide-spin-buttons
             required
           ></v-text-field>
           <v-select
+              clearable
               v-model="edited_subject.sex_at_birth"
-              item-text="text"
+              item-title="text"
               item-value="value"
               label="Sex assigned at birth (Optional)"
               :items="sexesOptions"
           ></v-select>
           <v-select
+              clearable
               v-model="edited_subject.gender"
-              item-text="text"
+              item-title="text"
               item-value="value"
               label="Gender (Optional)"
               :items="gendersOptions"
@@ -191,16 +200,16 @@
           <v-btn
             color="blue darken-1"
             text
-            @click="edit_dialog = false"
+            @click="cancelSubjectForm()"
           >
             Cancel
           </v-btn>
           <v-btn
             color="green darken-1"
             text
-            @click="edit_dialog = false"
+            @click="submitSubjectForm()"
           >
-            Submit
+            Save
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -232,9 +241,9 @@ export default {
         { text: 'Gender', value: 'gender_display' },
         { text: 'Characteristics', value: 'characteristics' }
       ],
-      edited_subject: {name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+      edited_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
       selected: null,
-      empty_subject: {name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""}
+      empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""}
     }
   },
     computed: {
@@ -264,10 +273,10 @@ export default {
       })).filter(s => this.show_trashed || !s.trashed)
     },
     sexesOptions () {
-      return Object.entries(this.sexes).map((s) => ({ text: s[0], value: s[1] }))
+      return Object.entries(this.sexes).map((s) => ({ text: s[1], value: s[0] }))
     },
     gendersOptions () {
-      return Object.entries(this.genders).map((s) => ({ text: s[0], value: s[1] }))
+      return Object.entries(this.genders).map((s) => ({ text: s[1], value: s[0] }))
     }
   },
   methods: {
@@ -293,6 +302,24 @@ export default {
       this.edited_subject = subject;
       console.log('edit subject', subject)
     },
+    async cancelSubjectForm() {
+      this.edit_dialog = false;
+      this.edited_subject = this.empty_subject;
+    },
+    async submitSubjectForm() {
+      this.edit_dialog = false;
+
+      if(this.edited_subject.id) {
+        const res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
+        console.log('update subject', res.data)
+      } else {
+        const res = await axios.post('/subjects/', this.edited_subject)
+        console.log('submit subject', res.data)
+      }
+
+      this.edited_subject = this.empty_subject;
+      this.loadSubjects()
+    },
     async trashSubject (id) {
       try {
         await this.trashExistingSubject(id)
@@ -310,3 +337,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+.trashed {
+  color: gray;
+}
+</style>

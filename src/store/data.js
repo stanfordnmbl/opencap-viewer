@@ -38,7 +38,7 @@ export default {
 
     subjects: [],
     sexes: {
-      "": "",
+      // "": "",
       "woman": "Woman",
       "man": "Man",
       "intersect": "Intersex",
@@ -46,7 +46,7 @@ export default {
       "prefer-not-respond": "Prefer not to respond"
     },
     genders: {
-      "": "",
+      // "": "",
       "woman": "Woman",
       "man": "Man",
       "transgender": "Transgender",
