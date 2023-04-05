@@ -181,19 +181,23 @@
             label="Name"
             required
           ></v-text-field>
+
           <v-text-field
             v-model="edited_subject.weight"
             label="Weight (kg)"
             type="number"
             hide-spin-buttons
             required
+            :rules="[weightRule]"
           ></v-text-field>
+
           <v-text-field
             v-model="edited_subject.height"
             label="Height (m)"
             type="number"
             hide-spin-buttons
             required
+            :rules="[heightRule]"
           ></v-text-field>
           <v-text-field
             v-model="edited_subject.age"
@@ -201,6 +205,7 @@
             type="number"
             hide-spin-buttons
             required
+            :rules="[ageRule]"
           ></v-text-field>
           <v-select
               clearable
@@ -218,10 +223,11 @@
               label="Gender (Optional)"
               :items="gendersOptions"
           ></v-select>
-          <v-text-field
+          <v-textarea
             v-model="edited_subject.characteristics"
             label="Characteristics (Optional)"
-          ></v-text-field>
+            rows=3
+          ></v-textarea>
 
         </v-card-text>
         <v-card-actions>
@@ -272,7 +278,26 @@ export default {
       ],
       edited_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
       selected: null,
-      empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""}
+      empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+      heightRule: (v) => {
+        if (!v.trim()) return true;
+        if (!isNaN(parseFloat(v)) && v >= 1.3 && v <= 3.0) return true;
+        if(!isNaN(parseFloat(v)) && v > 3.0) return "It is unlikely that the height of subject is higher than 3 m. Are you using the right units? Height should be in m.";
+        if(!isNaN(parseFloat(v)) && v < 1.3) return "It is unlikely that the subject is shorter than 1.3 m. Are you using the right units? Height should be in m.";
+      },
+      weightRule: (v) => {
+        if (!v.trim()) return true;
+        if (!isNaN(parseFloat(v)) && v >= 3 && v <= 200.0) return true;
+        if(!isNaN(parseFloat(v)) && v > 200.0) return "It is unlikely that the weight of subject is higher than 200 kg. Are you using the right units? Weight should be in kg.";
+        if(!isNaN(parseFloat(v)) && v < 3) return "It is unlikely that the weight of subject is lower than 3 kg. Are you using the right units? Weight should be in kg.";
+      },
+      ageRule: (v) => {
+        if (!v.trim()) return true;
+        if (!isNaN(parseFloat(v)) && v >= 5 && v <= 100) return true;
+        if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
+        if(!isNaN(parseFloat(v)) && v < 5) return "It is unlikely that the age of subject is lower than 5 years. Are you using the right units? Age should be in years.";
+      }
+
     }
   },
     computed: {

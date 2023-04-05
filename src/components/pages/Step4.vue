@@ -35,92 +35,94 @@
         </v-card-title>
         <v-card-text>
           <v-select
+              @change="isAllInputsValid"
               required
               v-model="subject"
-              item-title="name"
+              item-text="name"
               item-value="id"
               label="Subject"
               :items="subjectsMapped"
+              return-object
           ></v-select>
         </v-card-text>
       </v-card>
 
-      <v-card class="mb-4">
-        <v-card-title class="justify-center subject-title">
-          Provide subject's details
-        </v-card-title>
+<!--      <v-card class="mb-4">-->
+<!--        <v-card-title class="justify-center subject-title">-->
+<!--          Provide subject's details-->
+<!--        </v-card-title>-->
 
-        <v-card-text class="d-flex flex-column align-center">
-          <ValidationObserver
-            tag="div"
-            class="d-flex flex-column subject-details"
-            ref="observer"
-            v-slot="{ }"
-          >
-            <ValidationProvider
-              rules="required"
-              v-slot="{ errors }"
-              name="Identifier"
-            >
-              <v-text-field
-                v-model="identifier"
-                label="Identifier"
-                class="mb-3"
-                @change="isAllInputsValid"
-                :error="errors.length > 0"
-                :error-messages="errors[0]"
-              />
-            </ValidationProvider>
-            <div class="form-divider">
-              <ValidationProvider
-                rules="required"
-                v-slot="{ errors }"
-                name="Weight (kg)"
-              >
-                <v-text-field
-                  v-model="weight"
-                  label="Weight (kg)"
-                  class="mb-3"
-                  @input="isSomeInputInvalid(weightRule(weight),'weight')"
-                  @change="isAllInputsValid"
-                  :rules="[weightRule]"
-                  :error="errors.length > 0"
-                  :error-messages="errors[0]"
-                />
-              </ValidationProvider>
+<!--        <v-card-text class="d-flex flex-column align-center">-->
+<!--          <ValidationObserver-->
+<!--            tag="div"-->
+<!--            class="d-flex flex-column subject-details"-->
+<!--            ref="observer"-->
+<!--            v-slot="{ }"-->
+<!--          >-->
+<!--            <ValidationProvider-->
+<!--              rules="required"-->
+<!--              v-slot="{ errors }"-->
+<!--              name="Identifier"-->
+<!--            >-->
+<!--              <v-text-field-->
+<!--                v-model="identifier"-->
+<!--                label="Identifier"-->
+<!--                class="mb-3"-->
+<!--                @change="isAllInputsValid"-->
+<!--                :error="errors.length > 0"-->
+<!--                :error-messages="errors[0]"-->
+<!--              />-->
+<!--            </ValidationProvider>-->
+<!--            <div class="form-divider">-->
+<!--              <ValidationProvider-->
+<!--                rules="required"-->
+<!--                v-slot="{ errors }"-->
+<!--                name="Weight (kg)"-->
+<!--              >-->
+<!--                <v-text-field-->
+<!--                  v-model="weight"-->
+<!--                  label="Weight (kg)"-->
+<!--                  class="mb-3"-->
+<!--                  @input="isSomeInputInvalid(weightRule(weight),'weight')"-->
+<!--                  @change="isAllInputsValid"-->
+<!--                  :rules="[weightRule]"-->
+<!--                  :error="errors.length > 0"-->
+<!--                  :error-messages="errors[0]"-->
+<!--                />-->
+<!--              </ValidationProvider>-->
 
-              <ValidationProvider
-                rules="required"
-                v-slot="{ errors }"
-                name="Height (m)"
-              >
-                <v-text-field
-                  v-model="height"
-                  label="Height (m)"
-                  class="mb-3"
-                  @input="isSomeInputInvalid(heightRule(height),'height')"
-                  @change="isAllInputsValid"
-                  :rules="[heightRule]"
-                  :error="errors.length > 0"
-                  :error-messages="errors[0]"
-                />
-              </ValidationProvider>
+<!--              <ValidationProvider-->
+<!--                rules="required"-->
+<!--                v-slot="{ errors }"-->
+<!--                name="Height (m)"-->
+<!--              >-->
+<!--                <v-text-field-->
+<!--                  v-model="height"-->
+<!--                  label="Height (m)"-->
+<!--                  class="mb-3"-->
+<!--                  @input="isSomeInputInvalid(heightRule(height),'height')"-->
+<!--                  @change="isAllInputsValid"-->
+<!--                  :rules="[heightRule]"-->
+<!--                  :error="errors.length > 0"-->
+<!--                  :error-messages="errors[0]"-->
+<!--                />-->
+<!--              </ValidationProvider>-->
 
-              <v-select
-                v-model="sex"
-                label="Sex assigned at birth (optional)"
-                :items="sexes"
-              />
+<!--              <v-select-->
+<!--                v-model="sex"-->
+<!--                label="Sex assigned at birth (optional)"-->
+<!--                :items="sexes"-->
+<!--              />-->
 
-              <v-select
-                v-model="gender"
-                label="Gender (optional)"
-                :items="genders"
-              />
-            </div>
-          </ValidationObserver>
-        </v-card-text>
-      </v-card>
+<!--              <v-select-->
+<!--                v-model="gender"-->
+<!--                label="Gender (optional)"-->
+<!--                :items="genders"-->
+<!--              />-->
+<!--            </div>-->
+<!--          </ValidationObserver>-->
+<!--        </v-card-text>-->
+<!--      </v-card>-->
 
       <v-card class="mb-4">
         <div class="d-flex justify-center">
@@ -359,6 +361,7 @@ export default {
       height: 1.8,
       data_sharing_0: false,
       data_sharing: "",
+      sex: "",
       sexes: [
         "Woman",
         "Man",
@@ -367,6 +370,7 @@ export default {
         "Prefer not to respond",
         "",
       ],
+      gender: "",
       genders: [
         "Woman",
         "Man",
@@ -421,7 +425,7 @@ export default {
       trialId: (state) => state.data.trialId,
     }),
     subjectsMapped () {
-      return this.subjects.map(s => ({
+      let t = this.subjects.map(s => ({
         id: s.id,
         name: s.name,
         age: s.age,
@@ -434,8 +438,13 @@ export default {
         weight: s.weight,
         created_at: s.created_at,
         trashed: s.trashed,
-        trashed_at: s.trashed_at,
+        trashed_at: s.trashed_at
       })).filter(s => this.show_trashed || !s.trashed)
+        console.log(t)
+        for (let i=0; i<t.length; i++) {
+          console.log(t[i].name, t[i].id)
+        }
+        return t
     },
     rightButtonCaption() {
       return this.imgs
@@ -487,17 +496,24 @@ export default {
       },0)
     },
     isAllInputsValid() {
-      const arr = ['weight', 'height', 'data_sharing_agreement']
+      const arr = ['subject', 'data_sharing_agreement']
 
-      const inputsInvalidFirst = arr.some(el => {
-        return typeof this.formErrors[el] === 'string'
-      })
+      let inputsInvalidFirst = true;
+      // const inputsInvalidFirst = arr.some(el => {
+      //   return typeof this.formErrors[el] === 'string'
+      // })
       let inputsInvalidSecond;
-      if(!this.identifier || !this.weight || !this.height || !this.data_sharing || !this.data_sharing_0 ) {
+      if(!this.subject || !this.data_sharing || !this.data_sharing_0 ) {
         inputsInvalidSecond = true
       }
 
-      inputsInvalidFirst || inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
+      console.log(this.subject, this.data_sharing, this.data_sharing_0)
+      console.log(!this.subject || !this.data_sharing || !this.data_sharing_0)
+
+      inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
+      // inputsInvalidFirst || inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
+      // console.log('inputsInvalidFirst', inputsInvalidFirst)
+        console.log(this.disabledNextButton)
     },
     async onNext() {
       if (this.imgs) {
@@ -514,11 +530,12 @@ export default {
           // Record press
           this.busy = true;
           this.setStep4({
-            identifier: this.identifier,
-            weight: this.weight,
-            height: this.height,
-            sex: this.sex,
-            gender: this.gender,
+              subject: this.subject,
+            // identifier: this.identifier,
+            // weight: this.weight,
+            // height: this.height,
+            // sex: this.sex,
+            // gender: this.gender,
             data_sharing: this.data_sharing,
             pose_model: this.pose_model,
             framerate: this.framerate
@@ -528,17 +545,26 @@ export default {
               `/sessions/${this.session.id}/set_metadata/`,
               {
                 params: {
-                  subject_id: this.identifier,
-                  subject_mass: this.weight,
-                  subject_height: this.height,
-                  subject_sex: this.sex,
-                  subject_gender: this.gender,
+                  // subject_id: this.identifier,
+                  // subject_mass: this.weight,
+                  // subject_height: this.height,
+                  // subject_sex: this.sex,
+                  // subject_gender: this.gender,
                   subject_data_sharing: this.data_sharing,
                   subject_pose_model: this.pose_model,
                   settings_framerate: this.framerate
                 },
               }
             );
+
+            const resSubject = await axios.get(
+                `/sessions/${this.session.id}/set_subject/`,
+                {
+                    params: {
+                        subject_id: this.subject_id,
+                    }
+                }
+            )
 
             const res = await axios.get(
               `/sessions/${this.session.id}/record/`,

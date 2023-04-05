@@ -93,12 +93,13 @@ export default {
     setStep3 (state, trialId) {
       state.trialId = trialId
     },
-    setStep4 (state, { identifier, weight, height, sex, gender, data_sharing, pose_model }) {
-      state.identifier = identifier
-      state.weight = weight
-      state.height = height
-      state.sex = sex
-      state.gender = gender
+    setStep4 (state, { subject, data_sharing, pose_model }) {
+      // state.identifier = identifier
+      // state.weight = weight
+      // state.height = height
+      // state.sex = sex
+      // state.gender = gender
+      state.subject = subject
       state.data_sharing = data_sharing
       state.pose_model = pose_model
     },
