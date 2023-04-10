@@ -41,7 +41,7 @@
               item-text="name"
               item-value="id"
               label="Subject"
-              :items="subjectsMapped"
+              :items="subjectSelectorChoices"
               return-object
           ></v-select>
         </v-card-text>
@@ -331,13 +331,93 @@
       </v-card-text>
     </v-card>
 
+    <v-dialog v-model="new_subject_dialog" width="500">
+      <v-form>
+      <v-card>
+        <v-card-title class="headline" v-if="edited_subject.id">Edit subject "{{ edited_subject.name }}"</v-card-title>
+        <v-card-title class="headline" v-else>Create new subject</v-card-title>
+        <v-card-text class="pt-4">
+          <v-text-field
+            v-model="edited_subject.name"
+            label="Name"
+            required
+          ></v-text-field>
+
+          <v-text-field
+            v-model="edited_subject.weight"
+            label="Weight (kg)"
+            type="number"
+            hide-spin-buttons
+            required
+            :rules="[weightRule]"
+          ></v-text-field>
+
+          <v-text-field
+            v-model="edited_subject.height"
+            label="Height (m)"
+            type="number"
+            hide-spin-buttons
+            required
+            :rules="[heightRule]"
+          ></v-text-field>
+          <v-text-field
+            v-model="edited_subject.age"
+            label="Age (y)"
+            type="number"
+            hide-spin-buttons
+            required
+            :rules="[ageRule]"
+          ></v-text-field>
+          <v-select
+              clearable
+              v-model="edited_subject.sex_at_birth"
+              item-title="text"
+              item-value="value"
+              label="Sex assigned at birth (Optional)"
+              :items="sexesOptions"
+          ></v-select>
+          <v-select
+              clearable
+              v-model="edited_subject.gender"
+              item-title="text"
+              item-value="value"
+              label="Gender (Optional)"
+              :items="gendersOptions"
+          ></v-select>
+          <v-textarea
+            v-model="edited_subject.characteristics"
+            label="Characteristics (Optional)"
+            rows=3
+          ></v-textarea>
+
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="cancelSubjectForm()"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="green darken-1"
+            text
+            @click="submitSubjectForm()"
+          >
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+      </v-form>
+    </v-dialog>
     
   </MainLayout>
 </template>
 
 <script>
 import axios from "axios";
-import { mapMutations, mapState } from "vuex";
+import { mapMutations, mapActions, mapState } from "vuex";
 import { apiError, apiSuccess, apiErrorRes, apiInfo } from "@/util/ErrorMessage.js";
 import MainLayout from "@/layout/MainLayout";
 import ExampleImage from "@/components/ui/ExampleImage";
@@ -355,6 +435,11 @@ export default {
         height: null,
         data_sharing_agreement: null,
       },
+      new_subject_dialog: false,
+      edited_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+      selected: null,
+      empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+
       subject: null,
       identifier: "",
       weight: 70,
@@ -362,23 +447,23 @@ export default {
       data_sharing_0: false,
       data_sharing: "",
       sex: "",
-      sexes: [
-        "Woman",
-        "Man",
-        "Intersex",
-        "Not Listed",
-        "Prefer not to respond",
-        "",
-      ],
+      // sexes: [
+      //   "Woman",
+      //   "Man",
+      //   "Intersex",
+      //   "Not Listed",
+      //   "Prefer not to respond",
+      //   "",
+      // ],
       gender: "",
-      genders: [
-        "Woman",
-        "Man",
-        "Transgender",
-        "Non-binary/non-conforming",
-        "Prefer not to respond",
-        "",
-      ],
+      // genders: [
+      //   "Woman",
+      //   "Man",
+      //   "Transgender",
+      //   "Non-binary/non-conforming",
+      //   "Prefer not to respond",
+      //   "",
+      // ],
       data_sharing_choices: [
         "Share processed data and identified videos",
         "Share processed data and de-identified videos",
@@ -415,6 +500,12 @@ export default {
         if (!isNaN(parseFloat(v)) && v >= 0 && v <= 200.0) return true;
         return "It is unlikely that the subject is heavier than 200 kg, are you using the right units? Weight should be in kg.";
       },
+      ageRule: (v) => {
+        if (!v.trim()) return true;
+        if (!isNaN(parseFloat(v)) && v >= 5 && v <= 100) return true;
+        if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
+        if(!isNaN(parseFloat(v)) && v < 5) return "It is unlikely that the age of subject is lower than 5 years. Are you using the right units? Age should be in years.";
+      },
       checkboxRule: (v) => !!v || 'The subject must agree to continue!'
     };
   },
@@ -423,28 +514,34 @@ export default {
       subjects: (state) => state.data.subjects,
       session: (state) => state.data.session,
       trialId: (state) => state.data.trialId,
+      genders: state => state.data.genders,
+      sexes: state => state.data.sexes,
     }),
+    subjectSelectorChoices() {
+      return [{'id':null, 'name': 'New subject...'}].concat(this.subjectsMapped);
+    },
     subjectsMapped () {
-      let t = this.subjects.map(s => ({
+      return this.subjects.map(s => ({
         id: s.id,
         name: s.name,
         age: s.age,
         characteristics: s.characteristics,
         gender: s.gender,
-        // gender_display: this.genders[s.gender],
+        gender_display: this.genders[s.gender],
         sex_at_birth: s.sex_at_birth,
-        // sex_display: this.sexes[s.sex_at_birth],
+        sex_display: this.sexes[s.sex_at_birth],
         height: s.height,
         weight: s.weight,
         created_at: s.created_at,
         trashed: s.trashed,
         trashed_at: s.trashed_at
       })).filter(s => this.show_trashed || !s.trashed)
-        console.log(t)
-        for (let i=0; i<t.length; i++) {
-          console.log(t[i].name, t[i].id)
-        }
-        return t
+    },
+    sexesOptions () {
+      return Object.entries(this.sexes).map((s) => ({ text: s[1], value: s[0] }))
+    },
+    gendersOptions () {
+      return Object.entries(this.genders).map((s) => ({ text: s[1], value: s[0] }))
     },
     rightButtonCaption() {
       return this.imgs
@@ -490,12 +587,19 @@ export default {
   },
   methods: {
     ...mapMutations("data", ["setStep4", "setStep3"]),
+    ...mapActions("data", ["loadSubjects"]),
     isSomeInputInvalid(state, input) {
       setTimeout(() => {
         this.formErrors[input] = state;
       },0)
     },
     isAllInputsValid() {
+      if(this.subject != null && this.subject.id === null) {
+        this.new_subject_dialog = true
+        console.log("!!!")
+        return
+      }
+
       const arr = ['subject', 'data_sharing_agreement']
 
       let inputsInvalidFirst = true;
@@ -651,6 +755,35 @@ export default {
     closeAdvancedSettings() {
       document.getElementById("overlay-panel").style.display = "none";
       document.getElementById("advanced-settings-menu").style.display = "none";
+    },
+    async cancelSubjectForm() {
+      this.new_subject_dialog = false;
+      this.edited_subject = this.empty_subject;
+      this.subject = null;
+    },
+    async submitSubjectForm() {
+      this.new_subject_dialog = false;
+      console.log(this.edited_subject)
+
+      let res = null;
+      if(this.edited_subject.id) {
+        res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
+        console.log('update subject', res.data)
+      } else {
+        res = await axios.post('/subjects/', this.edited_subject)
+        console.log('submit subject', res.data)
+      }
+
+      this.edited_subject = this.empty_subject;
+      await this.loadSubjects()
+      console.log(res.data)
+      for(let i = 0; i < this.subjects.length; i++) {
+          console.log(this.subjects[i].id, '==', res.data.id)
+        if(this.subjects[i].id == res.data.id) {
+          this.subject = this.subjects[i]
+          break;
+        }
+      }
     },
     async getAvailableFramerates() {
       const session_settings = await axios.get(`/sessions/${this.session.id}/get_session_settings/`)
