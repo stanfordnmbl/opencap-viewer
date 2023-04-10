@@ -665,7 +665,7 @@ export default {
                 `/sessions/${this.session.id}/set_subject/`,
                 {
                     params: {
-                        subject_id: this.subject_id,
+                        subject_id: this.subject.id,
                     }
                 }
             )
