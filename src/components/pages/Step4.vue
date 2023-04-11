@@ -38,7 +38,7 @@
               @change="isAllInputsValid"
               required
               v-model="subject"
-              item-text="name"
+              item-text="display_name"
               item-value="id"
               label="Subject"
               :items="subjectSelectorChoices"
@@ -518,11 +518,12 @@ export default {
       sexes: state => state.data.sexes,
     }),
     subjectSelectorChoices() {
-      return [{'id':null, 'name': 'New subject...'}].concat(this.subjectsMapped);
+      return [{'id':null, 'display_name': 'New subject...'}].concat(this.subjectsMapped);
     },
     subjectsMapped () {
       return this.subjects.map(s => ({
         id: s.id,
+        display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.age} years)`,
         name: s.name,
         age: s.age,
         characteristics: s.characteristics,

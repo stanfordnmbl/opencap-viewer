@@ -129,6 +129,47 @@
                           </v-card>
                         </v-dialog>
                       </v-list-item>
+                      <v-list-item link v-if="!item.trashed">
+                        <v-dialog v-model="download_dialog" max-width="500">
+                          <template v-slot:activator="{ on }">
+                            <v-list-item-title v-on="on">Download data...</v-list-item-title>
+                          </template>
+                          <v-card>
+                            <v-card-text class="pt-4">
+                              <v-row class="m-0">
+                                <v-col cols="2">
+                                  <v-icon x-large color="green">mdi-download</v-icon>
+                                </v-col>
+                                <v-col cols="10">
+                                  <p>
+                                    Do you want to download all data associated to the
+                                    subject <code>{{item.name}}</code>? (This includes every session
+                                    and trial associated to it, and can take several minutes).
+                                  </p>
+                                </v-col>
+                              </v-row>
+                            </v-card-text>
+                            <v-card-actions>
+                              <v-spacer></v-spacer>
+                              <v-btn
+                                color="blue darken-1"
+                                text
+                                @click="item.isMenuOpen = false; download_dialog = false"
+                              >
+                                Cancel
+                              </v-btn>
+                              <v-btn
+                                color="green darken-1"
+                                text
+                                @click="item.isMenuOpen = false; download_dialog = false; downloadSubjectData(item.id)"
+                              >
+                                Download
+                              </v-btn>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                      </v-list-item>
+
                     </v-list>
                   </v-menu>
                 </div>
@@ -265,6 +306,7 @@ export default {
     return {
       remove_dialog: false,
       restore_dialog: false,
+      download_dialog: false,
       edit_dialog: false,
       show_trashed: false,
       headers: [
@@ -388,6 +430,14 @@ export default {
     async restoreSubject (id) {
       try {
         await this.restoreTrashedSubject(id)
+      } catch (error) {
+        apiError(error)
+      }
+    },
+    async downloadSubjectData (id) {
+      try {
+        const res = await axios.get('/subjects/' + id + '/download/')
+        console.log('download subject data', res.data)
       } catch (error) {
         apiError(error)
       }
