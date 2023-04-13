@@ -91,7 +91,7 @@
                           </v-card>
                         </v-dialog>
                       </v-list-item>
-                      <v-list-item link v-else>
+                      <v-list-item link v-if="item.trashed">
                         <v-dialog v-model="restore_dialog" max-width="500">
                           <template v-slot:activator="{ on }">
                             <v-list-item-title v-on="on">Restore...</v-list-item-title>
@@ -122,6 +122,45 @@
                                 color="green darken-1"
                                 text
                                 @click="item.isMenuOpen = false; restore_dialog = false; restoreSubject(item.id)"
+                              >
+                                Yes
+                              </v-btn>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                      </v-list-item>
+                      <v-list-item link v-if="item.trashed">
+                        <v-dialog v-model="remove_permanently_dialog" max-width="500">
+                          <template v-slot:activator="{ on }">
+                            <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
+                          </template>
+                          <v-card>
+                            <v-card-text class="pt-4">
+                              <v-row class="m-0">
+                                <v-col cols="2">
+                                  <v-icon x-large color="red">mdi-close-circle</v-icon>
+                                </v-col>
+                                <v-col cols="10">
+                                  <p>
+                                    Do you want to <strong>permanently</strong>
+                                      remove subject <code>{{item.name}}</code>?
+                                  </p>
+                                </v-col>
+                              </v-row>
+                            </v-card-text>
+                            <v-card-actions>
+                              <v-spacer></v-spacer>
+                              <v-btn
+                                color="blue darken-1"
+                                text
+                                @click="item.isMenuOpen = false; remove_permanently_dialog = false"
+                              >
+                                No
+                              </v-btn>
+                              <v-btn
+                                color="red darken-1"
+                                text
+                                @click="item.isMenuOpen = false; remove_permanently_dialog = false; permanentRemoveSubject(item.id)"
                               >
                                 Yes
                               </v-btn>
@@ -161,7 +200,8 @@
                               <v-btn
                                 color="green darken-1"
                                 text
-                                @click="item.isMenuOpen = false; download_dialog = false; downloadSubjectData(item.id)"
+                                :disabled="downloading"
+                                @click="item.isMenuOpen = false; download_dialog = false;downloadSubjectData(item.id)"
                               >
                                 Download
                               </v-btn>
@@ -305,10 +345,12 @@ export default {
   data () {
     return {
       remove_dialog: false,
+      remove_permanently_dialog: false,
       restore_dialog: false,
       download_dialog: false,
       edit_dialog: false,
       show_trashed: false,
+      downloading: false,
       headers: [
         { text: 'Name', value: 'name' },
         { text: 'Weight', value: 'weight' },
@@ -435,9 +477,27 @@ export default {
       }
     },
     async downloadSubjectData (id) {
+        this.downloading = true
+        try {
+            let link = document.createElement('a')
+            link.setAttribute('href', `${axios.defaults.baseURL}/subjects/${id}/download/`)
+            link.setAttribute('download', `subject_results_${id}.zip`)
+            // This method works in all browsers including FireFox
+            // console.log(link)
+            link.dispatchEvent(new MouseEvent('click'))
+
+            window.setTimeout(() => {
+                this.downloading = false
+            }, 5000)
+        } catch (error) {
+            apiError(error)
+            this.downloading = false
+        }
+    },
+    async permanentRemoveSubject (id) {
       try {
-        const res = await axios.get('/subjects/' + id + '/download/')
-        console.log('download subject data', res.data)
+        await axios.post('/subjects/' + id + '/permanent_remove/')
+        this.loadSubjects()
       } catch (error) {
         apiError(error)
       }
