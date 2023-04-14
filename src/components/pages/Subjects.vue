@@ -201,7 +201,7 @@
                                 color="green darken-1"
                                 text
                                 :disabled="downloading"
-                                @click="item.isMenuOpen = false; download_dialog = false;downloadSubjectData(item.id)"
+                                @click="item.isMenuOpen = false; download_dialog = false; downloadSubjectData(item.id)"
                               >
                                 Download
                               </v-btn>
@@ -270,6 +270,8 @@
             hide-spin-buttons
             required
             :rules="[weightRule]"
+            :error="formErrors.weight"
+            :error-messages="formErrors.weight"
           ></v-text-field>
 
           <v-text-field
@@ -279,6 +281,8 @@
             hide-spin-buttons
             required
             :rules="[heightRule]"
+            :error="formErrors.height"
+            :error-messages="formErrors.height"
           ></v-text-field>
           <v-text-field
             v-model="edited_subject.age"
@@ -287,6 +291,8 @@
             hide-spin-buttons
             required
             :rules="[ageRule]"
+            :error="formErrors.age"
+            :error-messages="formErrors.age"
           ></v-text-field>
           <v-select
               clearable
@@ -351,6 +357,11 @@ export default {
       edit_dialog: false,
       show_trashed: false,
       downloading: false,
+      formErrors: {
+          weight: null,
+          height: null,
+          age: null
+      },
       headers: [
         { text: 'Name', value: 'name' },
         { text: 'Weight', value: 'weight' },
@@ -442,6 +453,11 @@ export default {
     async editSubject(subject) {
       this.edit_dialog = true;
       this.edited_subject = subject;
+      this.formErrors = {
+          weight: null,
+          height: null,
+          age: null
+      }
       console.log('edit subject', subject)
     },
     async cancelSubjectForm() {
@@ -450,12 +466,33 @@ export default {
     },
     async submitSubjectForm() {
       this.edit_dialog = false;
+      this.formErrors = {
+          weight: null,
+          height: null,
+          age: null
+      }
 
       if(this.edited_subject.id) {
         const res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
+            .catch(error => {
+              if(error.response.status === 400) {
+                for (const [key, value] of Object.entries(error.response.data)) {
+                  this.formErrors[key] = value
+                }
+                this.edit_dialog = true;
+              }
+            })
         console.log('update subject', res.data)
       } else {
         const res = await axios.post('/subjects/', this.edited_subject)
+            .catch(error => {
+              if(error.response.status === 400) {
+                for (const [key, value] of Object.entries(error.response.data)) {
+                  this.formErrors[key] = value
+                }
+                this.edit_dialog = true;
+              }
+            })
         console.log('submit subject', res.data)
       }
 
