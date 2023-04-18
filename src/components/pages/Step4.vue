@@ -36,6 +36,7 @@
         <v-card-text>
           <v-select
               @change="isAllInputsValid"
+              class="cursor-pointer"
               required
               v-model="subject"
               item-text="display_name"
@@ -46,84 +47,6 @@
           ></v-select>
         </v-card-text>
       </v-card>
-
-<!--      <v-card class="mb-4">-->
-<!--        <v-card-title class="justify-center subject-title">-->
-<!--          Provide subject's details-->
-<!--        </v-card-title>-->
-
-<!--        <v-card-text class="d-flex flex-column align-center">-->
-<!--          <ValidationObserver-->
-<!--            tag="div"-->
-<!--            class="d-flex flex-column subject-details"-->
-<!--            ref="observer"-->
-<!--            v-slot="{ }"-->
-<!--          >-->
-<!--            <ValidationProvider-->
-<!--              rules="required"-->
-<!--              v-slot="{ errors }"-->
-<!--              name="Identifier"-->
-<!--            >-->
-<!--              <v-text-field-->
-<!--                v-model="identifier"-->
-<!--                label="Identifier"-->
-<!--                class="mb-3"-->
-<!--                @change="isAllInputsValid"-->
-<!--                :error="errors.length > 0"-->
-<!--                :error-messages="errors[0]"-->
-<!--              />-->
-<!--            </ValidationProvider>-->
-<!--            <div class="form-divider">-->
-<!--              <ValidationProvider-->
-<!--                rules="required"-->
-<!--                v-slot="{ errors }"-->
-<!--                name="Weight (kg)"-->
-<!--              >-->
-<!--                <v-text-field-->
-<!--                  v-model="weight"-->
-<!--                  label="Weight (kg)"-->
-<!--                  class="mb-3"-->
-<!--                  @input="isSomeInputInvalid(weightRule(weight),'weight')"-->
-<!--                  @change="isAllInputsValid"-->
-<!--                  :rules="[weightRule]"-->
-<!--                  :error="errors.length > 0"-->
-<!--                  :error-messages="errors[0]"-->
-<!--                />-->
-<!--              </ValidationProvider>-->
-
-<!--              <ValidationProvider-->
-<!--                rules="required"-->
-<!--                v-slot="{ errors }"-->
-<!--                name="Height (m)"-->
-<!--              >-->
-<!--                <v-text-field-->
-<!--                  v-model="height"-->
-<!--                  label="Height (m)"-->
-<!--                  class="mb-3"-->
-<!--                  @input="isSomeInputInvalid(heightRule(height),'height')"-->
-<!--                  @change="isAllInputsValid"-->
-<!--                  :rules="[heightRule]"-->
-<!--                  :error="errors.length > 0"-->
-<!--                  :error-messages="errors[0]"-->
-<!--                />-->
-<!--              </ValidationProvider>-->
-
-<!--              <v-select-->
-<!--                v-model="sex"-->
-<!--                label="Sex assigned at birth (optional)"-->
-<!--                :items="sexes"-->
-<!--              />-->
-
-<!--              <v-select-->
-<!--                v-model="gender"-->
-<!--                label="Gender (optional)"-->
-<!--                :items="genders"-->
-<!--              />-->
-<!--            </div>-->
-<!--          </ValidationObserver>-->
-<!--        </v-card-text>-->
-<!--      </v-card>-->
-
       <v-card class="mb-4">
         <div class="d-flex justify-center">
           <v-card-title class="justify-center data-title">
@@ -341,6 +264,8 @@
             v-model="edited_subject.name"
             label="Name"
             required
+            :error="formErrors.name != null"
+            :error-messages="formErrors.name"
           ></v-text-field>
 
           <v-text-field
@@ -350,6 +275,8 @@
             hide-spin-buttons
             required
             :rules="[weightRule]"
+            :error="formErrors.weight != null"
+            :error-messages="formErrors.weight"
           ></v-text-field>
 
           <v-text-field
@@ -359,6 +286,8 @@
             hide-spin-buttons
             required
             :rules="[heightRule]"
+            :error="formErrors.height != null"
+            :error-messages="formErrors.height"
           ></v-text-field>
           <v-text-field
             v-model="edited_subject.age"
@@ -367,6 +296,8 @@
             hide-spin-buttons
             required
             :rules="[ageRule]"
+            :error="formErrors.age != null"
+            :error-messages="formErrors.age"
           ></v-text-field>
           <v-select
               clearable
@@ -431,8 +362,10 @@ export default {
   data() {
     return {
       formErrors: {
+        name: null,
         weight: null,
         height: null,
+        age: null,
         data_sharing_agreement: null,
       },
       new_subject_dialog: false,
@@ -447,23 +380,7 @@ export default {
       data_sharing_0: false,
       data_sharing: "",
       sex: "",
-      // sexes: [
-      //   "Woman",
-      //   "Man",
-      //   "Intersex",
-      //   "Not Listed",
-      //   "Prefer not to respond",
-      //   "",
-      // ],
       gender: "",
-      // genders: [
-      //   "Woman",
-      //   "Man",
-      //   "Transgender",
-      //   "Non-binary/non-conforming",
-      //   "Prefer not to respond",
-      //   "",
-      // ],
       data_sharing_choices: [
         "Share processed data and identified videos",
         "Share processed data and de-identified videos",
@@ -518,7 +435,7 @@ export default {
       sexes: state => state.data.sexes,
     }),
     subjectSelectorChoices() {
-      return [{'id':null, 'display_name': 'New subject...'}].concat(this.subjectsMapped);
+      return [{'id':'new', 'display_name': 'New subject...'}].concat(this.subjectsMapped);
     },
     subjectsMapped () {
       return this.subjects.map(s => ({
@@ -595,7 +512,14 @@ export default {
       },0)
     },
     isAllInputsValid() {
-      if(this.subject != null && this.subject.id === null) {
+        console.log(this.subject)
+      this.formErrors = {
+          name: null,
+          weight: null,
+          height: null,
+          age: null
+      }
+      if(this.subject != null && this.subject.id === 'new') {
         this.new_subject_dialog = true
         console.log("!!!")
         return
@@ -761,29 +685,60 @@ export default {
       this.new_subject_dialog = false;
       this.edited_subject = this.empty_subject;
       this.subject = null;
+      this.formErrors = {
+          name: null,
+          weight: null,
+          height: null,
+          age: null
+      }
     },
     async submitSubjectForm() {
       this.new_subject_dialog = false;
+      this.formErrors = {
+          name: null,
+          weight: null,
+          height: null,
+          age: null
+      }
       console.log(this.edited_subject)
 
       let res = null;
       if(this.edited_subject.id) {
         res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
-        console.log('update subject', res.data)
+          .catch(error => {
+              if(error.response.status === 400) {
+                for (const [key, value] of Object.entries(error.response.data)) {
+                  this.formErrors[key] = value
+                }
+                this.new_subject_dialog = true;
+              }
+            })
+        // console.log('update subject', res.data)
       } else {
         res = await axios.post('/subjects/', this.edited_subject)
-        console.log('submit subject', res.data)
+          .catch(error => {
+              if(error.response.status === 400) {
+                for (const [key, value] of Object.entries(error.response.data)) {
+                  this.formErrors[key] = value
+                }
+                this.new_subject_dialog = true;
+              }
+            })
+        // console.log('submit subject', res.data)
       }
 
-      this.edited_subject = this.empty_subject;
-      await this.loadSubjects()
-      console.log(res.data)
-      for(let i = 0; i < this.subjects.length; i++) {
-          console.log(this.subjects[i].id, '==', res.data.id)
-        if(this.subjects[i].id == res.data.id) {
-          this.subject = this.subjects[i]
-          break;
+      if (res) {
+        this.edited_subject = this.empty_subject;
+        await this.loadSubjects()
+        // console.log(res.data)
+        for(let i = 0; i < this.subjects.length; i++) {
+            console.log(this.subjects[i].id, '==', res.data.id)
+          if(this.subjects[i].id == res.data.id) {
+            this.subject = this.subjects[i]
+            break;
+          }
         }
+
       }
     },
     async getAvailableFramerates() {

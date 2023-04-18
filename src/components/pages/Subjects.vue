@@ -261,6 +261,8 @@
             v-model="edited_subject.name"
             label="Name"
             required
+            :error="formErrors.name != null"
+            :error-messages="formErrors.name"
           ></v-text-field>
 
           <v-text-field
@@ -270,7 +272,7 @@
             hide-spin-buttons
             required
             :rules="[weightRule]"
-            :error="formErrors.weight"
+            :error="formErrors.weight != null"
             :error-messages="formErrors.weight"
           ></v-text-field>
 
@@ -281,7 +283,7 @@
             hide-spin-buttons
             required
             :rules="[heightRule]"
-            :error="formErrors.height"
+            :error="formErrors.height != null"
             :error-messages="formErrors.height"
           ></v-text-field>
           <v-text-field
@@ -291,7 +293,7 @@
             hide-spin-buttons
             required
             :rules="[ageRule]"
-            :error="formErrors.age"
+            :error="formErrors.age != null"
             :error-messages="formErrors.age"
           ></v-text-field>
           <v-select
@@ -448,12 +450,19 @@ export default {
     async addSubject() {
       this.edit_dialog = true;
       this.edited_subject = this.empty_subject;
+      this.formErrors = {
+          name: null,
+          weight: null,
+          height: null,
+          age: null
+      }
       console.log('add subject')
     },
     async editSubject(subject) {
       this.edit_dialog = true;
       this.edited_subject = subject;
       this.formErrors = {
+          name: null,
           weight: null,
           height: null,
           age: null
@@ -463,10 +472,17 @@ export default {
     async cancelSubjectForm() {
       this.edit_dialog = false;
       this.edited_subject = this.empty_subject;
+      this.formErrors = {
+          name: null,
+          weight: null,
+          height: null,
+          age: null
+      }
     },
     async submitSubjectForm() {
       this.edit_dialog = false;
       this.formErrors = {
+          name: null,
           weight: null,
           height: null,
           age: null
