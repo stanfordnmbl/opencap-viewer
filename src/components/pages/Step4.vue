@@ -579,8 +579,8 @@ export default {
                   // subject_height: this.height,
                   // subject_sex: this.sex,
                   // subject_gender: this.gender,
-                  subject_data_sharing: this.data_sharing,
-                  subject_pose_model: this.pose_model,
+                  settings_data_sharing: this.data_sharing,
+                  settings_pose_model: this.pose_model,
                   settings_framerate: this.framerate
                 },
               }
