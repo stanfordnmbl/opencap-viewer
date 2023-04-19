@@ -21,6 +21,12 @@
 
       <v-btn
         class="ml-2"
+        @click="$router.push({ name: 'Subjects' })">
+        Subjects
+      </v-btn>
+
+      <v-btn
+        class="ml-2"
         @click="$router.push({ name: 'RecycleBin' })">
         Recycle Bin
       </v-btn>
@@ -169,7 +175,7 @@ import { formatDate } from '@/util/DateFormat.js'
 export default {
   name: 'SelectSession',
   created: function () {
-  
+      this.loadSubjects()
   },
   data () {
     return {
@@ -209,7 +215,9 @@ export default {
     }
   },
   methods: {
-    ...mapActions('data', ['loadExistingSessions', 'trashExistingSession', 'restoreTrashedSession']),
+    ...mapActions('data', [
+        'loadExistingSessions', 'trashExistingSession',
+        'restoreTrashedSession', 'loadSubjects']),
     onSelect ({ item, value }) {
       this.selected = value ? item : null
     },
@@ -221,7 +229,7 @@ export default {
     },
     async onLoadAllSessions(){
       try {
-        await this.loadExistingSessions({reroute: true, quantity:-1})           
+        await this.loadExistingSessions({reroute: true, quantity:-1})
       } catch (error) {
         apiError(error)
         this.$router.push({ name: 'Step1' })

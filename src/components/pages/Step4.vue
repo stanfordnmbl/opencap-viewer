@@ -31,81 +31,22 @@
     <div v-else class="step-4-1 d-flex flex-column">
       <v-card class="mb-4">
         <v-card-title class="justify-center subject-title">
-          Provide subject's details
+          Select Subject
         </v-card-title>
-
-        <v-card-text class="d-flex flex-column align-center">
-          <ValidationObserver
-            tag="div"
-            class="d-flex flex-column subject-details"
-            ref="observer"
-            v-slot="{ }"
-          >
-            <ValidationProvider
-              rules="required"
-              v-slot="{ errors }"
-              name="Identifier"
-            >
-              <v-text-field
-                v-model="identifier"
-                label="Identifier"
-                class="mb-3"
-                @change="isAllInputsValid"
-                :error="errors.length > 0"
-                :error-messages="errors[0]"
-              />
-            </ValidationProvider>
-            <div class="form-divider">
-              <ValidationProvider
-                rules="required"
-                v-slot="{ errors }"
-                name="Weight (kg)"
-              >
-                <v-text-field
-                  v-model="weight"
-                  label="Weight (kg)"
-                  class="mb-3"
-                  @input="isSomeInputInvalid(weightRule(weight),'weight')"
-                  @change="isAllInputsValid"
-                  :rules="[weightRule]"
-                  :error="errors.length > 0"
-                  :error-messages="errors[0]"
-                />
-              </ValidationProvider>
-
-              <ValidationProvider
-                rules="required"
-                v-slot="{ errors }"
-                name="Height (m)"
-              >
-                <v-text-field
-                  v-model="height"
-                  label="Height (m)"
-                  class="mb-3"
-                  @input="isSomeInputInvalid(heightRule(height),'height')"
-                  @change="isAllInputsValid"
-                  :rules="[heightRule]"
-                  :error="errors.length > 0"
-                  :error-messages="errors[0]"
-                />
-              </ValidationProvider>
-
-              <v-select
-                v-model="sex"
-                label="Sex assigned at birth (optional)"
-                :items="sexes"
-              />
-
-              <v-select
-                v-model="gender"
-                label="Gender (optional)"
-                :items="genders"
-              />
-            </div>
-          </ValidationObserver>
+        <v-card-text>
+          <v-select
+              @change="isAllInputsValid"
+              class="cursor-pointer"
+              required
+              v-model="subject"
+              item-text="display_name"
+              item-value="id"
+              label="Subject"
+              :items="subjectSelectorChoices"
+              return-object
+          ></v-select>
         </v-card-text>
       </v-card>
-
       <v-card class="mb-4">
         <div class="d-flex justify-center">
           <v-card-title class="justify-center data-title">
@@ -313,13 +254,101 @@
       </v-card-text>
     </v-card>
 
+    <v-dialog v-model="new_subject_dialog" width="500">
+      <v-form>
+      <v-card>
+        <v-card-title class="headline" v-if="edited_subject.id">Edit subject "{{ edited_subject.name }}"</v-card-title>
+        <v-card-title class="headline" v-else>Create new subject</v-card-title>
+        <v-card-text class="pt-4">
+          <v-text-field
+            v-model="edited_subject.name"
+            label="Name"
+            required
+            :error="formErrors.name != null"
+            :error-messages="formErrors.name"
+          ></v-text-field>
+
+          <v-text-field
+            v-model="edited_subject.weight"
+            label="Weight (kg)"
+            type="number"
+            hide-spin-buttons
+            required
+            :rules="[weightRule]"
+            :error="formErrors.weight != null"
+            :error-messages="formErrors.weight"
+          ></v-text-field>
+
+          <v-text-field
+            v-model="edited_subject.height"
+            label="Height (m)"
+            type="number"
+            hide-spin-buttons
+            required
+            :rules="[heightRule]"
+            :error="formErrors.height != null"
+            :error-messages="formErrors.height"
+          ></v-text-field>
+          <v-text-field
+            v-model="edited_subject.age"
+            label="Age (y)"
+            type="number"
+            hide-spin-buttons
+            required
+            :rules="[ageRule]"
+            :error="formErrors.age != null"
+            :error-messages="formErrors.age"
+          ></v-text-field>
+          <v-select
+              clearable
+              v-model="edited_subject.sex_at_birth"
+              item-title="text"
+              item-value="value"
+              label="Sex assigned at birth (Optional)"
+              :items="sexesOptions"
+          ></v-select>
+          <v-select
+              clearable
+              v-model="edited_subject.gender"
+              item-title="text"
+              item-value="value"
+              label="Gender (Optional)"
+              :items="gendersOptions"
+          ></v-select>
+          <v-textarea
+            v-model="edited_subject.characteristics"
+            label="Characteristics (Optional)"
+            rows=3
+          ></v-textarea>
+
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            color="blue darken-1"
+            text
+            @click="cancelSubjectForm()"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="green darken-1"
+            text
+            @click="submitSubjectForm()"
+          >
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+      </v-form>
+    </v-dialog>
     
   </MainLayout>
 </template>
 
 <script>
 import axios from "axios";
-import { mapMutations, mapState } from "vuex";
+import { mapMutations, mapActions, mapState } from "vuex";
 import { apiError, apiSuccess, apiErrorRes, apiInfo } from "@/util/ErrorMessage.js";
 import MainLayout from "@/layout/MainLayout";
 import ExampleImage from "@/components/ui/ExampleImage";
@@ -333,31 +362,25 @@ export default {
   data() {
     return {
       formErrors: {
+        name: null,
         weight: null,
         height: null,
+        age: null,
         data_sharing_agreement: null,
       },
+      new_subject_dialog: false,
+      edited_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+      selected: null,
+      empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+
+      subject: null,
       identifier: "",
       weight: 70,
       height: 1.8,
       data_sharing_0: false,
       data_sharing: "",
-      sexes: [
-        "Woman",
-        "Man",
-        "Intersex",
-        "Not Listed",
-        "Prefer not to respond",
-        "",
-      ],
-      genders: [
-        "Woman",
-        "Man",
-        "Transgender",
-        "Non-binary/non-conforming",
-        "Prefer not to respond",
-        "",
-      ],
+      sex: "",
+      gender: "",
       data_sharing_choices: [
         "Share processed data and identified videos",
         "Share processed data and de-identified videos",
@@ -394,14 +417,50 @@ export default {
         if (!isNaN(parseFloat(v)) && v >= 0 && v <= 200.0) return true;
         return "It is unlikely that the subject is heavier than 200 kg, are you using the right units? Weight should be in kg.";
       },
+      ageRule: (v) => {
+        if (!v.trim()) return true;
+        if (!isNaN(parseFloat(v)) && v >= 5 && v <= 100) return true;
+        if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
+        if(!isNaN(parseFloat(v)) && v < 5) return "It is unlikely that the age of subject is lower than 5 years. Are you using the right units? Age should be in years.";
+      },
       checkboxRule: (v) => !!v || 'The subject must agree to continue!'
     };
   },
   computed: {
     ...mapState({
+      subjects: (state) => state.data.subjects,
       session: (state) => state.data.session,
       trialId: (state) => state.data.trialId,
+      genders: state => state.data.genders,
+      sexes: state => state.data.sexes,
     }),
+    subjectSelectorChoices() {
+      return [{'id':'new', 'display_name': 'New subject...'}].concat(this.subjectsMapped);
+    },
+    subjectsMapped () {
+      return this.subjects.map(s => ({
+        id: s.id,
+        display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.age} years)`,
+        name: s.name,
+        age: s.age,
+        characteristics: s.characteristics,
+        gender: s.gender,
+        gender_display: this.genders[s.gender],
+        sex_at_birth: s.sex_at_birth,
+        sex_display: this.sexes[s.sex_at_birth],
+        height: s.height,
+        weight: s.weight,
+        created_at: s.created_at,
+        trashed: s.trashed,
+        trashed_at: s.trashed_at
+      })).filter(s => this.show_trashed || !s.trashed)
+    },
+    sexesOptions () {
+      return Object.entries(this.sexes).map((s) => ({ text: s[1], value: s[0] }))
+    },
+    gendersOptions () {
+      return Object.entries(this.genders).map((s) => ({ text: s[1], value: s[0] }))
+    },
     rightButtonCaption() {
       return this.imgs
         ? "Confirm"
@@ -446,23 +505,44 @@ export default {
   },
   methods: {
     ...mapMutations("data", ["setStep4", "setStep3"]),
+    ...mapActions("data", ["loadSubjects"]),
     isSomeInputInvalid(state, input) {
       setTimeout(() => {
         this.formErrors[input] = state;
       },0)
     },
     isAllInputsValid() {
-      const arr = ['weight', 'height', 'data_sharing_agreement']
+        console.log(this.subject)
+      this.formErrors = {
+          name: null,
+          weight: null,
+          height: null,
+          age: null
+      }
+      if(this.subject != null && this.subject.id === 'new') {
+        this.new_subject_dialog = true
+        console.log("!!!")
+        return
+      }
 
-      const inputsInvalidFirst = arr.some(el => {
-        return typeof this.formErrors[el] === 'string'
-      })
+      const arr = ['subject', 'data_sharing_agreement']
+
+      let inputsInvalidFirst = true;
+      // const inputsInvalidFirst = arr.some(el => {
+      //   return typeof this.formErrors[el] === 'string'
+      // })
       let inputsInvalidSecond;
-      if(!this.identifier || !this.weight || !this.height || !this.data_sharing || !this.data_sharing_0 ) {
+      if(!this.subject || !this.data_sharing || !this.data_sharing_0 ) {
         inputsInvalidSecond = true
       }
 
-      inputsInvalidFirst || inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
+      console.log(this.subject, this.data_sharing, this.data_sharing_0)
+      console.log(!this.subject || !this.data_sharing || !this.data_sharing_0)
+
+      inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
+      // inputsInvalidFirst || inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
+      // console.log('inputsInvalidFirst', inputsInvalidFirst)
+        console.log(this.disabledNextButton)
     },
     async onNext() {
       if (this.imgs) {
@@ -479,11 +559,12 @@ export default {
           // Record press
           this.busy = true;
           this.setStep4({
-            identifier: this.identifier,
-            weight: this.weight,
-            height: this.height,
-            sex: this.sex,
-            gender: this.gender,
+              subject: this.subject,
+            // identifier: this.identifier,
+            // weight: this.weight,
+            // height: this.height,
+            // sex: this.sex,
+            // gender: this.gender,
             data_sharing: this.data_sharing,
             pose_model: this.pose_model,
             framerate: this.framerate
@@ -493,17 +574,26 @@ export default {
               `/sessions/${this.session.id}/set_metadata/`,
               {
                 params: {
-                  subject_id: this.identifier,
-                  subject_mass: this.weight,
-                  subject_height: this.height,
-                  subject_sex: this.sex,
-                  subject_gender: this.gender,
+                  // subject_id: this.identifier,
+                  // subject_mass: this.weight,
+                  // subject_height: this.height,
+                  // subject_sex: this.sex,
+                  // subject_gender: this.gender,
                   subject_data_sharing: this.data_sharing,
                   subject_pose_model: this.pose_model,
                   settings_framerate: this.framerate
                 },
               }
             );
+
+            const resSubject = await axios.get(
+                `/sessions/${this.session.id}/set_subject/`,
+                {
+                    params: {
+                        subject_id: this.subject.id,
+                    }
+                }
+            )
 
             const res = await axios.get(
               `/sessions/${this.session.id}/record/`,
@@ -590,6 +680,66 @@ export default {
     closeAdvancedSettings() {
       document.getElementById("overlay-panel").style.display = "none";
       document.getElementById("advanced-settings-menu").style.display = "none";
+    },
+    async cancelSubjectForm() {
+      this.new_subject_dialog = false;
+      this.edited_subject = this.empty_subject;
+      this.subject = null;
+      this.formErrors = {
+          name: null,
+          weight: null,
+          height: null,
+          age: null
+      }
+    },
+    async submitSubjectForm() {
+      this.new_subject_dialog = false;
+      this.formErrors = {
+          name: null,
+          weight: null,
+          height: null,
+          age: null
+      }
+      console.log(this.edited_subject)
+
+      let res = null;
+      if(this.edited_subject.id) {
+        res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
+          .catch(error => {
+              if(error.response.status === 400) {
+                for (const [key, value] of Object.entries(error.response.data)) {
+                  this.formErrors[key] = value
+                }
+                this.new_subject_dialog = true;
+              }
+            })
+        // console.log('update subject', res.data)
+      } else {
+        res = await axios.post('/subjects/', this.edited_subject)
+          .catch(error => {
+              if(error.response.status === 400) {
+                for (const [key, value] of Object.entries(error.response.data)) {
+                  this.formErrors[key] = value
+                }
+                this.new_subject_dialog = true;
+              }
+            })
+        // console.log('submit subject', res.data)
+      }
+
+      if (res) {
+        this.edited_subject = this.empty_subject;
+        await this.loadSubjects()
+        // console.log(res.data)
+        for(let i = 0; i < this.subjects.length; i++) {
+            console.log(this.subjects[i].id, '==', res.data.id)
+          if(this.subjects[i].id == res.data.id) {
+            this.subject = this.subjects[i]
+            break;
+          }
+        }
+
+      }
     },
     async getAvailableFramerates() {
       const session_settings = await axios.get(`/sessions/${this.session.id}/get_session_settings/`)
