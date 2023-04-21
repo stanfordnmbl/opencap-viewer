@@ -220,11 +220,18 @@
 
       </v-col>
       <v-col cols="4">
-        <v-simple-table
-            v-if="selected"
-            class="mx-2">
+
+            <v-data-table
+              v-if="selected"
+              :headers="sessionHeaders"
+              :items="selectedSessions"
+              :item-class="itemClasses"
+              disable-pagination
+              hide-default-footer
+              single-select
+              class="mx-2"
+              @click:row="onRowSessionClick">
             <template v-slot:default>
-              <thead>
                 <tr>
                   <th class="text-left">
                     Session ID
@@ -236,19 +243,8 @@
                     Date
                   </th>
                 </tr>
-              </thead>
-              <tbody>
-                <tr v-for="session in selectedSessions" :key="session.id">
-                  <td>{{ session.id }}</td>
-                  <td>{{ session.trials.length }}</td>
-                  <td>{{ session.created_at }}</td>
-                </tr>
-                <tr v-if="selectedSessions.length === 0">
-                  <td colspan="3" class="v-data-table__empty-wrapper text-center">No related sessions</td>
-                </tr>
-              </tbody>
             </template>
-        </v-simple-table>
+        </v-data-table>
       </v-col>
     </v-row>
     <v-dialog v-model="edit_dialog" width="500">
@@ -359,6 +355,9 @@ export default {
       edit_dialog: false,
       show_trashed: false,
       downloading: false,
+      delay: 300,
+      clicks: 0,
+      timer: null,
       formErrors: {
           weight: null,
           height: null,
@@ -372,6 +371,11 @@ export default {
         { text: 'Sex', value: 'sex_display' },
         { text: 'Gender', value: 'gender_display' },
         { text: 'Characteristics', value: 'characteristics' }
+      ],
+      sessionHeaders: [
+        { text: 'Session ID', value: 'id' },
+        { text: 'Trials', value: 'trials.length' },
+        { text: 'Date', value: 'created_at' },
       ],
       edited_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
       selected: null,
@@ -440,6 +444,19 @@ export default {
         'trashExistingSubject', 'restoreTrashedSubject']),
     onSelect ({ item, value }) {
       this.selected = value ? item : null
+    },
+    onRowSessionClick (item, params) {
+      console.log("LOG: " + item.id)
+      this.clicks++;
+      if (this.clicks === 1) {
+        this.timer = setTimeout( () => {
+          this.clicks = 0
+        }, this.delay);
+      } else {
+         clearTimeout(this.timer);
+         this.$router.push({ name: 'Session', params: { id: item.id }})
+         this.clicks = 0;
+      }
     },
     onRowClick (item, params) {
       params.select(!params.isSelected)

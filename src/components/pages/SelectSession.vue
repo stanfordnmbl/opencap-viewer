@@ -145,7 +145,7 @@
             </v-list>
           </v-menu>
         </div>
-        <div class="cursor-pointer mt-2">{{ item.id }}</div>
+        <div class="mt-2">{{ item.id }}</div>
       </template>
     </v-data-table>
       
