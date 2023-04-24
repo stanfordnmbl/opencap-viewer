@@ -199,11 +199,16 @@ export default {
 
       commit('updateSession', res.data)
     },
-    async loadExistingSessions ({ state, commit }, {reroute, quantity = -1}) {
+    async loadExistingSessions ({ state, commit }, {reroute, quantity = -1, subject_id = null}) {
       console.log(quantity)
-      const res = await axios.post('/sessions/valid/', {
+      let data = {
         quantity: quantity
-      })
+      }
+      if (subject_id) {
+        data.subject_id = subject_id
+      }
+
+      const res = await axios.post('/sessions/valid/', data)
       commit('setExistingSessions', res.data)
 
       if (reroute) {
