@@ -443,7 +443,7 @@ export default {
         'loadExistingSessions', 'loadSubjects',
         'trashExistingSubject', 'restoreTrashedSubject']),
     onSelect ({ item, value }) {
-      if (item) {
+      if (item && value) {
           this.loadExistingSessions({reroute: false, quantity: -1, subject_id: item.id})
       }
       this.selected = value ? item : null
