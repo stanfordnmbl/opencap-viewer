@@ -16,7 +16,7 @@
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
-                <div v-for="(t, index) in filteredTrialsWithMenu" :key="`trial-${index}`" class="my-1 trial d-flex justify-content-between"
+                <div v-for="(t, index) in filteredTrialsWithMenu" :key="`trial-${index}`" :ref="`trial-${index}`" class="my-1 trial d-flex justify-content-between"
                     :class="{ selected: isSelected(t) }">
                     <Status :value="t" :class="trialClasses(t)" @click="loadTrial(t)" />
                     <div class="">
@@ -35,6 +35,42 @@
                           </v-btn>
                         </template>
                         <v-list>
+                          <v-list-item link v-if="t.name !== 'neutral'">
+                            <v-dialog v-model="rename_dialog" max-width="500">
+                              <template v-slot:activator="{ on }">
+                                <v-list-item-title v-on="on">Rename...</v-list-item-title>
+                              </template>
+
+                              <v-card>
+                                <v-card-text class="pt-4">
+                                  <v-row class="m-0">
+                                    <v-col cols="2">
+                                      <v-icon x-large color="orange">mdi-rename-box</v-icon>
+                                    </v-col>
+                                    <v-col cols="10">
+                                      <p>
+                                        Insert a new name for trial {{t.name}}:
+                                      </p>
+                                      <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
+                                        <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
+
+                                            <v-text-field v-model="trialNewName" label="Trial new name" class="flex-grow-0"
+                                                :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
+                                        </ValidationProvider>
+
+                                        <v-spacer></v-spacer>
+
+                                        <v-btn class="text-right" :disabled="invalid" @click="t.isMenuOpen = false; remove_dialog = false; renameTrial(t, index, trialNewName);">
+                                            Rename Trial
+                                        </v-btn>
+                                      </ValidationObserver>
+                                    </v-col>
+                                  </v-row>
+                                </v-card-text>
+                              </v-card>
+                            </v-dialog>
+
+                          </v-list-item>
                           <v-list-item link v-if="!t.trashed">
                             <v-dialog v-model="remove_dialog" max-width="500">
                               <template v-slot:activator="{ on }">
@@ -298,6 +334,7 @@ export default {
             state: 'ready',
             submitted: false,
             trialName: '',
+            trialNewName: '',
             statusPoll: null,
             downloading: false,
             dialog: null,
@@ -584,6 +621,16 @@ export default {
         },
         trialClasses (trial) {
           return trial.trashed ? 'trashed' : 'cursor-pointer';
+        },
+        async renameTrial(trial, index, trialNewName) {
+          try {
+            let oldName = trial.name
+            console.log(trial.name + " will be renamed to " + trialNewName);
+            const { data } = await axios.post(`/trials/${trial.id}/rename/`, {trialNewName});
+            await this.updateTrialWithData(trial, data.data);
+          } catch (error) {
+            apiError(error)
+          }
         },
         async updateTrialWithData(trial, data) {
             const index = this.session.trials.findIndex(x => x.id === trial.id)

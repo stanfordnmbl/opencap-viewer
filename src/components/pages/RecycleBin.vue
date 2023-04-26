@@ -305,7 +305,7 @@ import axios from 'axios'
 import { apiInfo, apiError } from '@/util/ErrorMessage.js'
 
 export default {
-  name: 'SelectSession',
+  name: 'RecycleBin',
   data () {
     return {
       restore_session_dialog: false,

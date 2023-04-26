@@ -38,6 +38,7 @@ export default {
               user_id: localStorage.getItem('auth_user_id'),
           })
         await dispatch('data/loadExistingSessions', {reroute: false, quantity: 20}, { root: true })
+        await dispatch('data/loadSubjects', null, { root: true })
       }
     },
     async login ({ state, commit }, { username, password }) {

@@ -34,7 +34,25 @@ export default {
     framerate: 60,
 
     // step 5
-    trialName: ''
+    trialName: '',
+
+    subjects: [],
+    sexes: {
+      // "": "",
+      "woman": "Woman",
+      "man": "Man",
+      "intersect": "Intersex",
+      "not-listed": "Not Listed",
+      "prefer-not-respond": "Prefer not to respond"
+    },
+    genders: {
+      // "": "",
+      "woman": "Woman",
+      "man": "Man",
+      "transgender": "Transgender",
+      "non-binary": "Non-Binary/Non-Conforming",
+      "prefer-not-respond": "Prefer not to respond",
+    }
   },
   mutations: {
     setSession (state, session) {
@@ -57,6 +75,13 @@ export default {
       state.sessions = sessions
 
     },
+    setSubjects (state, subjects) {
+      for (let i = 0; i < subjects.length; i++) {
+        subjects[i].created_at = formatDate(subjects[i].created_at);
+      }
+      state.subjects = subjects
+      console.log(state.subjects)
+    },
     setStep1 (state, { cameras }) {
       state.cameras = cameras
     },
@@ -68,12 +93,13 @@ export default {
     setStep3 (state, trialId) {
       state.trialId = trialId
     },
-    setStep4 (state, { identifier, weight, height, sex, gender, data_sharing, pose_model }) {
-      state.identifier = identifier
-      state.weight = weight
-      state.height = height
-      state.sex = sex
-      state.gender = gender
+    setStep4 (state, { subject, data_sharing, pose_model }) {
+      // state.identifier = identifier
+      // state.weight = weight
+      // state.height = height
+      // state.sex = sex
+      // state.gender = gender
+      state.subject = subject
       state.data_sharing = data_sharing
       state.pose_model = pose_model
     },
@@ -115,6 +141,13 @@ export default {
 
       if (index >= 0) {
         Vue.set(state.sessions, index, session);
+      }
+    },
+    updateSubject (state, subject) {
+      const index = state.subjects.findIndex(t => t.id === subject.id);
+
+      if (index >= 0) {
+        Vue.set(state.subjects, index, subject);
       }
     }
   },
@@ -166,11 +199,16 @@ export default {
 
       commit('updateSession', res.data)
     },
-    async loadExistingSessions ({ state, commit }, {reroute, quantity = -1}) {
+    async loadExistingSessions ({ state, commit }, {reroute, quantity = -1, subject_id = null}) {
       console.log(quantity)
-      const res = await axios.post('/sessions/valid/', {
+      let data = {
         quantity: quantity
-      })
+      }
+      if (subject_id) {
+        data.subject_id = subject_id
+      }
+
+      const res = await axios.post('/sessions/valid/', data)
       commit('setExistingSessions', res.data)
 
       if (reroute) {
@@ -180,6 +218,29 @@ export default {
           router.push({ name: 'Step1' })
         }  
       }
+    },
+    async loadSubjects ({ state, commit }) {
+      const res = await axios.get('/subjects/')
+      commit('setSubjects', res.data)
+    },
+    async trashExistingSubject ({ state, commit }, id) {
+      const subjectId = id
+
+      const res = await axios.post(`/subjects/${subjectId}/trash/`)
+
+      res.data.created_at = formatDate(res.data.created_at);
+
+      commit('updateSubject', res.data)
+    },
+    async restoreTrashedSubject ({ state, commit }, id) {
+      const subjectId = id
+
+      const res = await axios.post(`/subjects/${subjectId}/restore/`)
+
+      res.data.created_at = formatDate(res.data.created_at);
+
+      commit('updateSubject', res.data)
     }
+
   }
 }

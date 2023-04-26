@@ -8,15 +8,14 @@
 
       <v-btn
         class="ml-2"
-        :disabled="!selected"
-        @click="$router.push({ name: 'Session', params: { id: selected.id }})">
-        Load session
-      </v-btn>
-      
-      <v-btn
-        class="ml-2"
         @click="$router.push({ name: 'Dashboard' })">
         Analysis Dashboard
+      </v-btn>
+
+      <v-btn
+        class="ml-2"
+        @click="$router.push({ name: 'Subjects' })">
+        Subjects
       </v-btn>
 
       <v-btn
@@ -55,6 +54,16 @@
               </v-btn>
             </template>
             <v-list>
+              <v-list-item link>
+                <v-list-item-title
+                    @click="$router.push({ name: 'Session', params: { id: item.id }})"
+                    >Load...</v-list-item-title>
+              </v-list-item>
+              <v-list-item link>
+                <v-list-item-title
+                  @click="$router.push({ name: 'Dashboard' })"
+                  >Dashboard...</v-list-item-title>
+              </v-list-item>
               <v-list-item link v-if="!item.trashed">
                 <v-dialog v-model="remove_dialog" max-width="500">
                   <template v-slot:activator="{ on }">
@@ -133,20 +142,10 @@
                   </v-card>
                 </v-dialog>
               </v-list-item>
-              <v-list-item link>
-                <v-list-item-title
-                    @click="$router.push({ name: 'Session', params: { id: item.id }})"
-                    >Load...</v-list-item-title>
-              </v-list-item>
-              <v-list-item link>
-                <v-list-item-title
-                  @click="$router.push({ name: 'Dashboard' })"
-                  >Dashboard...</v-list-item-title>
-              </v-list-item>
             </v-list>
           </v-menu>
         </div>
-        <div class="cursor-pointer mt-2">{{ item.id }}</div>
+        <div class="mt-2">{{ item.id }}</div>
       </template>
     </v-data-table>
       
@@ -169,7 +168,7 @@ import { formatDate } from '@/util/DateFormat.js'
 export default {
   name: 'SelectSession',
   created: function () {
-  
+      this.loadSubjects()
   },
   data () {
     return {
@@ -187,7 +186,10 @@ export default {
         { text: 'Number of trials', align: 'center', value: 'trials_count' },
         { text: 'Date', value: 'created_at' }
       ],
-      selected: null
+      selected: null,
+      delay: 300,
+      clicks: 0,
+      timer: null
     }
   },
   computed: {
@@ -209,19 +211,32 @@ export default {
     }
   },
   methods: {
-    ...mapActions('data', ['loadExistingSessions', 'trashExistingSession', 'restoreTrashedSession']),
+    ...mapActions('data', [
+        'loadExistingSessions', 'trashExistingSession',
+        'restoreTrashedSession', 'loadSubjects']),
     onSelect ({ item, value }) {
       this.selected = value ? item : null
     },
     onRowClick (item, params) {
-      params.select(!params.isSelected)
+      console.log("LOG: " + item.id)
+      this.clicks++;
+      if (this.clicks === 1) {
+        this.timer = setTimeout( () => {
+          params.select(!params.isSelected)
+          this.clicks = 0
+        }, this.delay);
+      } else {
+         clearTimeout(this.timer);
+         this.$router.push({ name: 'Session', params: { id: item.id }})
+         this.clicks = 0;
+      }
     },
     itemClasses (item) {
       return item.trashed ? 'trashed' : '';
     },
     async onLoadAllSessions(){
       try {
-        await this.loadExistingSessions({reroute: true, quantity:-1})           
+        await this.loadExistingSessions({reroute: true, quantity:-1})
       } catch (error) {
         apiError(error)
         this.$router.push({ name: 'Step1' })
