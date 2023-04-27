@@ -75,6 +75,18 @@ export default {
       state.sessions = sessions
 
     },
+    updateExistingSessions (state, session) {
+      let old_session_ids = state.sessions.map(s => s.id);
+
+      for(let i = 0; i < session.length; i++) {
+        if(old_session_ids.includes(session[i].id)) {
+          let index = old_session_ids.indexOf(session[i].id);
+          state.sessions.splice(index, 1, session[i]);
+        } else {
+          state.sessions.push(session[i]);
+        }
+      }
+    },
     setSubjects (state, subjects) {
       for (let i = 0; i < subjects.length; i++) {
         subjects[i].created_at = formatDate(subjects[i].created_at);
@@ -201,15 +213,21 @@ export default {
     },
     async loadExistingSessions ({ state, commit }, {reroute, quantity = -1, subject_id = null}) {
       console.log(quantity)
+      let update_sessions = false;
       let data = {
         quantity: quantity
       }
       if (subject_id) {
         data.subject_id = subject_id
+        update_sessions = true;
       }
 
       const res = await axios.post('/sessions/valid/', data)
-      commit('setExistingSessions', res.data)
+      if (update_sessions) {
+        commit('updateExistingSessions', res.data)
+      } else {
+        commit('setExistingSessions', res.data)
+      }
 
       if (reroute) {
         if (state.sessions.length > 0) {
