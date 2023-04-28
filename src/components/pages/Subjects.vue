@@ -52,7 +52,10 @@
                           >Edit...</v-list-item-title>
                       </v-list-item>
                       <v-list-item link v-if="!item.trashed">
-                        <v-dialog v-model="remove_dialog" max-width="500">
+                        <v-dialog
+                                v-model="remove_dialog"
+                                v-click-outside="clickOutsideDialogSubjectHideMenu"
+                                max-width="500">
                           <template v-slot:activator="{ on }">
                             <v-list-item-title v-on="on">Remove...</v-list-item-title>
                           </template>
@@ -92,7 +95,10 @@
                         </v-dialog>
                       </v-list-item>
                       <v-list-item link v-if="item.trashed">
-                        <v-dialog v-model="restore_dialog" max-width="500">
+                        <v-dialog
+                                v-model="restore_dialog"
+                                v-click-outside="clickOutsideDialogSubjectHideMenu"
+                                max-width="500">
                           <template v-slot:activator="{ on }">
                             <v-list-item-title v-on="on">Restore...</v-list-item-title>
                           </template>
@@ -130,7 +136,10 @@
                         </v-dialog>
                       </v-list-item>
                       <v-list-item link v-if="item.trashed">
-                        <v-dialog v-model="remove_permanently_dialog" max-width="500">
+                        <v-dialog
+                                v-model="remove_permanently_dialog"
+                                v-click-outside="clickOutsideDialogSubjectHideMenu"
+                                max-width="500">
                           <template v-slot:activator="{ on }">
                             <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
                           </template>
@@ -169,7 +178,10 @@
                         </v-dialog>
                       </v-list-item>
                       <v-list-item link v-if="!item.trashed">
-                        <v-dialog v-model="download_dialog" max-width="500">
+                        <v-dialog
+                                v-model="download_dialog"
+                                v-click-outside="clickOutsideDialogSubjectHideMenu"
+                                max-width="500">
                           <template v-slot:activator="{ on }">
                             <v-list-item-title v-on="on">Download data...</v-list-item-title>
                           </template>
@@ -466,6 +478,13 @@ export default {
     },
     itemClasses (item) {
       return item.trashed ? 'trashed' : '';
+    },
+    clickOutsideDialogSubjectHideMenu(e) {
+      if (e.target.className === 'v-overlay__scrim') {
+          for(let t of this.subjectsMapped) {
+            t.isMenuOpen = false;
+          }
+      }
     },
     async addSubject() {
       this.edit_dialog = true;
