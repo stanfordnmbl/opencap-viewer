@@ -45,7 +45,10 @@
                     </template>
                     <v-list>
                       <v-list-item link>
-                        <v-dialog v-model="restore_session_dialog" max-width="500">
+                        <v-dialog
+                                v-model="restore_session_dialog"
+                                v-click-outside="clickOutsideDialogSessionHideMenu"
+                                max-width="500">
                           <template v-slot:activator="{ on }">
                             <v-list-item-title v-on="on">Restore...</v-list-item-title>
                           </template>
@@ -83,7 +86,10 @@
                         </v-dialog>
                       </v-list-item>
                       <v-list-item link>
-                        <v-dialog v-model="remove_permanently_session_dialog" max-width="500">
+                        <v-dialog
+                                v-model="remove_permanently_session_dialog"
+                                v-click-outside="clickOutsideDialogSessionHideMenu"
+                                max-width="500">
                           <template v-slot:activator="{ on }">
                             <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
                           </template>
@@ -147,7 +153,7 @@
               </thead>
               <tbody>
                 <tr
-                  v-for="trial in selected.trials.filter(t => t.trashed || selected.trashed).map(t => ({...t, isMenuOpen: false}))"
+                  v-for="trial in trialsMapped"
                   :key="trial.id"
                 >
                   <td>
@@ -169,7 +175,10 @@
                         </template>
                         <v-list>
                           <v-list-item link>
-                            <v-dialog v-model="restore_trial_dialog" max-width="500">
+                            <v-dialog
+                                    v-model="restore_trial_dialog"
+                                    v-click-outside="clickOutsideDialogTrialHideMenu"
+                                    max-width="500">
                               <template v-slot:activator="{ on }">
                                 <v-list-item-title v-on="on">Restore...</v-list-item-title>
                               </template>
@@ -207,7 +216,10 @@
                             </v-dialog>
                           </v-list-item>
                           <v-list-item link>
-                            <v-dialog v-model="remove_permanently_trial_dialog" max-width="500">
+                            <v-dialog
+                                    v-model="remove_permanently_trial_dialog"
+                                    v-click-outside="clickOutsideDialogTrialHideMenu"
+                                    max-width="500">
                               <template v-slot:activator="{ on }">
                                 <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
                               </template>
@@ -345,6 +357,9 @@ export default {
         trashed_at: s.trashed_at,
         isMenuOpen: false
       })).filter(s => s.trashed || s.trashed_trials_count > 0)
+    },
+    trialsMapped () {
+        return this.selected.trials.filter(t => t.trashed || this.selected.trashed).map(t => ({...t, isMenuOpen: false}))
     }
   },
   methods: {
@@ -358,6 +373,20 @@ export default {
     onRowClick(item, params) {
       params.select(!params.isSelected);
       this.loadSession(item.id)
+    },
+    clickOutsideDialogSessionHideMenu(e) {
+      if (e.target.className === 'v-overlay__scrim') {
+          for(let t of this.sessionsMapped) {
+            t.isMenuOpen = false;
+          }
+      }
+    },
+    clickOutsideDialogTrialHideMenu(e) {
+      if (e.target.className === 'v-overlay__scrim') {
+          for(let t of this.trialsMapped) {
+            t.isMenuOpen = false;
+          }
+      }
     },
     async permanentRemoveSession(id) {
       try {
