@@ -65,7 +65,10 @@
                   >Dashboard...</v-list-item-title>
               </v-list-item>
               <v-list-item link v-if="!item.trashed">
-                <v-dialog v-model="remove_dialog" max-width="500">
+                <v-dialog
+                        v-model="remove_dialog"
+                        v-click-outside="clickOutsideDialogSessionHideMenu"
+                        max-width="500">
                   <template v-slot:activator="{ on }">
                     <v-list-item-title v-on="on">Remove...</v-list-item-title>
                   </template>
@@ -105,7 +108,10 @@
                 </v-dialog>
               </v-list-item>
               <v-list-item link v-else>
-                <v-dialog v-model="restore_dialog" max-width="500">
+                <v-dialog
+                        v-model="restore_dialog"
+                        v-click-outside="clickOutsideDialogSessionHideMenu"
+                        max-width="500">
                   <template v-slot:activator="{ on }">
                     <v-list-item-title v-on="on">Restore...</v-list-item-title>
                   </template>
@@ -233,6 +239,13 @@ export default {
     },
     itemClasses (item) {
       return item.trashed ? 'trashed' : '';
+    },
+    clickOutsideDialogSessionHideMenu(e) {
+      if (e.target.className === 'v-overlay__scrim') {
+          for(let t of this.sessionsMapped) {
+            t.isMenuOpen = false;
+          }
+      }
     },
     async onLoadAllSessions(){
       try {

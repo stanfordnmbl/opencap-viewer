@@ -36,7 +36,10 @@
                         </template>
                         <v-list>
                           <v-list-item link v-if="t.name !== 'neutral'">
-                            <v-dialog v-model="rename_dialog" max-width="500">
+                            <v-dialog
+                                    v-model="rename_dialog"
+                                    v-click-outside="clickOutsideDialogTrialHideMenu"
+                                    max-width="500">
                               <template v-slot:activator="{ on }">
                                 <v-list-item-title v-on="on">Rename...</v-list-item-title>
                               </template>
@@ -72,7 +75,10 @@
 
                           </v-list-item>
                           <v-list-item link v-if="!t.trashed">
-                            <v-dialog v-model="remove_dialog" max-width="500">
+                            <v-dialog
+                                    v-model="remove_dialog"
+                                    v-click-outside="clickOutsideDialogTrialHideMenu"
+                                    max-width="500">
                               <template v-slot:activator="{ on }">
                                 <v-list-item-title v-on="on">Remove...</v-list-item-title>
                               </template>
@@ -112,7 +118,10 @@
                             </v-dialog>
                           </v-list-item>
                           <v-list-item link v-else>
-                            <v-dialog v-model="restore_dialog" max-width="500">
+                            <v-dialog
+                                    v-model="restore_dialog"
+                                    v-click-outside="clickOutsideDialogTrialHideMenu"
+                                    max-width="500">
                               <template v-slot:activator="{ on }">
                                 <v-list-item-title v-on="on">Restore...</v-list-item-title>
                               </template>
@@ -326,6 +335,7 @@ export default {
                 recording: 'Stop recording',
                 processing: 'Cancel trial'
             },
+            rename_dialog: false,
             remove_dialog: false,
             restore_dialog: false,
             show_trashed: false,
@@ -621,6 +631,13 @@ export default {
         },
         trialClasses (trial) {
           return trial.trashed ? 'trashed' : 'cursor-pointer';
+        },
+        clickOutsideDialogTrialHideMenu(e) {
+          if (e.target.className === 'v-overlay__scrim') {
+              for(let t of this.filteredTrialsWithMenu) {
+                t.isMenuOpen = false;
+              }
+          }
         },
         async renameTrial(trial, index, trialNewName) {
           try {
