@@ -41,7 +41,14 @@
             :append-icon="show_password ? 'mdi-eye' : 'mdi-eye-off'"
             :type="show_password ? 'text' : 'password'"
             @click:append="show_password = !show_password"/>
-        </ValidationProvider>              
+        </ValidationProvider>
+
+        <v-checkbox
+          label="Remember this device for 90 days"
+          v-if="show_remember_checkbox"
+          v-model="remember_device"
+          dark
+        ></v-checkbox>
 
         <v-btn
           type="submit" 
@@ -86,6 +93,8 @@ export default {
       submitted: false,
       username: '',
       password: '',
+      show_remember_checkbox: true,
+      remember_device: false,
       show_password: false,
     }
   },
@@ -94,8 +103,15 @@ export default {
       sessions: state => state.data.sessions
     })
   },
+  mounted() {
+      const remember_device_timestamp = localStorage.getItem('remember_device_timestamp')
+      const valid_date = remember_device_timestamp != null ? remember_device_timestamp + 90*24*60*60*1000 >= Date.now() : false
+      if (remember_device_timestamp && valid_date) {
+          this.show_remember_checkbox = false
+      }
+  },
   methods: {
-    ...mapActions('auth', ['login']),
+    ...mapActions('auth', ['login', 'verify_without_otp']),
     ...mapActions('data', ['loadExistingSessions']),
     async onLogin () {
       this.loading = true
@@ -106,10 +122,31 @@ export default {
         if (await this.$refs.observer.validate()) {
           await this.login({
             username: this.username, 
-            password: this.password
+            password: this.password,
+            remember_device: this.remember_device
           })
 
-          this.$router.push({ name: 'Verify' })
+          const remember_device_timestamp = localStorage.getItem('remember_device_timestamp')
+          const valid_date = remember_device_timestamp != null ? remember_device_timestamp + 90*24*60*60*1000 >= Date.now() : false
+          let go_to_validate = true
+          if (remember_device_timestamp && valid_date) {
+              // Skip the 2FA step if the user has logged in within the last 90 days
+              await this.verify_without_otp()
+              try {
+                await this.loadExistingSessions({reroute: true, quantity:20})
+              } catch (error) {
+                apiError(error)
+                this.$router.push({ name: 'Step1' })
+              }
+              go_to_validate = false
+          }
+
+          if (this.remember_device) {
+              localStorage.setItem('remember_device_timestamp', Date.now())
+          }
+          if(go_to_validate) {
+            this.$router.push({ name: 'Verify' })
+          }
         } else {
           if (this.password) {
             this.password = ''
