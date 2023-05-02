@@ -13,6 +13,8 @@
                 <v-btn v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
                 </v-btn>
+                <p v-if="state === 'recording'" style="color: orange;">Videos are recording, do not refresh</p>
+                <p v-if="state === 'processing'" style="color: green;">Videos are uploading, do not refresh</p>
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
@@ -333,7 +335,7 @@ export default {
             startButtonCaptions: {
                 ready: 'Start recording',
                 recording: 'Stop recording',
-                processing: 'Cancel trial'
+                processing: 'Cancel Upload'
             },
             rename_dialog: false,
             remove_dialog: false,
