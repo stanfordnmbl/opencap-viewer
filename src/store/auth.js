@@ -41,7 +41,7 @@ export default {
         await dispatch('data/loadSubjects', null, { root: true })
       }
     },
-    async login ({ state, commit }, { username, password, remember_device }) {
+    async login ({ state, commit }, { username, password }) {
       let res = await axios.post('/login/', {
         username,
         password
@@ -65,17 +65,16 @@ export default {
         user_id: res.data.user_id,
       })
     },
-    async verify_without_otp ({ state, commit }) {
-      let res = await axios.post('/verify/', {
-        'no_otp': true
-      })
+    async set_verify ({ state, commit }) {
       commit('setVerified', { verified: true })
       localStorage.setItem('auth_verified', true)
     },
-    async verify ({ state, commit }, { otp_token }) {
-      let res = await axios.post('/verify/', {
-        otp_token
-      })
+    async verify ({ state, commit }, { otp_token, remember_device }) {
+      let data = {
+        otp_token,
+      }
+      if (remember_device) { data.remember_device = true }
+      let res = await axios.post('/verify/', data)
 
       commit('setVerified', {
         verified: true

@@ -105,13 +105,16 @@ export default {
   },
   mounted() {
       const remember_device_timestamp = localStorage.getItem('remember_device_timestamp')
-      const valid_date = remember_device_timestamp != null ? remember_device_timestamp + 90*24*60*60*1000 >= Date.now() : false
+      const valid_date = remember_device_timestamp != null ? parseInt(remember_device_timestamp) + 90*24*60*60*1000 >= Date.now() : false
       if (remember_device_timestamp && valid_date) {
           this.show_remember_checkbox = false
       }
+      if (remember_device_timestamp && !valid_date) {
+          localStorage.removeItem('remember_device_timestamp')
+      }
   },
   methods: {
-    ...mapActions('auth', ['login', 'verify_without_otp']),
+    ...mapActions('auth', ['login', 'set_verify']),
     ...mapActions('data', ['loadExistingSessions']),
     async onLogin () {
       this.loading = true
@@ -122,16 +125,16 @@ export default {
         if (await this.$refs.observer.validate()) {
           await this.login({
             username: this.username, 
-            password: this.password,
-            remember_device: this.remember_device
+            password: this.password
           })
 
           const remember_device_timestamp = localStorage.getItem('remember_device_timestamp')
-          const valid_date = remember_device_timestamp != null ? remember_device_timestamp + 90*24*60*60*1000 >= Date.now() : false
+          const valid_date = remember_device_timestamp != null ? parseInt(remember_device_timestamp) + 90*24*60*60*1000 >= Date.now() : false
           let go_to_validate = true
+
           if (remember_device_timestamp && valid_date) {
               // Skip the 2FA step if the user has logged in within the last 90 days
-              await this.verify_without_otp()
+              await this.set_verify()
               try {
                 await this.loadExistingSessions({reroute: true, quantity:20})
               } catch (error) {
