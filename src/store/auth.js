@@ -65,10 +65,16 @@ export default {
         user_id: res.data.user_id,
       })
     },
-    async verify ({ state, commit }, { otp_token }) {
-      let res = await axios.post('/verify/', {
-        otp_token
-      })
+    async set_verify ({ state, commit }) {
+      commit('setVerified', { verified: true })
+      localStorage.setItem('auth_verified', true)
+    },
+    async verify ({ state, commit }, { otp_token, remember_device }) {
+      let data = {
+        otp_token,
+      }
+      if (remember_device) { data.remember_device = true }
+      let res = await axios.post('/verify/', data)
 
       commit('setVerified', {
         verified: true

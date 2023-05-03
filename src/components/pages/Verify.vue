@@ -71,9 +71,14 @@ export default {
         this.submitted = true
 
         if (await this.$refs.observer.validate()) {
-          await this.verify({
-            otp_token: this.otp_token, 
-          })
+          const remember_device_timestamp = localStorage.getItem('remember_device_timestamp')
+          const valid_date = remember_device_timestamp != null ? parseInt(remember_device_timestamp) + 90*24*60*60*1000 >= Date.now() : false
+          let data = {otp_token: this.otp_token}
+          if (remember_device_timestamp && valid_date) {
+            data.remember_device = true
+          }
+
+          await this.verify(data)
 
           try {
             await this.loadExistingSessions({reroute: true, quantity:20})      
