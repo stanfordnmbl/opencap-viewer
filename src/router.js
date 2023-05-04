@@ -104,13 +104,14 @@ const routesWithOutAuth = [
   'Session',
   'ResetPassword',
   'NewPassword',
-  'Dashboard'
+  'Dashboard',
+  'Step4'
 ]
 
 const routesRequireSession = [
   'Step2',
   'Step3',
-  'Step4'
+  
 ]
 
 const acceptedRoutes = [

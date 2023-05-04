@@ -252,6 +252,32 @@
           />
 
       </v-card-text>
+
+      <div class="d-flex justify-center">
+        <v-card-title class="justify-center data-title">
+          Select musculoskeletal model
+        </v-card-title>
+        <v-tooltip bottom="">
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+          </template>
+          TODO: adapt description.
+          The default full body model (https://pubmed.ncbi.nlm.nih.gov/27392337/) models the shoulder joint as a sequence of three rotations (flexion-adduction-rotation) defined as a sequence of Euler angles (Z-X-Y).
+          This definition does not repsect the ISB conventions (https://pubmed.ncbi.nlm.nih.gov/15844264/). 
+          OpenCap therefore supports a new model, referred to as full body model with ISB shoulder, that models the shoulder joint as as a sequence of three rotations (flexion-adduction-rotation) defined as a sequence of Euler angles (Y-X-Y).
+        </v-tooltip>
+      </div>
+
+      <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+
+        <v-select
+            v-model="msk_model"
+            label="Musculoskeletal model"
+            v-bind:items="msk_models"
+          />
+
+      </v-card-text>
+
     </v-card>
 
     <v-dialog v-model="new_subject_dialog" width="500">
@@ -395,6 +421,11 @@ export default {
       framerate: 60,
       framerates_available: [
         {"text": "60fps (max recording time: 60s, default)", "value": 60},
+      ],
+      msk_model: 'msk_fbm',
+      msk_models: [
+        {"text": "Default (Full body model)", "value": "msk_fbm"},
+        {"text": "Full body model with ISB shoulder (In beta, feedback welcome!)", "value": "msk_fbm_isb_shoulder"},
       ],
       busy: false,
       disabledNextButton: true,
@@ -567,7 +598,8 @@ export default {
             // gender: this.gender,
             data_sharing: this.data_sharing,
             pose_model: this.pose_model,
-            framerate: this.framerate
+            framerate: this.framerate,
+            msk_model: this.msk_model,
           });
           try {
             const resUpdate = await axios.get(
@@ -581,7 +613,8 @@ export default {
                   // subject_gender: this.gender,
                   settings_data_sharing: this.data_sharing,
                   settings_pose_model: this.pose_model,
-                  settings_framerate: this.framerate
+                  settings_framerate: this.framerate,
+                  settings_msk_model: this._model,
                 },
               }
             );
@@ -606,7 +639,8 @@ export default {
                   subject_sex: this.sex,
                   subject_gender: this.gender,
                   subject_data_sharing: this.data_sharing,
-                  subject_pose_model: this.pose_model,
+                  subject_pose_model: this.pose_model, 
+                  subject_msk_model: this.msk_model, // not sure if needed
                 },
               }
             );
