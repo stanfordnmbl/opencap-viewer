@@ -422,10 +422,10 @@ export default {
       framerates_available: [
         {"text": "60fps (max recording time: 60s, default)", "value": 60},
       ],
-      msk_model: 'msk_fbm',
+      msk_model: 'LaiArnoldModified2017_poly_withArms_weldHand',
       msk_models: [
-        {"text": "Default (Full body model)", "value": "msk_fbm"},
-        {"text": "Full body model with ISB shoulder (In beta, feedback welcome!)", "value": "msk_fbm_isb_shoulder"},
+        {"text": "Default (Full body model)", "value": "LaiArnoldModified2017_poly_withArms_weldHand"},
+        {"text": "Full body model with ISB shoulder (In beta, feedback welcome!)", "value": "LaiArnoldModified2017_poly_withArms_weldHand_isb_shoulder"},
       ],
       busy: false,
       disabledNextButton: true,

@@ -32,7 +32,7 @@ export default {
     data_sharing: '',
     pose_model: 'openpose',
     framerate: 60,
-    msk_model: 'msk_fbm',
+    msk_model: 'LaiArnoldModified2017_poly_withArms_weldHand',
 
     // step 5
     trialName: '',
@@ -137,7 +137,7 @@ export default {
       state.gender = 'woman'
       state.data_sharing = ''
       state.pose_model = 'openpose'
-      state.msk_model = 'msk_fbm'
+      state.msk_model = 'LaiArnoldModified2017_poly_withArms_weldHand'
       // step 5
       state.trialName = ''       
     },
