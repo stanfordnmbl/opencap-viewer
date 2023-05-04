@@ -614,7 +614,7 @@ export default {
                   settings_data_sharing: this.data_sharing,
                   settings_pose_model: this.pose_model,
                   settings_framerate: this.framerate,
-                  settings_msk_model: this._model,
+                  settings_msk_model: this.msk_model,
                 },
               }
             );
