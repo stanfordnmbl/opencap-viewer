@@ -13,8 +13,8 @@
                 <v-btn v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
                 </v-btn>
-                <p v-if="state === 'recording'" style="color: orange;">Videos are recording, do not refresh</p>
-                <p v-if="state === 'processing'" style="color: green;">Videos are uploading, do not refresh</p>
+                <p v-if="state === 'recording'">Videos are recording, do not refresh</p>
+                <p v-if="state === 'processing'">Videos are uploading, do not refresh</p>
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
