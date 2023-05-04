@@ -639,8 +639,7 @@ export default {
                   subject_sex: this.sex,
                   subject_gender: this.gender,
                   subject_data_sharing: this.data_sharing,
-                  subject_pose_model: this.pose_model, 
-                  subject_msk_model: this.msk_model, // not sure if needed
+                  subject_pose_model: this.pose_model,
                 },
               }
             );
