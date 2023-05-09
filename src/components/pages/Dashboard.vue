@@ -3,7 +3,11 @@
 
     <!-- Google Charts container. -->
     <div class="content-chart">
-      <GChart :type="chart_type" :data="chart_data" :options="chart_options" :resizeDebounce="500" @ready="onChartReady" style="width: 100%; height: 100%;"/>
+      <LineChartGenerator
+        id="my-chart-id"
+        :chart-options="chartOptions"
+        :chart-data="chartData"
+      />
     </div>
 
     <!-- Left floating button. -->
@@ -84,21 +88,26 @@
         <div class="left d-flex flex-column pa-2">
           <v-select v-model="chart_type" v-bind:items="chart_type_options" label="Chart Type" outlined dense></v-select>
 
-          <v-text-field v-model="chart_options.title" label="Title" outlined dense></v-text-field>
+          <v-select v-model="chart_color_scales_selected" v-bind:items="chart_color_scales_options"
+            label="Color Scale" outlined dense v-on:change="drawChart"></v-select>
 
-          <v-text-field v-model="chart_options.hAxis.title" label="H. Axis Title" outlined dense></v-text-field>
+          <v-text-field v-model="chartOptions.plugins.title.text" label="Title" outlined dense></v-text-field>
 
-          <v-text-field v-model="chart_options.vAxis.title" label="V. Axis Title" outlined dense></v-text-field>
+          <v-text-field v-model="chartOptions.scales.x.title.text" label="H. Axis Title" outlined dense></v-text-field>
 
-          <v-select v-model="chart_options.legend.position" v-bind:items="chart_legend_position" label="Legend Position"
+          <v-text-field v-model="chartOptions.scales.y.title.text" label="V. Axis Title" outlined dense></v-text-field>
+
+          <v-select v-model="chartOptions.plugins.legend.position" v-bind:items="chart_legend_position" label="Legend Position"
             outlined dense v-on:change="placeholderFunction"></v-select>
 
-          <v-select v-model="chart_options.legend.alignment" v-bind:items="chart_legend_alignment"
+          <v-select v-model="chartOptions.plugins.legend.align" v-bind:items="chart_legend_alignment"
             label="Legend Alignment" outlined dense v-on:change="placeholderFunction"></v-select>
 
           <v-select v-model="chart_download_format_selected" v-bind:items="chart_download_format"
             label="Download Format" outlined dense v-on:change="placeholderFunction"></v-select>
+
         </div>
+
       </v-card-text>
     </v-card>
 
@@ -115,11 +124,32 @@ import VueGoogleCharts from "vue3-googl-chart"
 import { jsPDF } from 'jspdf'
 import 'svg2pdf.js'
 import store from '@/store/store.js'
+import chroma from 'chroma-js';
+import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
 
 Vue.use(VueGoogleCharts);
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  LinearScale,
+  CategoryScale,
+  PointElement} from 'chart.js'
+
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  LineElement,
+  LinearScale,
+  CategoryScale,
+  PointElement)
 
 export default {
   name: 'ChartPage',
+  components: { LineChartGenerator  },
   // This function is executed once the page has been loaded.
   created: function () {
       // Indicates if the current logged in user owns the session.
@@ -207,7 +237,7 @@ export default {
           // Split file in lines.
           var lines = data.split("\n");
 
-          // Proccess line by line. First obtain number of rows and number of columns.
+          // Process line by line. First obtain number of rows and number of columns.
           var nRows = 0;
           var nColumns = 0;
           i = 0;
@@ -232,21 +262,52 @@ export default {
           columnNames.push(...this.y_quantities_selected);
           i++;
 
-          // First, add headers to chart_data, and then add information from rows.
-          var rows = [];
-          this.chart_data = [];
-          this.chart_data.push([this.x_quantity_selected]);
-          this.chart_data[0].push(...this.y_quantities_selected);
-          var j = 0;
-          var k = 0;
-          for (j = 0; j < nRows; j++) {
-            var lineArray = lines[j + i].trim().split("\t");
-            var row = [];
-            for (k = 0; k < indexes.length; k++) {
-              row.push(parseFloat(lineArray[indexes[k]].trim()));
+          // Get name of selected color scale.
+          const selectedOption = this.chart_color_scales_options.find(option => {
+            return option.value === this.chart_color_scales_selected;
+          });
+
+          const selectedText = selectedOption ? selectedOption.text : "";
+
+            // Create an empty dataset per column.
+            var j = 0;
+            this.chartData.labels = []
+            this.chartData.datasets = []
+            var colors = chroma.scale("Viridis").correctLightness().gamma(2).cache(false).colors(this.y_quantities_selected.length);
+            if (selectedText == "Spectral" || selectedText == "Rainbow" || selectedText == "Red-Yellow-Blue" || selectedText == "Yellow-Green-Blue")
+                colors = chroma.scale(this.chart_color_scales_selected).colors(this.y_quantities_selected.length);
+            else if (selectedText == "Yellow-Green")
+                colors = chroma.scale(this.chart_color_scales_selected).correctLightness().colors(this.y_quantities_selected.length);
+            else if (selectedText == "Red-Green" || selectedText == "Red-Blue" || selectedText == "Green-Blue")
+                colors = chroma.scale(this.chart_color_scales_selected).gamma(0.75).cache(false).colors(this.y_quantities_selected.length);
+            else
+                colors = chroma.scale(this.chart_color_scales_selected).correctLightness().gamma(2).cache(false).colors(this.y_quantities_selected.length);
+
+            // Add y quantities.
+            var dataset = {};
+            for(j = 0; j < this.y_quantities_selected.length; j++) {
+              dataset = {};
+              dataset["data"] = [];
+              dataset["label"] = this.y_quantities_selected[j];
+              dataset["backgroundColor"] = colors[j];
+              dataset["borderColor"] = colors[j];
+
+              this.chartData.datasets.push(dataset);
             }
-            this.chart_data.push(row);
-          }
+
+            // Insert value from each row
+            j = 0;
+            var k = 0;
+            for (j = 0; j < nRows; j++) {
+                var lineArray = lines[j + i].trim().split("\t");
+                var row = [];
+                for (k = 0; k < indexes.length; k++) {
+                  if (k === 0)
+                    this.chartData["labels"].push(parseFloat(lineArray[indexes[k]].trim()));
+                  else
+                    this.chartData.datasets[k-1]["data"].push(parseFloat(lineArray[indexes[k]].trim()));
+                }
+            }
         }
 
       } catch (error) {
@@ -255,7 +316,7 @@ export default {
       }
 
     },
-    // Get trials and update trials select when a sessin is selected.
+    // Get trials and update trials select when a session is selected.
     onSessionSelected(sessionName) {
 
       // Get value between parentheses (session id).
@@ -328,7 +389,7 @@ export default {
           // Split file in lines.
           var lines = data.split("\n");
 
-          // Proccess line by line. First obtain number of rows and number of columns.
+          // Process line by line. First obtain number of rows and number of columns.
           var i = 0;
           while (lines[i].trim() !== "endheader") {
             i++;
@@ -354,7 +415,7 @@ export default {
     },
     onXQuantitySelected(xQuantitySelected) {
       this.x_quantity_selected = xQuantitySelected;
-      this.chart_options.hAxis.title = xQuantitySelected;
+      this.chartOptions.scales.y.title.text = xQuantitySelected;
     },
     onYQuantitySelected(yQuantitySelected) {
       this.y_quantities_selected = yQuantitySelected;
@@ -455,35 +516,65 @@ export default {
       chart_download_format: ['png', 'svg', 'pdf'],
       chart_download_format_selected: 'png',
       chart_object: undefined,
-      chart_data: [['', ''],
-      ['', 0]],
       chart_type: "LineChart",
+      chart_color_scales_selected: "Viridis",
       chart_type_options: ["LineChart", "ScatterChart", "AreaChart", "SteppedAreaChart", "ColumnChart"], // "BarChart", "Histogram"
-      chart_legend_position: ["none", "top", "right", "bottom"],
+      chart_color_scales_options: [
+        { text: 'Viridis (recommended)', value: 'Viridis' },
+        { text: 'Hot', value: ['black', 'red', 'yellow'] },
+        { text: 'Spectral', value: 'Spectral' },
+        { text: 'Rainbow', value: ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'] },
+        { text: 'Red-Yellow-Blue', value: ['red', 'yellow', 'blue'] },
+        { text: 'Yellow-Green-Blue', value: ['yellow', 'green', 'blue'] },
+        { text: 'Yellow-Blue', value: ['yellow', 'blue'] },
+        { text: 'Yellow-Green', value: ['yellow', 'green'] },
+        { text: 'Red-Green', value: ['red', 'green'] },
+        { text: 'Red-Blue', value: ['red', 'blue'] },
+        { text: 'Green-Blue', value: ['green', 'blue'] },
+        { text: 'ORange-Red', value: ['orange', 'red'] },
+        { text: 'Grays', value: ['lightgrey', 'black'] },
+        { text: 'Greens', value: ['#e5f5e0', '#00441b'] },
+        { text: 'Blues', value: ['#add8e6', '#191970'] },
+        { text: 'Reds', value: ['#ffb2b2', '#7b0000'] }
+      ],
+      chart_legend_position: ["top", "right", "bottom", "left", "chartArea"],
       chart_legend_alignment: ["start", "center", "end"],
-      chart_options: {
-        title: "Chart Title",
-        is3D: true,
-        vAxis: {
-          scaleType: 'decimal', // log
-          title: 'v-Axis'
-        },
-        hAxis: {
-          scaleType: 'decimal', // log
-          title: 'h-Axis'
-        },
-        legend: {
-          position: 'right',
-          alignment: 'start'
-        },
-        explorer: {
-          actions: ['dragToZoom', 'rightClickToReset'],
-          axis: 'horizontal',
-          keepInBounds: true,
-          maxZoomIn: 4.0
-        }
+      chartData: {
+        datasets: [{
+          label: 'Ratings by date',
+          data: [1, 2, 3],
+        }]
       },
-      session_owned: false
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Y axis title'
+            },
+            type: 'linear',
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Y axis title'
+            },
+            type: 'linear',
+          },
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Chart',
+          },
+          legend: {
+            position: 'right',
+            align: 'center'
+          }
+        },
+      }
     }
   },
   computed: {
@@ -559,6 +650,7 @@ export default {
   vertical-align: middle;
   width: 100%;
   height: 100%;
+  background-color: white;
 }
 
 .sidebar {
@@ -622,5 +714,6 @@ export default {
   margin: auto;
   width: 60%;
   height: 80%;
+  background-color: white;
 }
 </style>

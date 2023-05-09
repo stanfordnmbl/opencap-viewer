@@ -8,7 +8,7 @@
 
       <v-btn
         class="ml-2"
-        @click="$router.push({ name: 'Dashboard' })">
+        @click="$router.push({ name: 'Dashboard', params: { id: '' } })">
         Analysis Dashboard
       </v-btn>
 
@@ -61,7 +61,7 @@
               </v-list-item>
               <v-list-item link>
                 <v-list-item-title
-                  @click="$router.push({ name: 'Dashboard' })"
+                  @click="$router.push({ name: 'Dashboard', params: { id: item.id } })"
                   >Dashboard...</v-list-item-title>
               </v-list-item>
               <v-list-item link v-if="!item.trashed">
