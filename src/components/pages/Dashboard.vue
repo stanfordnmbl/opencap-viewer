@@ -53,7 +53,7 @@
           <v-select v-model="trial_selected" v-bind:items="trial_names" label="Select trial" outlined dense
             v-on:change="onTrialSelected"></v-select>
 
-          <v-select v-bind:items="x_quantities" label="X Quantity" outlined dense
+          <v-select v-bind:items="x_quantities" v-model="x_quantity_selected" label="X Quantity" outlined dense
             v-on:change="onXQuantitySelected"></v-select>
 
           <v-select v-bind:items="y_quantities" label="Y Quantities" multiple outlined dense
@@ -98,6 +98,8 @@
         <div class="left d-flex flex-column pa-2">
           <v-text-field v-model="chartOptions.plugins.title.text" label="Title" outlined dense></v-text-field>
 
+          <v-text-field v-model="chartOptions.plugins.subtitle.text" label="Subtitle" outlined dense></v-text-field>
+
           <v-text-field v-model="chartOptions.scales.x.title.text" label="H. Axis Title" outlined dense></v-text-field>
 
           <v-text-field v-model="chartOptions.scales.y.title.text" label="V. Axis Title" outlined dense></v-text-field>
@@ -139,6 +141,7 @@ Vue.use(VueGoogleCharts);
 import {
   Chart as ChartJS,
   Title,
+  SubTitle,
   Tooltip,
   Legend,
   LineElement,
@@ -148,6 +151,7 @@ import {
 
 ChartJS.register(
   Title,
+  SubTitle,
   Tooltip,
   Legend,
   LineElement,
@@ -365,7 +369,11 @@ export default {
     },
     // Get x-quantities and y-quantities and update respective selects when a trial is selected.
     async onTrialSelected(trialName) {
-      // TODO In following versions, load just available columns, and show them in the select.
+
+      // Show spinner and hide chart until finished.
+      document.getElementById("spinner-layer").style.display = "block";
+      document.getElementById("my-chart-id").style.display = "None";
+
       // Then, when generate chart is clicked, use the available data and calculate the data of
       // the columns that are not in database.
       this.trial_selected = trialName;
@@ -422,8 +430,14 @@ export default {
           this.y_quantities = this.x_quantities.slice();
           this.y_quantities.shift();
 
+          this.x_quantity_selected = this.x_quantities[0]
+
+          this.drawChart()
         }
 
+        // Show chart and hide spinner.
+        document.getElementById("spinner-layer").style.display = "None";
+        document.getElementById("my-chart-id").style.display = "block";
       } catch (error) {
         apiError(error)
         this.trialLoading = false
@@ -432,9 +446,11 @@ export default {
     onXQuantitySelected(xQuantitySelected) {
       this.x_quantity_selected = xQuantitySelected;
       this.chartOptions.scales.x.title.text = xQuantitySelected;
+      this.drawChart();
     },
     onYQuantitySelected(yQuantitySelected) {
       this.y_quantities_selected = yQuantitySelected;
+      this.drawChart();
     },
     onChartDownload() {
       if (this.chart_download_format_selected === 'png') {
@@ -591,9 +607,16 @@ export default {
             font: {
               size: 35
             },
+          },
+          subtitle: {
+            display: true,
+            text: 'Subtitle',
+            font: {
+              size: 15
+            },
             padding: {
               top: 10,
-              bottom: 40
+              bottom: 35
             }
           },
           legend: {
@@ -675,10 +698,6 @@ export default {
       // Load data from this trial.
       this.onTrialSelected(this.trial_selected);
     }
-
-    // Show chart and hide spinner.
-    document.getElementById("spinner-layer").style.display = "None";
-    document.getElementById("my-chart-id").style.display = "block";
   },
 }
 </script>
