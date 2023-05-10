@@ -3,10 +3,20 @@
 
     <!-- Google Charts container. -->
     <div class="content-chart">
+      <div id="spinner-layer" style="position: relative; width: 100%; height: 100%; display:none;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+          <div class="spinner"></div>
+        </div>
+        <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; color:black">
+          <h3>Loading Chart...</h3>
+        </div>
+      </div>
+
       <LineChartGenerator
         id="my-chart-id"
         :chart-options="chartOptions"
         :chart-data="chartData"
+        style="position: relative; width: 100%; height: 100%;"
       />
     </div>
 
@@ -86,16 +96,14 @@
         <v-subheader class="subheader-bold"></v-subheader>
 
         <div class="left d-flex flex-column pa-2">
-          <v-select v-model="chart_type" v-bind:items="chart_type_options" label="Chart Type" outlined dense></v-select>
-
-          <v-select v-model="chart_color_scales_selected" v-bind:items="chart_color_scales_options"
-            label="Color Scale" outlined dense v-on:change="drawChart"></v-select>
-
           <v-text-field v-model="chartOptions.plugins.title.text" label="Title" outlined dense></v-text-field>
 
           <v-text-field v-model="chartOptions.scales.x.title.text" label="H. Axis Title" outlined dense></v-text-field>
 
           <v-text-field v-model="chartOptions.scales.y.title.text" label="V. Axis Title" outlined dense></v-text-field>
+
+          <v-select v-model="chart_color_scales_selected" v-bind:items="chart_color_scales_options"
+            label="Color Scale" outlined dense v-on:change="drawChart"></v-select>
 
           <v-select v-model="chartOptions.plugins.legend.position" v-bind:items="chart_legend_position" label="Legend Position"
             outlined dense v-on:change="placeholderFunction"></v-select>
@@ -194,6 +202,10 @@ export default {
     },
     // Draw a chart. In future iterations this function should take care of compute the requested data, not only load it.
     async drawChart() {
+      // Show spinner and hide chart until finished.
+      document.getElementById("spinner-layer").style.display = "block";
+      document.getElementById("my-chart-id").style.display = "None";
+
       var index = this.trial_names.indexOf(this.trial_selected);
       var id = this.trial_ids[index];
 
@@ -310,10 +322,14 @@ export default {
             }
         }
 
+        // Show spinner and hide chart until finished.
+        document.getElementById("spinner-layer").style.display = "None";
+        document.getElementById("my-chart-id").style.display = "block";
       } catch (error) {
         apiError(error)
         this.trialLoading = false
       }
+
 
     },
     // Get trials and update trials select when a session is selected.
@@ -415,7 +431,7 @@ export default {
     },
     onXQuantitySelected(xQuantitySelected) {
       this.x_quantity_selected = xQuantitySelected;
-      this.chartOptions.scales.y.title.text = xQuantitySelected;
+      this.chartOptions.scales.x.title.text = xQuantitySelected;
     },
     onYQuantitySelected(yQuantitySelected) {
       this.y_quantities_selected = yQuantitySelected;
@@ -516,9 +532,7 @@ export default {
       chart_download_format: ['png', 'svg', 'pdf'],
       chart_download_format_selected: 'png',
       chart_object: undefined,
-      chart_type: "LineChart",
       chart_color_scales_selected: "Viridis",
-      chart_type_options: ["LineChart", "ScatterChart", "AreaChart", "SteppedAreaChart", "ColumnChart"], // "BarChart", "Histogram"
       chart_color_scales_options: [
         { text: 'Viridis (recommended)', value: 'Viridis' },
         { text: 'Hot', value: ['black', 'red', 'yellow'] },
@@ -531,7 +545,7 @@ export default {
         { text: 'Red-Green', value: ['red', 'green'] },
         { text: 'Red-Blue', value: ['red', 'blue'] },
         { text: 'Green-Blue', value: ['green', 'blue'] },
-        { text: 'ORange-Red', value: ['orange', 'red'] },
+        { text: 'Orange-Red', value: ['orange', 'red'] },
         { text: 'Grays', value: ['lightgrey', 'black'] },
         { text: 'Greens', value: ['#e5f5e0', '#00441b'] },
         { text: 'Blues', value: ['#add8e6', '#191970'] },
@@ -541,8 +555,8 @@ export default {
       chart_legend_alignment: ["start", "center", "end"],
       chartData: {
         datasets: [{
-          label: 'Ratings by date',
-          data: [1, 2, 3],
+          label: 'Empty',
+          data: [],
         }]
       },
       chartOptions: {
@@ -552,14 +566,20 @@ export default {
           x: {
             title: {
               display: true,
-              text: 'Y axis title'
+              text: 'X axis title',
+              font: {
+                size: 20
+              },
             },
             type: 'linear',
           },
           y: {
             title: {
               display: true,
-              text: 'Y axis title'
+              text: 'Y axis title',
+              font: {
+                size: 20
+              },
             },
             type: 'linear',
           },
@@ -568,10 +588,22 @@ export default {
           title: {
             display: true,
             text: 'Chart',
+            font: {
+              size: 35
+            },
+            padding: {
+              top: 10,
+              bottom: 40
+            }
           },
           legend: {
             position: 'right',
-            align: 'center'
+            align: 'center',
+            labels: {
+              font: {
+                size: 15
+              },
+            }
           }
         },
       }
@@ -622,6 +654,10 @@ export default {
     }
   },
   async mounted () {
+    // Show spinner and hide chart until finished.
+    document.getElementById("spinner-layer").style.display = "block";
+    document.getElementById("my-chart-id").style.display = "None";
+
     // If not logged in, load session from params and show trials.
     if(!this.session_owned) {
       await this.loadSession(this.$route.params.id)
@@ -639,6 +675,10 @@ export default {
       // Load data from this trial.
       this.onTrialSelected(this.trial_selected);
     }
+
+    // Show chart and hide spinner.
+    document.getElementById("spinner-layer").style.display = "None";
+    document.getElementById("my-chart-id").style.display = "block";
   },
 }
 </script>
@@ -715,5 +755,18 @@ export default {
   width: 60%;
   height: 80%;
   background-color: white;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #767676;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+  to {transform: rotate(360deg);}
 }
 </style>
