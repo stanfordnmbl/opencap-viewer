@@ -13,7 +13,7 @@
       </div>
 
       <LineChartGenerator
-        id="my-chart-id"
+        id="chart"
         :chart-options="chartOptions"
         :chart-data="chartData"
         style="position: relative; width: 100%; height: 100%;"
@@ -62,11 +62,8 @@
       </v-card-text>
 
       <div class="left d-flex flex-column pa-2">
-        <v-btn class="w-100 mt-4" @click="drawChart">
-          Generate Chart
-        </v-btn>
 
-        <v-btn class="w-100 mt-4" @click="onChartDownload">
+        <v-btn class="w-100" @click="onChartDownload">
           Download Chart
         </v-btn>
 
@@ -104,17 +101,14 @@
 
           <v-text-field v-model="chartOptions.scales.y.title.text" label="V. Axis Title" outlined dense></v-text-field>
 
-          <v-select v-model="chart_color_scales_selected" v-bind:items="chart_color_scales_options"
-            label="Color Scale" outlined dense v-on:change="drawChart"></v-select>
-
           <v-select v-model="chartOptions.plugins.legend.position" v-bind:items="chart_legend_position" label="Legend Position"
             outlined dense v-on:change="placeholderFunction"></v-select>
 
           <v-select v-model="chartOptions.plugins.legend.align" v-bind:items="chart_legend_alignment"
             label="Legend Alignment" outlined dense v-on:change="placeholderFunction"></v-select>
 
-          <v-select v-model="chart_download_format_selected" v-bind:items="chart_download_format"
-            label="Download Format" outlined dense v-on:change="placeholderFunction"></v-select>
+          <v-select v-model="chart_color_scales_selected" v-bind:items="chart_color_scales_options"
+            label="Color Scale" outlined dense v-on:change="drawChart"></v-select>
 
         </div>
 
@@ -130,14 +124,10 @@ import { mapState, mapActions } from 'vuex'
 import axios from 'axios'
 import { apiError } from '@/util/ErrorMessage.js'
 import Vue from 'vue'
-import VueGoogleCharts from "vue3-googl-chart"
-import { jsPDF } from 'jspdf'
-import 'svg2pdf.js'
 import store from '@/store/store.js'
 import chroma from 'chroma-js';
 import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
 
-Vue.use(VueGoogleCharts);
 import {
   Chart as ChartJS,
   Title,
@@ -208,7 +198,7 @@ export default {
     async drawChart() {
       // Show spinner and hide chart until finished.
       document.getElementById("spinner-layer").style.display = "block";
-      document.getElementById("my-chart-id").style.display = "None";
+      document.getElementById("chart").style.display = "None";
 
       var index = this.trial_names.indexOf(this.trial_selected);
       var id = this.trial_ids[index];
@@ -328,7 +318,7 @@ export default {
 
         // Show spinner and hide chart until finished.
         document.getElementById("spinner-layer").style.display = "None";
-        document.getElementById("my-chart-id").style.display = "block";
+        document.getElementById("chart").style.display = "block";
       } catch (error) {
         apiError(error)
         this.trialLoading = false
@@ -372,7 +362,7 @@ export default {
 
       // Show spinner and hide chart until finished.
       document.getElementById("spinner-layer").style.display = "block";
-      document.getElementById("my-chart-id").style.display = "None";
+      document.getElementById("chart").style.display = "None";
 
       // Then, when generate chart is clicked, use the available data and calculate the data of
       // the columns that are not in database.
@@ -437,7 +427,7 @@ export default {
 
         // Show chart and hide spinner.
         document.getElementById("spinner-layer").style.display = "None";
-        document.getElementById("my-chart-id").style.display = "block";
+        document.getElementById("chart").style.display = "block";
       } catch (error) {
         apiError(error)
         this.trialLoading = false
@@ -454,73 +444,15 @@ export default {
     },
     onChartDownload() {
       if (this.chart_download_format_selected === 'png') {
-        // Get image URI from Google Charts object.
-        var imgUri = this.chart_reference.getImageURI();
-
-        // Open image in new window.
-        window.open(imgUri);
-
-        // Create a link element to download the image.
-        var downloadLinkPng = document.createElement("a");
-
-        // Set URI of the image.
-        downloadLinkPng.href = imgUri;
-
-        // Set name of the downloaded file.
-        downloadLinkPng.download = "chart.svg";
-
-        // Append link element, click it, and remove it.
-        document.body.appendChild(downloadLinkPng);
-        downloadLinkPng.click();
-        document.body.removeChild(downloadLinkPng);
-
-      } else if (this.chart_download_format_selected == 'svg') {
-        // Get source of the SVG element.
-        var svg = document.getElementsByTagName("svg");
-        var svgData = svg[0].outerHTML;
-        var serializer = new XMLSerializer();
-        var source = serializer.serializeToString(svg[0]);
-
-        // Add xml declaration to the svg object.
-        var svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-        var svgUri = URL.createObjectURL(svgBlob);
-
-        // Open image in new window.
-        window.open(svgUri);
-
-        // Create a link element to download the image.
-        var downloadLinkSvg = document.createElement("a");
-
-        // Set URI of the image.
-        downloadLinkSvg.href = svgUri;
-
-        // Set name of the downloaded file.
-        downloadLinkSvg.download = "chart.svg";
-
-        // Append link element, click it, and remove it.
-        document.body.appendChild(downloadLinkSvg);
-        downloadLinkSvg.click();
-        document.body.removeChild(downloadLinkSvg);
-      } else if (this.chart_download_format_selected == 'pdf') {
-
-        // Get SVG element.
-        var svg_for_pdf = document.getElementsByTagName("svg");
-        var element = svg_for_pdf[0];
-
-        // Get dimensions of the SVG element.
-        element.getBoundingClientRect()
-        const width = element.width.baseVal.value
-        const height = element.height.baseVal.value
-
-        // Create a new PDF file with the required dimensions.
-        const doc = new jsPDF(width > height ? 'l' : 'p', 'pt', [width, height])
-
-        // Add SVG element to the PDF and download it.
-        doc.svg(element, { width, height })
-          .then(() => {
-            // save the created pdf
-            doc.save('chart.pdf')
-          })
+          const canvas = document.getElementById("chart").getElementsByTagName('canvas')[0];
+          const downloadLink = document.createElement('a');
+          downloadLink.setAttribute('download', 'chart.png');
+          canvas.toBlob(function(blob) {
+          const url = URL.createObjectURL(blob);
+          downloadLink.setAttribute('href', url);
+          downloadLink.click();
+          URL.revokeObjectURL(url);
+        }, 'image/png', 1);
       }
 
     },
@@ -545,7 +477,6 @@ export default {
       x_quantity_selected: [],
       x_data: [],
       placeholder: [],
-      chart_download_format: ['png', 'svg', 'pdf'],
       chart_download_format_selected: 'png',
       chart_object: undefined,
       chart_color_scales_selected: "Viridis",
@@ -679,10 +610,9 @@ export default {
   async mounted () {
     // Show spinner and hide chart until finished.
     document.getElementById("spinner-layer").style.display = "block";
-    document.getElementById("my-chart-id").style.display = "None";
+    document.getElementById("chart").style.display = "None";
 
     // If not logged in, load session from params and show trials.
-    if(!this.session_owned) {
       await this.loadSession(this.$route.params.id)
 
       var trials = this.session['trials'];
@@ -697,7 +627,6 @@ export default {
 
       // Load data from this trial.
       this.onTrialSelected(this.trial_selected);
-    }
   },
 }
 </script>
