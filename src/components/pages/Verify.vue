@@ -46,6 +46,7 @@
 <script>
 import { mapActions, mapState } from 'vuex'
 import { apiError } from '@/util/ErrorMessage.js'
+import axios from "axios";
 
 export default {
   name: 'Verify',
@@ -59,11 +60,18 @@ export default {
   computed: {
     ...mapState({
       sessions: state => state.data.sessions,
-      remember_device_flag: state => state.auth.remember_device_flag
+      remember_device_flag: state => state.auth.remember_device_flag,
+      skip_forcing_otp: state => state.auth.skip_forcing_otp
     })
   },
-  methods: {
-    ...mapActions('auth', ['verify']),
+    mounted() {
+      if (!this.skip_forcing_otp) {
+        let res = axios.post('/reset-otp-challenge/')
+        this.set_skip_forcing_otp(false)
+      }
+    },
+    methods: {
+    ...mapActions('auth', ['verify', 'set_skip_forcing_otp']),
     ...mapActions('data', ['loadExistingSessions']),
     async onLogin () {
       this.loading = true

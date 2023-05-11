@@ -10,7 +10,8 @@ export default {
     username: '',
     user_id: '',
     sessionTime: 1000 * 60 * 60 * 12,
-    remember_device_flag: false
+    remember_device_flag: false,
+    skip_forcing_otp: false
   },
   mutations: {
     setLoggedIn (state, { loggedIn, username, user_id}) {
@@ -23,6 +24,9 @@ export default {
     },
     setRememberDeviceFlag (state, {flag}) {
       state.remember_device_flag = flag
+    },
+    setSkipForcingOTP (state, {value}) {
+      state.skip_forcing_otp = value
     }
   },
   actions: {
@@ -73,6 +77,9 @@ export default {
     async set_verify ({ state, commit }) {
       commit('setVerified', { verified: true })
       localStorage.setItem('auth_verified', true)
+    },
+    async set_skip_forcing_otp ({ state, commit }, value) {
+        commit('setSkipForcingOTP', { value: value })
     },
     async verify ({ state, commit }, { otp_token, remember_device }) {
       console.log('verify:state.remember_device_flag', state.remember_device_flag, remember_device)
