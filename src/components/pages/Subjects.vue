@@ -1,19 +1,19 @@
 <template>
   <div>
     <div class="d-flex flex-column">
-      <div class="pa-2 d-flex">
-        <v-btn
-          width="16em"
-          @click="$router.push({ name: 'SelectSession' })">
-          Go back to sessions list
-        </v-btn>
-        <v-btn class="ml-2"
-          @click="addSubject()">
-          New Subject
-        </v-btn>
+    <div class="pa-2 d-flex">
+      <v-btn
+        width="16em"
+        @click="$router.push({ name: 'SelectSession' })">
+        Go back to sessions list
+      </v-btn>
+      <v-btn class="ml-2"
+        @click="addSubject()">
+        New Subject
+      </v-btn>
 
-        <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed subjects"></v-checkbox>
-      </div>
+      <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed subjects"></v-checkbox>
+    </div>
     </div>
 
     <v-row>
@@ -23,7 +23,9 @@
               :headers="headers"
               :items="subjectsMapped"
               :item-class="itemClasses"
+              height="80vh"
               disable-pagination
+              fixed-header
               hide-default-footer
               single-select
               class="subjects-table mx-2 mb-4 flex-grow-1"
@@ -238,6 +240,7 @@
               :headers="sessionHeaders"
               :items="selectedSessions"
               :item-class="itemClasses"
+              height="80vh"
               disable-pagination
               hide-default-footer
               single-select

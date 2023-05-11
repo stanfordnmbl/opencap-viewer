@@ -20,6 +20,7 @@
             <v-data-table
               :headers="headers"
               :items="sessionsMapped"
+              height="80vh"
               disable-pagination
               hide-default-footer
               single-select
