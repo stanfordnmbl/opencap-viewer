@@ -499,6 +499,7 @@ export default {
     },
   },
   mounted() {
+    this.loadSubjects();
     if (this.$route.query.autoRecord) {
       this.onNext();
     }
