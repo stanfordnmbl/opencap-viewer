@@ -450,6 +450,9 @@ export default {
       return this.sessions.filter(s => s.subject === this.selected.id)
     }
   },
+  mounted () {
+    this.loadSubjects()
+  },
   methods: {
     ...mapActions('data', [
         'loadExistingSessions', 'loadSubjects',
