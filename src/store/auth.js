@@ -1,5 +1,6 @@
 import router from '@/router'
 import axios from 'axios'
+import Vue from "vue";
 
 export default {
   namespaced: true,
@@ -8,7 +9,8 @@ export default {
     verified: false,
     username: '',
     user_id: '',
-    sessionTime: 1000 * 60 * 60 * 12
+    sessionTime: 1000 * 60 * 60 * 12,
+    remember_device_flag: false
   },
   mutations: {
     setLoggedIn (state, { loggedIn, username, user_id}) {
@@ -18,6 +20,9 @@ export default {
     },
     setVerified (state, {verified}) {
       state.verified = verified
+    },
+    setRememberDeviceFlag (state, {flag}) {
+      state.remember_device_flag = flag
     }
   },
   actions: {
@@ -70,10 +75,13 @@ export default {
       localStorage.setItem('auth_verified', true)
     },
     async verify ({ state, commit }, { otp_token, remember_device }) {
+      console.log('verify:state.remember_device_flag', state.remember_device_flag, remember_device)
       let data = {
         otp_token,
       }
-      if (remember_device) { data.remember_device = true }
+      if (state.remember_device_flag && remember_device) {
+        data.remember_device = true
+      }
       let res = await axios.post('/verify/', data)
 
       commit('setVerified', {
@@ -83,6 +91,12 @@ export default {
       const token = localStorage.getItem('auth_token')
       const username = localStorage.getItem('auth_user')
       localStorage.setItem('auth_verified', true)
+      if (state.remember_device_flag && remember_device) {
+        localStorage.setItem('remember_device_timestamp', Date.now())
+      }
+    },
+    async setRememberDeviceFlag ({ state, commit }, flag) {
+        commit('setRememberDeviceFlag', {flag: flag})
     },
     logout ({ commit }) {
       commit('setLoggedIn', {

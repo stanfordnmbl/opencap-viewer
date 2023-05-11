@@ -114,7 +114,7 @@ export default {
       }
   },
   methods: {
-    ...mapActions('auth', ['login', 'set_verify']),
+    ...mapActions('auth', ['login', 'set_verify', 'setRememberDeviceFlag']),
     ...mapActions('data', ['loadExistingSessions']),
     async onLogin () {
       this.loading = true
@@ -145,7 +145,8 @@ export default {
           }
 
           if (this.remember_device) {
-              localStorage.setItem('remember_device_timestamp', Date.now())
+            await this.setRememberDeviceFlag(true)
+              // localStorage.setItem('remember_device_timestamp', Date.now())
           }
           if(go_to_validate) {
             this.$router.push({ name: 'Verify' })

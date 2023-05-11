@@ -58,7 +58,8 @@ export default {
   },
   computed: {
     ...mapState({
-      sessions: state => state.data.sessions
+      sessions: state => state.data.sessions,
+      remember_device_flag: state => state.auth.remember_device_flag
     })
   },
   methods: {
@@ -71,13 +72,14 @@ export default {
         this.submitted = true
 
         if (await this.$refs.observer.validate()) {
+            console.log('onLogin:this.remember_device_flag', this.remember_device_flag)
           const remember_device_timestamp = localStorage.getItem('remember_device_timestamp')
           const valid_date = remember_device_timestamp != null ? parseInt(remember_device_timestamp) + 90*24*60*60*1000 >= Date.now() : false
           let data = {otp_token: this.otp_token}
-          if (remember_device_timestamp && valid_date) {
+          if (remember_device_timestamp && valid_date || this.remember_device_flag) {
             data.remember_device = true
           }
-
+          console.log('onLogin:data', data, remember_device_timestamp, valid_date)
           await this.verify(data)
 
           try {
