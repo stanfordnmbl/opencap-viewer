@@ -397,21 +397,21 @@ export default {
       empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
       heightRule: (v) => {
         if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 1.3 && v <= 3.0) return true;
+        if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0) return true;
         if(!isNaN(parseFloat(v)) && v > 3.0) return "It is unlikely that the height of subject is higher than 3 m. Are you using the right units? Height should be in m.";
-        if(!isNaN(parseFloat(v)) && v < 1.3) return "It is unlikely that the subject is shorter than 1.3 m. Are you using the right units? Height should be in m.";
+        if(!isNaN(parseFloat(v)) && v < .1) return "It is unlikely that the subject is shorter than .1 m. Are you using the right units? Height should be in m.";
       },
       weightRule: (v) => {
         if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 3 && v <= 200.0) return true;
+        if (!isNaN(parseFloat(v)) && v >= 1 && v <= 200.0) return true;
         if(!isNaN(parseFloat(v)) && v > 200.0) return "It is unlikely that the weight of subject is higher than 200 kg. Are you using the right units? Weight should be in kg.";
-        if(!isNaN(parseFloat(v)) && v < 3) return "It is unlikely that the weight of subject is lower than 3 kg. Are you using the right units? Weight should be in kg.";
+        if(!isNaN(parseFloat(v)) && v < 1) return "It is unlikely that the weight of subject is lower than 1 kg. Are you using the right units? Weight should be in kg.";
       },
       ageRule: (v) => {
         if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 5 && v <= 100) return true;
+        if (!isNaN(parseFloat(v)) && v >= 0 && v <= 100) return true;
         if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
-        if(!isNaN(parseFloat(v)) && v < 5) return "It is unlikely that the age of subject is lower than 5 years. Are you using the right units? Age should be in years.";
+        if(!isNaN(parseFloat(v)) && v < 0) return "It is not possible that the age of subject is lower than 0 years. Are you using the right units? Age should be in years.";
       }
 
     }
