@@ -419,9 +419,9 @@ export default {
       },
       ageRule: (v) => {
         if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 5 && v <= 100) return true;
+        if (!isNaN(parseFloat(v)) && v >= 1 && v <= 100) return true;
         if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
-        if(!isNaN(parseFloat(v)) && v < 5) return "It is unlikely that the age of subject is lower than 5 years. Are you using the right units? Age should be in years.";
+        if(!isNaN(parseFloat(v)) && v < 1) return "It is unlikely that the age of subject is lower than 1 years. Are you using the right units? Age should be in years.";
       },
       checkboxRule: (v) => !!v || 'The subject must agree to continue!'
     };
