@@ -84,6 +84,7 @@
 <script>
 import { mapActions, mapState } from 'vuex'
 import { apiError } from '@/util/ErrorMessage.js'
+import axios from "axios";
 
 export default {
   name: 'Login',
@@ -100,7 +101,8 @@ export default {
   },
   computed: {
     ...mapState({
-      sessions: state => state.data.sessions
+      sessions: state => state.data.sessions,
+      skip_forcing_otp: state => state.auth.skip_forcing_otp
     })
   },
   mounted() {
@@ -114,7 +116,7 @@ export default {
       }
   },
   methods: {
-    ...mapActions('auth', ['login', 'set_verify']),
+    ...mapActions('auth', ['login', 'set_verify', 'setRememberDeviceFlag', 'set_skip_forcing_otp']),
     ...mapActions('data', ['loadExistingSessions']),
     async onLogin () {
       this.loading = true
@@ -134,18 +136,26 @@ export default {
 
           if (remember_device_timestamp && valid_date) {
               // Skip the 2FA step if the user has logged in within the last 90 days
-              await this.set_verify()
-              try {
-                await this.loadExistingSessions({reroute: true, quantity:20})
-              } catch (error) {
-                apiError(error)
-                this.$router.push({ name: 'Step1' })
+              let res = await axios.get('/check-otp-verified/')
+              console.log(res.data)
+              if (res.data.otp_verified) {
+                await this.set_verify()
+                try {
+                  await this.loadExistingSessions({reroute: true, quantity:20})
+                } catch (error) {
+                  apiError(error)
+                  this.$router.push({ name: 'Step1' })
+                }
+                go_to_validate = false
+              } else {
+                await this.set_skip_forcing_otp(true)
+                go_to_validate = true
               }
-              go_to_validate = false
           }
 
           if (this.remember_device) {
-              localStorage.setItem('remember_device_timestamp', Date.now())
+            await this.setRememberDeviceFlag(true)
+              // localStorage.setItem('remember_device_timestamp', Date.now())
           }
           if(go_to_validate) {
             this.$router.push({ name: 'Verify' })
