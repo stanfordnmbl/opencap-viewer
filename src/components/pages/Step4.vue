@@ -438,7 +438,6 @@ export default {
       return [{'id':'new', 'display_name': 'New subject...'}].concat(this.subjectsMapped);
     },
     subjectsMapped () {
-      this.loadSubjects()
       return this.subjects.map(s => ({
         id: s.id,
         display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.age} years)`,
