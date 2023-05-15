@@ -65,6 +65,7 @@ export default {
       localStorage.setItem('auth_token', res.data.token)
       localStorage.setItem('auth_user', username)
       localStorage.setItem('auth_user_id', res.data.user_id)
+      commit('setSkipForcingOTP', { value: res.data.otp_challenge_sent })
 
       axios.defaults.headers.common['Authorization'] = `Token ${res.data.token}`
 
