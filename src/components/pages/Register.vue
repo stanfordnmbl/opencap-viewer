@@ -154,7 +154,7 @@
 
               <div class="row">
                 <div class="col-12">
-                  <ValidationProvider rules="required" v-slot="{ errors }" name="Website">
+                  <ValidationProvider v-slot="{ errors }" name="Website">
                   <v-text-field
                     label="Website"
                     v-model="website"
@@ -185,7 +185,18 @@
                         :error-messages="errors[0]"
                         :append-icon="show_password ? 'mdi-eye' : 'mdi-eye-off'"
                         :type="show_password ? 'text' : 'password'"
-                        @click:append="show_password = !show_password"/>
+                        @click:append="show_password = !show_password">
+                        <!-- Add tabindex="-1" to the show password icon -->
+                        <template v-slot:append>
+                          <v-icon
+                            class="show-pass-icon"
+                            :tabindex="-1"
+                            @click="show_confirm_password = !show_confirm_password"
+                          >
+                            {{ show_confirm_password ? 'mdi-eye' : 'mdi-eye-off' }}
+                          </v-icon>
+                        </template>
+                       </v-text-field>
                     </ValidationProvider>
                   </div>
 
@@ -206,7 +217,19 @@
                         :error-messages="errors[0]"
                         :append-icon="show_confirm_password ? 'mdi-eye' : 'mdi-eye-off'"
                         :type="show_confirm_password ? 'text' : 'password'"
-                        @click:append="show_confirm_password = !show_confirm_password"/>
+                        @click:append="show_confirm_password = !show_confirm_password">
+
+                        <!-- Add tabindex="-1" to the show password icon -->
+                        <template v-slot:append>
+                          <v-icon
+                            class="show-pass-icon"
+                            :tabindex="-1"
+                            @click="show_confirm_password = !show_confirm_password"
+                          >
+                            {{ show_confirm_password ? 'mdi-eye' : 'mdi-eye-off' }}
+                          </v-icon>
+                        </template>
+                       </v-text-field>
                     </ValidationProvider>
                   </div>
 
@@ -370,5 +393,8 @@ li.dropdown-item > strong {
 }
 li.dropdown-item > span {
   display: none;
+}
+.show-pass-icon {
+  width: auto;
 }
 </style>
