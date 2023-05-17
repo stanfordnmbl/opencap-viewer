@@ -335,7 +335,8 @@ export default {
           sortable: false,
           value: 'id',
         },
-        { text: 'Name', value: 'name' },
+        { text: 'Session Name', value: 'sessionName' },
+        { text: 'Subject Name', value: 'name' },
         { text: 'Number of trials', align: 'center', value: 'trials_count' },
         { text: 'Date', value: 'created_at' }
       ],
@@ -349,6 +350,7 @@ export default {
     sessionsMapped () {
       return this.sessions.map(s => ({
         id: s.id,
+        sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
         name: s.name,
         trials_count: String(s.trials.length),
         trashed_trials_count: String(s.trials.filter(t => t.trashed).length),

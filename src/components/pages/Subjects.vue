@@ -252,6 +252,9 @@
                     Session ID
                   </th>
                   <th class="text-left">
+                    Session Name
+                  </th>
+                  <th class="text-left">
                     Trials
                   </th>
                   <th class="text-left">
@@ -389,6 +392,7 @@ export default {
       ],
       sessionHeaders: [
         { text: 'Session ID', value: 'id' },
+        { text: 'Session Name', value: 'sessionName' },
         { text: 'Trials', value: 'trials.length' },
         { text: 'Date', value: 'created_at' },
       ],
@@ -450,7 +454,19 @@ export default {
       return Object.entries(this.genders).map((s) => ({ text: s[1], value: s[0] }))
     },
     selectedSessions () {
-      return this.sessions.filter(s => s.subject === this.selected.id)
+      return this.sessions.map(s => ({
+        id: s.id,
+        sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
+        name: s.name,
+        trials_count: String(s.trials.length),
+        trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+        trials: s.trials,
+        created_at: s.created_at,
+        trashed: s.trashed,
+        trashed_at: s.trashed_at,
+        isMenuOpen: false,
+        subject: s.subject
+      })).filter((s => s.trashed || s.trashed_trials_count > 0) && (s => s.subject === this.selected.id))
     }
   },
   mounted () {
