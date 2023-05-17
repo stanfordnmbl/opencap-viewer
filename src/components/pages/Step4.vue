@@ -35,7 +35,7 @@
         </v-card-title>
         <v-card-text>
           <v-select
-              @click.stop="reloadSubjects"
+              @click="reloadSubjects"
               @change="isAllInputsValid"
               class="cursor-pointer"
               required
