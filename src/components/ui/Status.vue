@@ -5,7 +5,7 @@
     @click="onClick">
     <div
       class="mr-2 flex-shrink-0"/>
-    <span>{{ value.name }}</span>
+    <span :title="value.name" class="overflow-text">{{ value.name }}</span>
   </div>
 </template>
 
@@ -88,4 +88,9 @@ export default {
     }
   }
 }
+
+.overflow-text {
+  max-width: 10em;
+}
+
 </style>

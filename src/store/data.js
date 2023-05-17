@@ -231,6 +231,7 @@ export default {
 
       if (reroute) {
         if (state.sessions.length > 0) {
+          console.log('rerouting to select session')
           router.push({ name: 'SelectSession' })
         } else {
           router.push({ name: 'Step1' })
