@@ -5,7 +5,7 @@
     rightButton="Calibrate"
     :step="2"
     :rightDisabled="busy"
-    @left="$router.push('/step1')"
+    @left="$router.push(`/${session.id}/step1`)"
     @right="onNext">
 
     <v-card class="step-2-1 flex-grow-1">
@@ -59,7 +59,7 @@
 
 <script>
 import axios from 'axios'
-import { mapMutations, mapState } from 'vuex'
+import {mapActions, mapMutations, mapState} from 'vuex'
 import { apiError, apiSuccess, apiErrorRes, apiInfo} from '@/util/ErrorMessage.js'
 import MainLayout from '@/layout/MainLayout'
 
@@ -84,11 +84,15 @@ export default {
       trialId: state => state.data.trialId
     })
   },
+  mounted () {
+      this.loadSession(this.$route.params.id)
+  },
   methods: {
     ...mapMutations('data', ['setStep2', 'setStep3']),
+    ...mapActions('data', ['loadSession']),
     async onNext () {
       if (this.imgs) {
-        this.$router.push('/step4')
+        this.$router.push(`/${this.session.id}/step4`)
       } else {
         this.lastPolledStatus = "";
         // Record press
@@ -126,7 +130,7 @@ export default {
         switch (res.data.status) {
           case "done": {
             this.$toasted.clear()
-            this.$router.push('/step4')
+            this.$router.push(`/${this.session.id}/step4`)
             break;
           }
           case "error": {

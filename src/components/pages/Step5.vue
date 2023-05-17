@@ -580,7 +580,7 @@ export default {
         },
         async newSessionSameSetup() {
             await this.initSessionSameSetup()
-            this.$router.push({ name: 'Step4' })
+            this.$router.push({ name: 'Step4', params: { id: this.session.id } })
         },
         startPoll() {
             this.statusPoll = window.setTimeout(async () => {
