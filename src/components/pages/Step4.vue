@@ -35,6 +35,7 @@
         </v-card-title>
         <v-card-text>
           <v-select
+              @click.stop="reloadSubjects"
               @change="isAllInputsValid"
               class="cursor-pointer"
               required
@@ -511,6 +512,10 @@ export default {
       setTimeout(() => {
         this.formErrors[input] = state;
       },0)
+    },
+    reloadSubjects() {
+      console.log('reloading subjects')
+      this.loadSubjects()
     },
     isAllInputsValid() {
         console.log(this.subject)
