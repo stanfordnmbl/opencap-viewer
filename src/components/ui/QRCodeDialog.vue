@@ -47,7 +47,7 @@ export default {
     },
     methods: {
         setShowSessionQR(){
-            this.showSessionQR = ['Step2', 'Step4', 'Step5'].find(
+            this.showSessionQR = ['Step2', 'Step4', 'Session'].find(
                 element => this.$route.name === element
             )
         },
