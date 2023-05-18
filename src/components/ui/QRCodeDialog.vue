@@ -5,7 +5,7 @@
             @click="loadQRCode"
             text
         >
-            <span class="mr-2">Session QR</span>
+            <span class="mr-2">Reconnect phone</span>
             <v-icon>mdi-qrcode</v-icon>
         </v-btn>
         <v-dialog
