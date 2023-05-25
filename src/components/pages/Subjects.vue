@@ -183,7 +183,7 @@
                         <v-dialog
                                 v-model="download_dialog"
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
-                                max-width="500">
+                                max-width="700">
                           <template v-slot:activator="{ on }">
                             <v-list-item-title v-on="on">Download data...</v-list-item-title>
                           </template>
@@ -202,7 +202,7 @@
                                 </v-col>
                               </v-row>
                             </v-card-text>
-                            <v-card-actions>
+                            <v-card-actions class="d-flex justify-center">
                               <v-spacer></v-spacer>
                               <v-btn
                                 color="blue darken-1"
@@ -215,9 +215,17 @@
                                 color="green darken-1"
                                 text
                                 :disabled="downloading"
-                                @click="item.isMenuOpen = false; download_dialog = false; downloadSubjectData(item.id)"
+                                @click="item.isMenuOpen = false; download_dialog = false; downloadSubjectArchive(item.id)"
                               >
                                 Download
+                              </v-btn>
+                              <v-btn
+                                color="green darken-1"
+                                text
+                                :disabled="downloading"
+                                @click="item.isMenuOpen = false; download_dialog = false; downloadSubjectData(item.id)"
+                              >
+                                Old Download
                               </v-btn>
                             </v-card-actions>
                           </v-card>
@@ -591,6 +599,38 @@ export default {
             apiError(error)
             this.downloading = false
         }
+    },
+    async downloadSubjectArchive(id){
+      this.downloading = true;
+      let state = this;
+      const startArchiveDownloadUrl = `${axios.defaults.baseURL}/subjects/${id}/async-download/`;
+      await axios.get(startArchiveDownloadUrl).then(
+        async function pollArchiveOnReady(data){
+          const taskID = data.data.task_id;
+          const downloadArchiveOnReadyURL = `${axios.defaults.baseURL}/logs/${taskID}/on-ready/`;
+          const response = await axios.get(downloadArchiveOnReadyURL, {responseType: "blob"});
+          if(response.status === 202){
+            setTimeout(function(){pollArchiveOnReady(data);}, 1000);
+          }
+          if(response.status === 200){
+            clearTimeout(pollArchiveOnReady);
+            let blob = new Blob([response.data], {type: response.headers['content-type']});
+            let link = document.createElement('a');
+            link.setAttribute('href', window.URL.createObjectURL(blob));
+            link.setAttribute('download', `subject_results_${id}.zip`);
+            link.dispatchEvent(new MouseEvent('click'));
+            window.URL.revokeObjectURL(link.href);
+            state.downloading = false;
+            state.download_dialog = false;
+          }
+          if(response.status === 404){
+            state.downloading = false;
+            state.download_dialog = false;
+            apiError(response.data.detail);
+            clearTimeout(pollArchiveOnReady);
+          }
+        }
+      );
     },
     async permanentRemoveSubject (id) {
       try {
