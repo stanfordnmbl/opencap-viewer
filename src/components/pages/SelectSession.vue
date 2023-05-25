@@ -80,9 +80,12 @@
                           <v-icon x-large color="orange">mdi-rename-box</v-icon>
                         </v-col>
                         <v-col cols="10">
-                          <p>
+                          <p class="mb-1">
                             Insert a new name for session {{item.sessionName}}:
                           </p>
+                          <small class="mt-0">
+                            Only alphanumeric characters and underscore (_) are allowed.
+                          </small>
                           <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
                             <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Session name">
 
