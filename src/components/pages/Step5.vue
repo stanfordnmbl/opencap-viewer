@@ -234,11 +234,13 @@
                 </v-card>
             </v-dialog>
 
-
+            <v-btn class="mt-4 w-100" :disabled="downloading" @click="onDownloadArchive">
+                <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
+                Download data
+            </v-btn>
             <v-btn class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
                 <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
-
-                Download data
+                Old download data
             </v-btn>
 
             <v-btn class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
@@ -569,6 +571,38 @@ export default {
                 apiError(error)
                 this.downloading = false
             }
+        },
+        async onDownloadArchive(){
+            this.downloading = true;
+            let state = this;
+            const startArchiveDownloadUrl = `${axios.defaults.baseURL}/sessions/${state.session.id}/async-download/`;
+            await axios.get(startArchiveDownloadUrl).then(
+                async function pollArchiveOnReady(data){
+                const taskID = data.data.task_id;
+                const downloadArchiveOnReadyURL = `${axios.defaults.baseURL}/logs/${taskID}/on-ready/`;
+                const response = await axios.get(downloadArchiveOnReadyURL, {responseType: "blob"});
+                if(response.status === 202){
+                    setTimeout(function(){pollArchiveOnReady(data);}, 1000);
+                }
+                if(response.status === 200){
+                    clearTimeout(pollArchiveOnReady);
+                    let blob = new Blob([response.data], {type: response.headers['content-type']});
+                    let link = document.createElement('a');
+                    link.setAttribute('href', window.URL.createObjectURL(blob));
+                    link.setAttribute('download', `session_results_${state.session.id}.zip`);
+                    link.dispatchEvent(new MouseEvent('click'));
+                    window.URL.revokeObjectURL(link.href);
+                    state.downloading = false;
+                    state.download_dialog = false;
+                }
+                if(response.status === 404){
+                    state.downloading = false;
+                    state.download_dialog = false;
+                    apiError(response.data.detail);
+                    clearTimeout(pollArchiveOnReady);
+                }
+                }
+            );
         },
         newSession() {
             this.clearAll()
