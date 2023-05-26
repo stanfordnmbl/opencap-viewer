@@ -236,7 +236,7 @@
 
             <!-- Archive session -->
             <v-btn class="mt-4 w-100" @click="showArchiveDialog = true">
-                Archive data
+                Download data
             </v-btn>
             <v-dialog
                 v-model="showArchiveDialog"
@@ -294,7 +294,7 @@
             <!-- End archive session -->
             <v-btn v-if="isSyncDownloadAllowed" class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
                 <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
-                Download data
+                Download data (old)
             </v-btn>
 
             <v-btn class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">

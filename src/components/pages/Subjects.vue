@@ -185,7 +185,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Download data...</v-list-item-title>
+                            <v-list-item-title v-on="on">Download data (old)...</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -230,7 +230,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Archive data...</v-list-item-title>
+                            <v-list-item-title v-on="on">Download data...</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
