@@ -234,13 +234,58 @@
                 </v-card>
             </v-dialog>
 
-            <v-btn class="mt-4 w-100" :disabled="downloading" @click="onDownloadArchive">
-                <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
-                Download data
+            <!-- Archive session -->
+            <v-btn class="mt-4 w-100" @click="showArchiveDialog = true">
+                Archive data
             </v-btn>
+            <v-dialog
+                v-model="showArchiveDialog"
+                max-width="800">
+                <v-card>
+                    <v-card-text class="pt-4">
+                        <v-row class="m-0">
+                        <v-col cols="2">
+                            <v-icon x-large color="green">mdi-download</v-icon>
+                        </v-col>
+                        <v-col cols="10">
+                            <p v-if="!isArchiveInProgress & !isArchiveDone">
+                            Do you want to download all data associated to the
+                            session <code>{{session.id}}</code>?
+                            (This includes every trial associated to it, and can take several minutes).
+                            </p>
+                            <p v-if="isArchiveInProgress & !isArchiveDone">
+                            <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                            Download in progress...
+                            </p>
+                            <v-btn v-if="isArchiveDone" :href="archiveUrl" :download="archiveName">{{archiveName}}</v-btn>
+                        </v-col>
+                        </v-row>
+                    </v-card-text>
+                    <v-card-actions>
+                        <v-spacer></v-spacer>
+                        <v-btn
+                            color="blue darken-1"
+                            text
+                            @click="showArchiveDialog = false;"
+                        >
+                            Cancel
+                        </v-btn>
+                        
+                        <v-btn
+                            color="green darken-1"
+                            text
+                            :disabled="isArchiveInProgress"
+                            @click="downloadSessionArchive(session.id)"
+                        >
+                            Download
+                        </v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
+            <!-- End archive session -->
             <v-btn class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
                 <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
-                Old download data
+                Download data
             </v-btn>
 
             <v-btn class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
@@ -352,6 +397,12 @@ export default {
             statusPoll: null,
             downloading: false,
             dialog: null,
+
+            showArchiveDialog: false,
+            isArchiveInProgress: false,
+            isArchiveDone: false,
+            archiveUrl: "#",
+            archiveName: "",
 
             trialInProcess: null,
             trial: null,
@@ -465,6 +516,14 @@ export default {
             this.eachVideo(videoElement => {
                 videoElement.playbackRate = this.playSpeed
             })
+        },
+        showArchiveDialog(newShowArchiveDialog, oldShowArchiveDialog){
+            if(!newShowArchiveDialog){
+                this.isArchiveDone = false;
+                this.isArchiveInProgress = false;
+                this.archiveName = "";
+                this.archiveUrl = "#";
+            }
         }
     },
     methods: {
@@ -572,38 +631,29 @@ export default {
                 this.downloading = false
             }
         },
-        async onDownloadArchive(){
-            this.downloading = true;
+        async downloadSessionArchive(id){
+            this.isArchiveInProgress = true;
+            this.isArchiveDone = false;
             let state = this;
-            const startArchiveDownloadUrl = `${axios.defaults.baseURL}/sessions/${state.session.id}/async-download/`;
+            const startArchiveDownloadUrl = `${axios.defaults.baseURL}/sessions/${id}/async-download/`;
             await axios.get(startArchiveDownloadUrl).then(
                 async function pollArchiveOnReady(data){
-                const taskID = data.data.task_id;
-                const downloadArchiveOnReadyURL = `${axios.defaults.baseURL}/logs/${taskID}/on-ready/`;
-                const response = await axios.get(downloadArchiveOnReadyURL, {responseType: "blob"});
-                if(response.status === 202){
-                    setTimeout(function(){pollArchiveOnReady(data);}, 1000);
-                }
-                if(response.status === 200){
-                    clearTimeout(pollArchiveOnReady);
-                    let blob = new Blob([response.data], {type: response.headers['content-type']});
-                    let link = document.createElement('a');
-                    link.setAttribute('href', window.URL.createObjectURL(blob));
-                    link.setAttribute('download', `session_results_${state.session.id}.zip`);
-                    link.dispatchEvent(new MouseEvent('click'));
-                    window.URL.revokeObjectURL(link.href);
-                    state.downloading = false;
-                    state.download_dialog = false;
-                }
-                if(response.status === 404){
-                    state.downloading = false;
-                    state.download_dialog = false;
-                    apiError(response.data.detail);
-                    clearTimeout(pollArchiveOnReady);
-                }
-                }
-            );
-        },
+                    const taskID = data.data.task_id;
+                    const downloadArchiveOnReadyURL = `${axios.defaults.baseURL}/logs/${taskID}/on-ready/`;
+                    const response = await axios.get(downloadArchiveOnReadyURL, {responseType: "blob"});
+                    if(response.status === 202){
+                        setTimeout(function(){pollArchiveOnReady(data);}, 1000);
+                    }
+                    if(response.status === 200){
+                        clearTimeout(pollArchiveOnReady);
+                        let blob = new Blob([response.data], {type: response.headers['content-type']});
+                        state.archiveName = `session_results_${id}.zip`
+                        state.archiveUrl = window.URL.createObjectURL(blob);
+                        state.isArchiveInProgress = false;
+                        state.isArchiveDone = true;
+                    }
+            });
+            },
         newSession() {
             this.clearAll()
             this.$router.push({ name: 'Step1' })
