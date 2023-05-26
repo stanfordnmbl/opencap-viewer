@@ -187,21 +187,12 @@
 
                 <v-dialog v-model="dialog" width="500">
                     <template v-slot:activator="{ on, attrs }">
-
-                        <v-btn class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="show_controls">Share on <v-icon
-                                aria-hidden="false">
-                                mdi-facebook
-                            </v-icon> <v-icon aria-hidden="false">
-                                mdi-twitter
-                            </v-icon> <v-icon aria-hidden="false">
-                                mdi-linkedin
-                            </v-icon>
-                        </v-btn>
+                        <v-btn class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="show_controls">Share session publicly</v-btn>
                     </template>
 
                     <v-card>
                         <v-card-title class="text-h5">
-                            Share on social media
+                            Share session publicly
                         </v-card-title>
 
                         <v-card-text>
