@@ -52,7 +52,8 @@ export default {
       "transgender": "Transgender",
       "non-binary": "Non-Binary/Non-Conforming",
       "prefer-not-respond": "Prefer not to respond",
-    }
+    },
+    isSyncDownloadAllowed: false
   },
   mutations: {
     setSession (state, session) {

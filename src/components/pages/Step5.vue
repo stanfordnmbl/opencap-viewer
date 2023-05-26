@@ -179,7 +179,7 @@
             <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'" @click="newSession">New
                 session
             </v-btn>
-
+            
             <v-dialog v-model="dialog" width="500">
                 <template v-slot:activator="{ on, attrs }">
 
@@ -248,16 +248,18 @@
                             <v-icon x-large color="green">mdi-download</v-icon>
                         </v-col>
                         <v-col cols="10">
-                            <p v-if="!isArchiveInProgress & !isArchiveDone">
-                            Do you want to download all data associated to the
-                            session <code>{{session.id}}</code>?
-                            (This includes every trial associated to it, and can take several minutes).
-                            </p>
                             <p v-if="isArchiveInProgress & !isArchiveDone">
-                            <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
-                            Download in progress...
+                                <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                                Download in progress...
                             </p>
-                            <v-btn v-if="isArchiveDone" :href="archiveUrl" :download="archiveName">{{archiveName}}</v-btn>
+                            <p v-if="!(isArchiveInProgress || isArchiveDone)">
+                                Do you want to download all data associated to the
+                                session <code>{{session.id}}</code>?
+                                (This includes every trial associated to it, and can take several minutes).
+                            </p>
+                            <p v-if="isArchiveDone">
+                                Archive has been generated successfuly!
+                            </p>
                         </v-col>
                         </v-row>
                     </v-card-text>
@@ -270,8 +272,15 @@
                         >
                             Cancel
                         </v-btn>
-                        
+                        <v-btn 
+                            v-if="isArchiveDone"
+                            :href="archiveUrl"
+                            :download="archiveName"
+                        >
+                            {{archiveName}}
+                        </v-btn>
                         <v-btn
+                            v-else
                             color="green darken-1"
                             text
                             :disabled="isArchiveInProgress"
@@ -283,7 +292,7 @@
                 </v-card>
             </v-dialog>
             <!-- End archive session -->
-            <v-btn class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
+            <v-btn v-if="isSyncDownloadAllowed" class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
                 <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
                 Download data
             </v-btn>
@@ -450,7 +459,8 @@ export default {
             identifier: state => state.data.identifier,
             weight: state => state.data.weight,
             height: state => state.data.height,
-            gender: state => state.data.gender
+            gender: state => state.data.gender,
+            isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
         }),
         sessionUrl() {
             return "https://app.opencap.ai/session/" + this.session.id;
