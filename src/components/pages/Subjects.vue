@@ -678,15 +678,14 @@ export default {
         async function pollArchiveOnReady(data){
             const taskID = data.data.task_id;
             const downloadArchiveOnReadyURL = `${axios.defaults.baseURL}/logs/${taskID}/on-ready/`;
-            const response = await axios.get(downloadArchiveOnReadyURL, {responseType: "blob"});
+            const response = await axios.get(downloadArchiveOnReadyURL);
             if(response.status === 202){
                 setTimeout(function(){pollArchiveOnReady(data);}, 1000);
             }
             if(response.status === 200){
                 clearTimeout(pollArchiveOnReady);
-                let blob = new Blob([response.data], {type: response.headers['content-type']});
                 state.archiveName = `subject_results_${id}.zip`
-                state.archiveUrl = window.URL.createObjectURL(blob);
+                state.archiveUrl = response.data.url;
                 state.isArchiveInProgress = false;
                 state.isArchiveDone = true;
             }
