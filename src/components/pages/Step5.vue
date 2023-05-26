@@ -168,26 +168,26 @@
                 </div>
             </div>
 
-            <v-btn class="my-4 w-100" @click="toggleSessionMenuButtons()">
+            <v-btn class="mt-4 w-100" @click="toggleSessionMenuButtons()">
                 <v-icon v-if="showSessionMenuButtons">mdi-menu-down</v-icon>
                 <v-icon v-else>mdi-menu-up</v-icon>
             </v-btn>
             <div v-if="showSessionMenuButtons">
                 <div>
-                    <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed trials"></v-checkbox>
+                    <v-checkbox v-model="show_trashed" class="ml-2 m-2" label="Show removed trials"></v-checkbox>
                 </div>
 
-                <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'"
+                <v-btn small class="w-100" v-show="show_controls" :disabled="busy || state !== 'ready'"
                     @click="newSessionSameSetup">New session, same setup
                 </v-btn>
 
-                <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'" @click="newSession">New
+                <v-btn small class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'" @click="newSession">New
                     session
                 </v-btn>
 
                 <v-dialog v-model="dialog" width="500">
                     <template v-slot:activator="{ on, attrs }">
-                        <v-btn class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="show_controls">Share session publicly</v-btn>
+                        <v-btn small class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="show_controls">Share session publicly</v-btn>
                     </template>
 
                     <v-card>
@@ -231,17 +231,17 @@
                 </v-dialog>
 
 
-                <v-btn class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
+                <v-btn small class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
                     <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
 
                     Download data
                 </v-btn>
 
-                <v-btn class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
+                <v-btn small class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
                     Analysis Dashboard
                 </v-btn>
 
-                <v-btn class="mt-4 w-100" v-show="show_controls" @click="$router.push({ name: 'SelectSession'})"
+                <v-btn small class="mt-4 w-100" v-show="show_controls" @click="$router.push({ name: 'SelectSession'})"
                     :disabled="busy || state !== 'ready'">
                     Back to session list
                 </v-btn>
