@@ -258,7 +258,7 @@
                                 (This includes every trial associated to it, and can take several minutes).
                             </p>
                             <p v-if="isArchiveDone">
-                                Archive has been generated successfuly!
+                                The archive has been generated successfully!
                             </p>
                         </v-col>
                         </v-row>
