@@ -168,11 +168,11 @@
                 </div>
             </div>
 
-            <v-btn class="my-4 w-100" @click="toggleButtonsMenu()">
-                <v-icon v-if="showSessionSetupButtons">mdi-menu-down</v-icon>
+            <v-btn class="my-4 w-100" @click="toggleSessionMenuButtons()">
+                <v-icon v-if="showSessionMenuButtons">mdi-menu-down</v-icon>
                 <v-icon v-else>mdi-menu-up</v-icon>
             </v-btn>
-            <div v-if="showSessionSetupButtons">
+            <div v-if="showSessionMenuButtons">
                 <div>
                     <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed trials"></v-checkbox>
                 </div>
@@ -385,7 +385,7 @@ export default {
             recordingTimer: null,
 
             trialsPoll: null,
-            showSessionSetupButtons: true
+            showSessionMenuButtons: true
         }
     },
     computed: {
@@ -1007,12 +1007,8 @@ export default {
 
             return timelimit
         },
-        toggleButtonsMenu(){
-            if(this.showSessionSetupButtons){
-                this.showSessionSetupButtons = false;
-            } else {
-                this.showSessionSetupButtons = true;
-            }
+        toggleSessionMenuButtons(){
+            this.showSessionMenuButtons = !this.showSessionMenuButtons;
         }
     }
 }
