@@ -168,87 +168,93 @@
                 </div>
             </div>
 
-           <div>
-             <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed trials"></v-checkbox>
-           </div>
-
-            <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'"
-                @click="newSessionSameSetup">New session, same setup
+            <v-btn class="my-4 w-100" @click="toggleButtonsMenu()">
+                <v-icon v-if="showSessionSetupButtons">mdi-menu-down</v-icon>
+                <v-icon v-else>mdi-menu-up</v-icon>
             </v-btn>
+            <div v-if="showSessionSetupButtons">
+                <div>
+                    <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed trials"></v-checkbox>
+                </div>
 
-            <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'" @click="newSession">New
-                session
-            </v-btn>
+                <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'"
+                    @click="newSessionSameSetup">New session, same setup
+                </v-btn>
 
-            <v-dialog v-model="dialog" width="500">
-                <template v-slot:activator="{ on, attrs }">
+                <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'" @click="newSession">New
+                    session
+                </v-btn>
 
-                    <v-btn class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="show_controls">Share on <v-icon
-                            aria-hidden="false">
-                            mdi-facebook
-                        </v-icon> <v-icon aria-hidden="false">
-                            mdi-twitter
-                        </v-icon> <v-icon aria-hidden="false">
-                            mdi-linkedin
-                        </v-icon>
-                    </v-btn>
-                </template>
+                <v-dialog v-model="dialog" width="500">
+                    <template v-slot:activator="{ on, attrs }">
 
-                <v-card>
-                    <v-card-title class="text-h5">
-                        Share on social media
-                    </v-card-title>
-
-                    <v-card-text>
-                        <v-checkbox id="session-public" v-model="session.public" name="session-public"
-                            label="Make session public" @change="setPublic($event)" />
-                        <v-container v-show="session.public">
-                            <h3 class="mb-2">Share on</h3>
-                            <ShareNetwork network="facebook" class="mr-2" style="text-decoration: none;"
-                                :url="sessionUrl" title="OpenCap session">
-                                <v-btn><v-icon aria-hidden="false">mdi-facebook</v-icon> &nbsp;Facebook</v-btn>
-                            </ShareNetwork>
-                            <ShareNetwork network="twitter" class="mr-2" style="text-decoration: none;"
-                                :url="sessionUrl" title="OpenCap session">
-                                <v-btn><v-icon aria-hidden="false">mdi-twitter</v-icon> &nbsp;Twitter</v-btn>
-                            </ShareNetwork>
-                            <ShareNetwork network="linkedin" :url="sessionUrl" style="text-decoration: none;"
-                                title="OpenCap session">
-                                <v-btn><v-icon aria-hidden="false">mdi-linkedin</v-icon> &nbsp;LinkedIn</v-btn>
-                            </ShareNetwork>
-
-                            <v-text-field label="Alternatively, copy the session link and share on social media"
-                                v-model="sessionUrl" class="mt-5" readonly></v-text-field>
-                        </v-container>
-
-                    </v-card-text>
-
-                    <v-divider></v-divider>
-
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="primary" text @click="dialog = false">
-                            Close
+                        <v-btn class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="show_controls">Share on <v-icon
+                                aria-hidden="false">
+                                mdi-facebook
+                            </v-icon> <v-icon aria-hidden="false">
+                                mdi-twitter
+                            </v-icon> <v-icon aria-hidden="false">
+                                mdi-linkedin
+                            </v-icon>
                         </v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-dialog>
+                    </template>
+
+                    <v-card>
+                        <v-card-title class="text-h5">
+                            Share on social media
+                        </v-card-title>
+
+                        <v-card-text>
+                            <v-checkbox id="session-public" v-model="session.public" name="session-public"
+                                label="Make session public" @change="setPublic($event)" />
+                            <v-container v-show="session.public">
+                                <h3 class="mb-2">Share on</h3>
+                                <ShareNetwork network="facebook" class="mr-2" style="text-decoration: none;"
+                                    :url="sessionUrl" title="OpenCap session">
+                                    <v-btn><v-icon aria-hidden="false">mdi-facebook</v-icon> &nbsp;Facebook</v-btn>
+                                </ShareNetwork>
+                                <ShareNetwork network="twitter" class="mr-2" style="text-decoration: none;"
+                                    :url="sessionUrl" title="OpenCap session">
+                                    <v-btn><v-icon aria-hidden="false">mdi-twitter</v-icon> &nbsp;Twitter</v-btn>
+                                </ShareNetwork>
+                                <ShareNetwork network="linkedin" :url="sessionUrl" style="text-decoration: none;"
+                                    title="OpenCap session">
+                                    <v-btn><v-icon aria-hidden="false">mdi-linkedin</v-icon> &nbsp;LinkedIn</v-btn>
+                                </ShareNetwork>
+
+                                <v-text-field label="Alternatively, copy the session link and share on social media"
+                                    v-model="sessionUrl" class="mt-5" readonly></v-text-field>
+                            </v-container>
+
+                        </v-card-text>
+
+                        <v-divider></v-divider>
+
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="dialog = false">
+                                Close
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
 
 
-            <v-btn class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
-                <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
+                <v-btn class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
+                    <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
 
-                Download data
-            </v-btn>
+                    Download data
+                </v-btn>
 
-            <v-btn class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
-                Analysis Dashboard
-            </v-btn>
+                <v-btn class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
+                    Analysis Dashboard
+                </v-btn>
 
-            <v-btn class="mt-4 w-100" v-show="show_controls" @click="$router.push({ name: 'SelectSession'})"
-                  :disabled="busy || state !== 'ready'">
-                Back to session list
-            </v-btn>
+                <v-btn class="mt-4 w-100" v-show="show_controls" @click="$router.push({ name: 'SelectSession'})"
+                    :disabled="busy || state !== 'ready'">
+                    Back to session list
+                </v-btn>
+            </div>
         </div>
 
         <div class="viewer flex-grow-1">
@@ -378,7 +384,8 @@ export default {
             recordingTimePassed: 0,
             recordingTimer: null,
 
-            trialsPoll: null
+            trialsPoll: null,
+            showSessionSetupButtons: true
         }
     },
     computed: {
@@ -999,6 +1006,13 @@ export default {
             }
 
             return timelimit
+        },
+        toggleButtonsMenu(){
+            if(this.showSessionSetupButtons){
+                this.showSessionSetupButtons = false;
+            } else {
+                this.showSessionSetupButtons = true;
+            }
         }
     }
 }
