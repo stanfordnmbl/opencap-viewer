@@ -13,6 +13,8 @@
         class="logo">OpenCap</h1>
       <v-spacer></v-spacer>
 
+      <QRCodeDialog/>
+
       <v-btn
         href="https://github.com/stanfordnmbl/opencap-core"
         target="_blank"
@@ -38,9 +40,11 @@
 
 <script>
 import { mapActions, mapState } from 'vuex'
+import QRCodeDialog from './components/ui/QRCodeDialog.vue'
 
 export default {
   name: 'App',
+  components: {QRCodeDialog},
   computed: {
     ...mapState({
       loggedIn: state => state.auth.loggedIn,

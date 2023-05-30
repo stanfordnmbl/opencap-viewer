@@ -61,11 +61,15 @@ export default {
     }
   },
   async mounted () {
-    try {
-      this.clearAll()
-      await this.initSession()
-    } finally {
-      this.loading = false
+    if (this.$router.params != undefined) {
+        await this.loadSession(this.$route.params.id)
+    } else {
+      try {
+        this.clearAll()
+        await this.initSession()
+      } finally {
+        this.loading = false
+      }
     }
   },
   computed: {
@@ -81,7 +85,7 @@ export default {
         cameras: this.cameras
       })
       
-      this.$router.push('/step2')
+      this.$router.push(`/${this.session.id}/step2`)
     }
   }
 }
