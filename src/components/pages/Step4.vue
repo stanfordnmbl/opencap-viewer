@@ -32,22 +32,6 @@
 
       <v-card class="mb-4">
         <v-card-title class="justify-center subject-title">
-          Session
-        </v-card-title>
-        <v-card-text>
-          <v-text-field
-            v-model="sessionName"
-            label="Session Name"
-            type="text"
-            required
-            :error="formErrors.name != null"
-            :error-messages="formErrors.name"
-          ></v-text-field>
-        </v-card-text>
-      </v-card>
-
-      <v-card class="mb-4">
-        <v-card-title class="justify-center subject-title">
           Select Subject
         </v-card-title>
         <v-card-text>
@@ -64,6 +48,19 @@
           ></v-select>
         </v-card-text>
       </v-card>
+      <v-card class="mb-4">
+        <v-card-text>
+          <v-text-field
+            v-model="sessionName"
+            label="Session Name (optional)"
+            type="text"
+            required
+            :error="formErrors.name != null"
+            :error-messages="formErrors.name"
+          ></v-text-field>
+        </v-card-text>
+      </v-card>
+
       <v-card class="mb-4">
         <div class="d-flex justify-center">
           <v-card-title class="justify-center data-title">
@@ -601,7 +598,7 @@ export default {
                   settings_data_sharing: this.data_sharing,
                   settings_pose_model: this.pose_model,
                   settings_framerate: this.framerate,
-                  sessionName: this.sessionName
+                  settings_session_name: this.sessionName
                 },
               }
             );

@@ -84,7 +84,7 @@
                             Insert a new name for session {{item.sessionName}}:
                           </p>
                           <small class="mt-0">
-                            Only alphanumeric characters and underscore (_) are allowed.
+                            Only alphanumeric characters and underscores are allowed.
                           </small>
                           <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
                             <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Session name">
@@ -336,6 +336,7 @@ export default {
         Vue.set(this.sessions, index, data);
         const sessionIndex = this.sessions.findIndex(x => x.id === session.id);
         Vue.set(this.sessions, sessionIndex, data);
+        data.created_at = formatDate(data.created_at);
       }
     }
 
