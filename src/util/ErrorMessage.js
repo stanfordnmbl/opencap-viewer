@@ -27,32 +27,30 @@ function processErrorMessage (err, operation) {
   let error = err.response ? err.response : err
 
   // message caption
-  let res = operation
-    ? `Error(s) occured while ${operation}:`
-    : 'Error(s) occured:'
+  let res = ""
+
 
   // if error is object
   if (typeof(error) === "object") {
     if (error.data && typeof(error.data) === "object") {
-      res += '<br/>'
 
       Object.keys(error.data).forEach(key => {
         let x = error.data[key]
 
         if (Array.isArray(x)) {
           x.forEach(y => {
-            res += getField(key, y)
+            res += y
           })
         } else {
-          res += getField(key, x)
+          res += x
         }
       })
     } else {
-      res += `<br/>${error.toString()}`
+      res += `${error.toString()}`
     }
 
     // status text and code
-    if (error.statusText) {
+/*    if (error.statusText) {
       res += `<br/>HTTP status: ${error.statusText}`
 
       if (error.status) {
@@ -63,13 +61,13 @@ function processErrorMessage (err, operation) {
       if (error.status) {
         res += `<br/>HTTP status code: ${error.status}`
       }
-    }
+    }*/
   } else {
     if (Array.isArray(error)) {
       res += error.join('<br/>')
     } else {
       // should be a string
-      res += `<br/>${error}`
+      res += `${error}`
     }
   }
 
@@ -83,6 +81,9 @@ function processErrorMessage (err, operation) {
  * @param {String} operation - optional operation name string
  */
 function apiError (error, operation) {
+  if (error == "Error: Network Error") {
+    error = "Something went wrong! Our server is currently down. Please try again later."
+  }
   Vue.toasted.error(processErrorMessage(error, operation),{duration: 10000})
 }
 /**

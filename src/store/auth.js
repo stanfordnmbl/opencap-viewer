@@ -1,5 +1,6 @@
 import router from '@/router'
 import axios from 'axios'
+import Vue from "vue";
 
 export default {
   namespaced: true,
@@ -8,7 +9,9 @@ export default {
     verified: false,
     username: '',
     user_id: '',
-    sessionTime: 1000 * 60 * 60 * 12
+    sessionTime: 1000 * 60 * 60 * 12,
+    remember_device_flag: false,
+    skip_forcing_otp: false
   },
   mutations: {
     setLoggedIn (state, { loggedIn, username, user_id}) {
@@ -18,6 +21,12 @@ export default {
     },
     setVerified (state, {verified}) {
       state.verified = verified
+    },
+    setRememberDeviceFlag (state, {flag}) {
+      state.remember_device_flag = flag
+    },
+    setSkipForcingOTP (state, {value}) {
+      state.skip_forcing_otp = value
     }
   },
   actions: {
@@ -56,6 +65,7 @@ export default {
       localStorage.setItem('auth_token', res.data.token)
       localStorage.setItem('auth_user', username)
       localStorage.setItem('auth_user_id', res.data.user_id)
+      commit('setSkipForcingOTP', { value: res.data.otp_challenge_sent })
 
       axios.defaults.headers.common['Authorization'] = `Token ${res.data.token}`
 
@@ -65,10 +75,22 @@ export default {
         user_id: res.data.user_id,
       })
     },
-    async verify ({ state, commit }, { otp_token }) {
-      let res = await axios.post('/verify/', {
-        otp_token
-      })
+    async set_verify ({ state, commit }) {
+      commit('setVerified', { verified: true })
+      localStorage.setItem('auth_verified', true)
+    },
+    async set_skip_forcing_otp ({ state, commit }, value) {
+        commit('setSkipForcingOTP', { value: value })
+    },
+    async verify ({ state, commit }, { otp_token, remember_device }) {
+      console.log('verify:state.remember_device_flag', state.remember_device_flag, remember_device)
+      let data = {
+        otp_token,
+      }
+      if (state.remember_device_flag && remember_device) {
+        data.remember_device = true
+      }
+      let res = await axios.post('/verify/', data)
 
       commit('setVerified', {
         verified: true
@@ -77,6 +99,12 @@ export default {
       const token = localStorage.getItem('auth_token')
       const username = localStorage.getItem('auth_user')
       localStorage.setItem('auth_verified', true)
+      if (state.remember_device_flag && remember_device) {
+        localStorage.setItem('remember_device_timestamp', Date.now())
+      }
+    },
+    async setRememberDeviceFlag ({ state, commit }, flag) {
+        commit('setRememberDeviceFlag', {flag: flag})
     },
     logout ({ commit }) {
       commit('setLoggedIn', {
