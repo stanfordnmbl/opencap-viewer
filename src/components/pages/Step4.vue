@@ -32,7 +32,7 @@
 
       <v-card class="mb-4">
         <v-card-title class="justify-center subject-title">
-          Select Subject
+          Session Info
         </v-card-title>
         <v-card-text>
           <v-select
@@ -47,10 +47,6 @@
               :items="subjectSelectorChoices"
               return-object
           ></v-select>
-        </v-card-text>
-      </v-card>
-      <v-card class="mb-4">
-        <v-card-text>
           <v-text-field
             v-model="sessionName"
             label="Session Name (optional)"
