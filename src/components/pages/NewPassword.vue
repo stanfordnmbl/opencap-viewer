@@ -86,32 +86,32 @@ export default {
     async onNewPassword() {
       this.loading = true;
 
-      this.submitted = true;
+      try {
+          this.submitted = true;
 
-      if (await this.$refs.observer.validate()) {
+          if (await this.$refs.observer.validate()) {
 
-        var parts = window.location.pathname.split('/');
-        var token = ""
-        if(window.location.pathname.endsWith("/")){
-          parts.pop()
-          token = parts.pop()
-        } else {
-          token = parts.pop()
-        }
+            var parts = window.location.pathname.split('/');
+            var token = ""
+            if(window.location.pathname.endsWith("/")){
+              parts.pop()
+              token = parts.pop()
+            } else {
+              token = parts.pop()
+            }
 
-        var response = await this.new_password({
-          token: token,
-          password: this.password
-        });
+            var response = await this.new_password({
+              token: token,
+              password: this.password
+            });
 
-        if (response.data.message == "Success") {
-          apiSuccess("Password changed successfully.");
-          this.$router.push({ name: 'Login'})
-        } else {
-          apiError(response.data.message);
-          this.$router.push({ name: 'ResetPassword'})
-        }
+            apiSuccess("Password changed successfully.");
+            this.$router.push({ name: 'Login'})
+          }
 
+      } catch (error) {
+        console.log(error)
+        apiError(error, 'sending the password recovery email.')
       }
 
       this.loading = false;

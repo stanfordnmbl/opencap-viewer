@@ -5,7 +5,7 @@
     :step="4"
     :rightDisabled="busy || disabledNextButton"
     :rightSpinner="busy && !imgs"
-    @left="$router.push('/step2')"
+    @left="$router.push(`/${session.id}/step2`)"
     @right="onNext"
   >
     <v-card v-if="imgs" class="step-4-1 pa-2 d-flex flex-column">
@@ -52,6 +52,7 @@
         </v-card-title>
         <v-card-text>
           <v-select
+              @click="reloadSubjects"
               @change="isAllInputsValid"
               class="cursor-pointer"
               required
@@ -517,18 +518,23 @@ export default {
     },
   },
   mounted() {
-    this.loadSubjects();
+    this.loadSession(this.$route.params.id)
+    this.loadSubjects()
     if (this.$route.query.autoRecord) {
       this.onNext();
     }
   },
   methods: {
     ...mapMutations("data", ["setStep4", "setStep3"]),
-    ...mapActions("data", ["loadSubjects"]),
+    ...mapActions("data", ["loadSubjects", "loadSession"]),
     isSomeInputInvalid(state, input) {
       setTimeout(() => {
         this.formErrors[input] = state;
       },0)
+    },
+    reloadSubjects() {
+      console.log('reloading subjects')
+      this.loadSubjects()
     },
     isAllInputsValid() {
         console.log(this.subject)

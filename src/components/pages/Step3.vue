@@ -78,7 +78,7 @@
 <script>
 import axios from 'axios'
 import { apiError, apiErrorRes } from '@/util/ErrorMessage.js'
-import { mapState } from 'vuex'
+import {mapActions, mapState} from 'vuex'
 import MainLayout from '@/layout/MainLayout'
 import ApproveImage from '@/components/ui/ApproveImage'
 import ExampleImage from '@/components/ui/ExampleImage'
@@ -113,8 +113,10 @@ export default {
   },
   async mounted () {
     this.startPoll()
+    this.loadSession(this.$route.params.id)
   },
   methods: {
+    ...mapActions('data', ['loadSession']),
     startPoll () {
       this.statusPoll = window.setTimeout(async () => {
         const res = await axios.get(`/sessions/${this.session.id}/calibration_img/`)
@@ -157,7 +159,7 @@ export default {
 
       try {
         await axios.post(`/sessions/${this.session.id}/calibration/`, data)
-        this.$router.push('/step4')
+        this.$router.push(`/${this.session.id}/step4`)
       } catch (error) {
         apiError(error)
       }
@@ -167,7 +169,7 @@ export default {
         apiError('You rejected two images from the same camera, which means the calibration has failed for this camera. You will now be redirected to the calibration step. Please visit opencap.ai/best-practices and opencap.ai/troubleshooting for tips on calibration. Make sure the checkerboard is <5m from each camera.')
       }
 
-      this.$router.push('/step2')
+      this.$router.push(`/${this.session.id}/step2`)
     }
   }
 }
