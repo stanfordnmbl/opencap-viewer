@@ -237,7 +237,7 @@
                 </v-btn>
                 <v-dialog
                     v-model="showArchiveDialog"
-                    max-width="800">
+                    max-width="500">
                     <v-card>
                         <v-card-text class="pt-4">
                             <v-row class="m-0">
@@ -250,12 +250,11 @@
                                     Download in progress...
                                 </p>
                                 <p v-if="!(isArchiveInProgress || isArchiveDone)">
-                                    Do you want to download all data associated to the
-                                    session <code>{{session.id}}</code>?
-                                    (This includes every trial associated to it, and can take several minutes).
+                                    Do you want to download all the data from session <code>{{session.id}}</code>? 
+                                    (This can take several minutes).
                                 </p>
                                 <p v-if="isArchiveDone">
-                                    The archive has been generated successfully!
+                                    The archive has been successfully generated. Click on data.zip to download.
                                 </p>
                             </v-col>
                             </v-row>
@@ -274,7 +273,7 @@
                                 :href="archiveUrl"
                                 :download="archiveName"
                             >
-                                {{archiveName}}
+                                data.zip
                             </v-btn>
                             <v-btn
                                 v-else
@@ -410,7 +409,6 @@ export default {
             isArchiveInProgress: false,
             isArchiveDone: false,
             archiveUrl: "#",
-            archiveName: "",
 
             trialInProcess: null,
             trial: null,
@@ -531,7 +529,6 @@ export default {
             if(!newShowArchiveDialog){
                 this.isArchiveDone = false;
                 this.isArchiveInProgress = false;
-                this.archiveName = "";
                 this.archiveUrl = "#";
             }
         }
@@ -656,7 +653,6 @@ export default {
                     }
                     if(response.status === 200){
                         clearTimeout(pollArchiveOnReady);
-                        state.archiveName = `session_results_${id}.zip`
                         state.archiveUrl = response.data.url;
                         state.isArchiveInProgress = false;
                         state.isArchiveDone = true;

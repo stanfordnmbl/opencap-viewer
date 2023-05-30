@@ -244,12 +244,11 @@
                                     Download in progress...
                                   </p>
                                   <p v-if="!(isArchiveInProgress || isArchiveDone)">
-                                    Do you want to download all data associated to the
-                                    session <code>{{item.name}}</code>?
-                                    (This includes every trial associated to it, and can take several minutes).
+                                    Do you want to download all the data from subject <code>{{item.name}}</code>?
+                                    (This can take several minutes).
                                   </p>
                                   <p v-if="isArchiveDone">
-                                    The archive has been generated successfully!
+                                    The archive has been successfully generated. Click on data.zip to download.
                                   </p>
                                 </v-col>
                               </v-row>
@@ -269,7 +268,7 @@
                                     :href="archiveUrl"
                                     :download="archiveName"
                                 >
-                                    {{archiveName}}
+                                    data.zip
                                 </v-btn>
                                 <v-btn
                                     v-else
@@ -433,7 +432,6 @@ export default {
       isArchiveInProgress: false,
       isArchiveDone: false,
       showArchiveDialog: false,
-      archiveName: "",
       archiveUrl: "#",
       delay: 300,
       clicks: 0,
@@ -527,7 +525,6 @@ export default {
       if(!newShowArchiveDialog){
         this.isArchiveDone = false;
         this.isArchiveInProgress = false;
-        this.archiveName = "";
         this.archiveUrl = "#";
       }
     }
@@ -684,7 +681,6 @@ export default {
             }
             if(response.status === 200){
                 clearTimeout(pollArchiveOnReady);
-                state.archiveName = `subject_results_${id}.zip`
                 state.archiveUrl = response.data.url;
                 state.isArchiveInProgress = false;
                 state.isArchiveDone = true;
