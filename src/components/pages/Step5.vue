@@ -229,12 +229,69 @@
                         </v-card-actions>
                     </v-card>
                 </v-dialog>
+                
 
-
-                <v-btn small class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
-                    <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
-
+                <!-- Archive session -->
+                <v-btn small class="mt-4 w-100" @click="showArchiveDialog = true">
                     Download data
+                </v-btn>
+                <v-dialog
+                    v-model="showArchiveDialog"
+                    max-width="500">
+                    <v-card>
+                        <v-card-text class="pt-4">
+                            <v-row class="m-0">
+                            <v-col cols="2">
+                                <v-icon x-large color="green">mdi-download</v-icon>
+                            </v-col>
+                            <v-col cols="10">
+                                <p v-if="isArchiveInProgress & !isArchiveDone">
+                                    <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                                    Download in progress...
+                                </p>
+                                <p v-if="!(isArchiveInProgress || isArchiveDone)">
+                                    Do you want to download all the data from session <code>{{session.id}}</code>? 
+                                    (This can take several minutes).
+                                </p>
+                                <p v-if="isArchiveDone">
+                                    The archive has been successfully generated. Click on data.zip to download.
+                                </p>
+                            </v-col>
+                            </v-row>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn
+                                color="blue darken-1"
+                                text
+                                @click="showArchiveDialog = false;"
+                            >
+                                Cancel
+                            </v-btn>
+                            <v-btn 
+                                v-if="isArchiveDone"
+                                :href="archiveUrl"
+                                :download="archiveName"
+                            >
+                                data.zip
+                            </v-btn>
+                            <v-btn
+                                v-else
+                                color="green darken-1"
+                                text
+                                :disabled="isArchiveInProgress"
+                                @click="downloadSessionArchive(session.id)"
+                            >
+                                Download
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+                <!-- End archive session -->
+
+                <v-btn small v-if="isSyncDownloadAllowed" class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
+                    <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
+                    Download data (old)
                 </v-btn>
 
                 <v-btn small class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
@@ -348,6 +405,11 @@ export default {
             downloading: false,
             dialog: null,
 
+            showArchiveDialog: false,
+            isArchiveInProgress: false,
+            isArchiveDone: false,
+            archiveUrl: "#",
+
             trialInProcess: null,
             trial: null,
             videos: [],
@@ -395,7 +457,8 @@ export default {
             identifier: state => state.data.identifier,
             weight: state => state.data.weight,
             height: state => state.data.height,
-            gender: state => state.data.gender
+            gender: state => state.data.gender,
+            isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
         }),
         sessionUrl() {
             return "https://app.opencap.ai/session/" + this.session.id;
@@ -461,6 +524,13 @@ export default {
             this.eachVideo(videoElement => {
                 videoElement.playbackRate = this.playSpeed
             })
+        },
+        showArchiveDialog(newShowArchiveDialog, oldShowArchiveDialog){
+            if(!newShowArchiveDialog){
+                this.isArchiveDone = false;
+                this.isArchiveInProgress = false;
+                this.archiveUrl = "#";
+            }
         }
     },
     methods: {
@@ -568,6 +638,27 @@ export default {
                 this.downloading = false
             }
         },
+        async downloadSessionArchive(id){
+            this.isArchiveInProgress = true;
+            this.isArchiveDone = false;
+            let state = this;
+            const startArchiveDownloadUrl = `${axios.defaults.baseURL}/sessions/${id}/async-download/`;
+            await axios.get(startArchiveDownloadUrl).then(
+                async function pollArchiveOnReady(data){
+                    const taskID = data.data.task_id;
+                    const downloadArchiveOnReadyURL = `${axios.defaults.baseURL}/logs/${taskID}/on-ready/`;
+                    const response = await axios.get(downloadArchiveOnReadyURL);
+                    if(response.status === 202){
+                        setTimeout(function(){pollArchiveOnReady(data);}, 1000);
+                    }
+                    if(response.status === 200){
+                        clearTimeout(pollArchiveOnReady);
+                        state.archiveUrl = response.data.url;
+                        state.isArchiveInProgress = false;
+                        state.isArchiveDone = true;
+                    }
+            });
+            },
         newSession() {
             this.clearAll()
             this.$router.push({ name: 'Step1' })
