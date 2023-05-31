@@ -271,7 +271,7 @@
                             <v-btn 
                                 v-if="isArchiveDone"
                                 :href="archiveUrl"
-                                :download="archiveName"
+                                download="data.zip"
                             >
                                 data.zip
                             </v-btn>
@@ -642,11 +642,11 @@ export default {
             this.isArchiveInProgress = true;
             this.isArchiveDone = false;
             let state = this;
-            const startArchiveDownloadUrl = `${axios.defaults.baseURL}/sessions/${id}/async-download/`;
+            const startArchiveDownloadUrl = new URL(`/sessions/${id}/async-download/`, axios.defaults.baseURL);
             await axios.get(startArchiveDownloadUrl).then(
                 async function pollArchiveOnReady(data){
                     const taskID = data.data.task_id;
-                    const downloadArchiveOnReadyURL = `${axios.defaults.baseURL}/logs/${taskID}/on-ready/`;
+                    const downloadArchiveOnReadyURL = new URL(`/logs/${taskID}/on-ready/`, axios.defaults.baseURL);
                     const response = await axios.get(downloadArchiveOnReadyURL);
                     if(response.status === 202){
                         setTimeout(function(){pollArchiveOnReady(data);}, 1000);
