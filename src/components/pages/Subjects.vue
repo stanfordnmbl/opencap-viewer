@@ -1,19 +1,19 @@
 <template>
   <div>
     <div class="d-flex flex-column">
-      <div class="pa-2 d-flex">
-        <v-btn
-          width="16em"
-          @click="$router.push({ name: 'SelectSession' })">
-          Go back to sessions list
-        </v-btn>
-        <v-btn class="ml-2"
-          @click="addSubject()">
-          New Subject
-        </v-btn>
+    <div class="pa-2 d-flex">
+      <v-btn
+        width="16em"
+        @click="$router.push({ name: 'SelectSession' })">
+        Go back to sessions list
+      </v-btn>
+      <v-btn class="ml-2"
+        @click="addSubject()">
+        New Subject
+      </v-btn>
 
-        <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed subjects"></v-checkbox>
-      </div>
+      <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed subjects"></v-checkbox>
+    </div>
     </div>
 
     <v-row>
@@ -23,7 +23,9 @@
               :headers="headers"
               :items="subjectsMapped"
               :item-class="itemClasses"
+              height="80vh"
               disable-pagination
+              fixed-header
               hide-default-footer
               single-select
               class="subjects-table mx-2 mb-4 flex-grow-1"
@@ -177,13 +179,13 @@
                           </v-card>
                         </v-dialog>
                       </v-list-item>
-                      <v-list-item link v-if="!item.trashed">
+                      <v-list-item link v-if="!item.trashed & isSyncDownloadAllowed">
                         <v-dialog
                                 v-model="download_dialog"
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Download data...</v-list-item-title>
+                            <v-list-item-title v-on="on">Download data (old)...</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -200,7 +202,7 @@
                                 </v-col>
                               </v-row>
                             </v-card-text>
-                            <v-card-actions>
+                            <v-card-actions class="d-flex justify-center">
                               <v-spacer></v-spacer>
                               <v-btn
                                 color="blue darken-1"
@@ -221,7 +223,66 @@
                           </v-card>
                         </v-dialog>
                       </v-list-item>
-
+                      <!-- Download archive -->
+                      <v-list-item link v-if="!item.trashed">
+                        <v-dialog
+                                v-model="showArchiveDialog"
+                                v-click-outside="clickOutsideDialogSubjectHideMenu"
+                                max-width="500">
+                          <template v-slot:activator="{ on }">
+                            <v-list-item-title v-on="on">Download data...</v-list-item-title>
+                          </template>
+                          <v-card>
+                            <v-card-text class="pt-4">
+                              <v-row class="m-0">
+                                <v-col cols="2">
+                                  <v-icon x-large color="green">mdi-download</v-icon>
+                                </v-col>
+                                <v-col cols="10">
+                                  <p v-if="isArchiveInProgress & !isArchiveDone">
+                                    <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                                    Download in progress...
+                                  </p>
+                                  <p v-if="!(isArchiveInProgress || isArchiveDone)">
+                                    Do you want to download all the data from subject <code>{{item.name}}</code>?
+                                    (This can take several minutes).
+                                  </p>
+                                  <p v-if="isArchiveDone">
+                                    The archive has been successfully generated. Click on data.zip to download.
+                                  </p>
+                                </v-col>
+                              </v-row>
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    @click="item.isMenuOpen = false;showArchiveDialog = false;"
+                                >
+                                    Cancel
+                                </v-btn>
+                                
+                                <v-btn 
+                                    v-if="isArchiveDone"
+                                    :href="archiveUrl"
+                                    download="data.zip"
+                                >
+                                    data.zip
+                                </v-btn>
+                                <v-btn
+                                    v-else
+                                    color="green darken-1"
+                                    text
+                                    :disabled="isArchiveInProgress"
+                                    @click="downloadSubjectArchive(item.id)"
+                                >
+                                    Download
+                                </v-btn>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                      </v-list-item>
                     </v-list>
                   </v-menu>
                 </div>
@@ -238,6 +299,7 @@
               :headers="sessionHeaders"
               :items="selectedSessions"
               :item-class="itemClasses"
+              height="80vh"
               disable-pagination
               hide-default-footer
               single-select
@@ -367,6 +429,10 @@ export default {
       edit_dialog: false,
       show_trashed: false,
       downloading: false,
+      isArchiveInProgress: false,
+      isArchiveDone: false,
+      showArchiveDialog: false,
+      archiveUrl: "#",
       delay: 300,
       clicks: 0,
       timer: null,
@@ -394,21 +460,21 @@ export default {
       empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
       heightRule: (v) => {
         if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 1.3 && v <= 3.0) return true;
+        if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0) return true;
         if(!isNaN(parseFloat(v)) && v > 3.0) return "It is unlikely that the height of subject is higher than 3 m. Are you using the right units? Height should be in m.";
-        if(!isNaN(parseFloat(v)) && v < 1.3) return "It is unlikely that the subject is shorter than 1.3 m. Are you using the right units? Height should be in m.";
+        if(!isNaN(parseFloat(v)) && v < .1) return "It is unlikely that the subject is shorter than .1 m. Are you using the right units? Height should be in m.";
       },
       weightRule: (v) => {
         if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 3 && v <= 200.0) return true;
+        if (!isNaN(parseFloat(v)) && v >= 1 && v <= 200.0) return true;
         if(!isNaN(parseFloat(v)) && v > 200.0) return "It is unlikely that the weight of subject is higher than 200 kg. Are you using the right units? Weight should be in kg.";
-        if(!isNaN(parseFloat(v)) && v < 3) return "It is unlikely that the weight of subject is lower than 3 kg. Are you using the right units? Weight should be in kg.";
+        if(!isNaN(parseFloat(v)) && v < 1) return "It is unlikely that the weight of subject is lower than 1 kg. Are you using the right units? Weight should be in kg.";
       },
       ageRule: (v) => {
         if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 5 && v <= 100) return true;
+        if (!isNaN(parseFloat(v)) && v >= 0 && v <= 100) return true;
         if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
-        if(!isNaN(parseFloat(v)) && v < 5) return "It is unlikely that the age of subject is lower than 5 years. Are you using the right units? Age should be in years.";
+        if(!isNaN(parseFloat(v)) && v < 0) return "It is not possible that the age of subject is lower than 0 years. Are you using the right units? Age should be in years.";
       }
 
     }
@@ -419,6 +485,7 @@ export default {
       subjects: state => state.data.subjects,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
+      isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
     }),
     subjectsMapped () {
       return this.subjects.map(s => ({
@@ -448,6 +515,18 @@ export default {
     },
     selectedSessions () {
       return this.sessions.filter(s => s.subject === this.selected.id)
+    }
+  },
+  mounted () {
+    this.loadSubjects()
+  },
+  watch:{
+    showArchiveDialog(newShowArchiveDialog, oldShowArchiveDialog){
+      if(!newShowArchiveDialog){
+        this.isArchiveDone = false;
+        this.isArchiveInProgress = false;
+        this.archiveUrl = "#";
+      }
     }
   },
   methods: {
@@ -585,6 +664,28 @@ export default {
             apiError(error)
             this.downloading = false
         }
+    },
+    async downloadSubjectArchive(id){
+      this.downloading = true;
+      this.isArchiveInProgress = true;
+      this.isArchiveDone = false;
+      let state = this;
+      const startArchiveDownloadUrl = new URL(`/subjects/${id}/async-download/`, axios.defaults.baseURL);
+      await axios.get(startArchiveDownloadUrl).then(
+        async function pollArchiveOnReady(data){
+            const taskID = data.data.task_id;
+            const downloadArchiveOnReadyURL = new URL(`/logs/${taskID}/on-ready/`, axios.defaults.baseURL);
+            const response = await axios.get(downloadArchiveOnReadyURL);
+            if(response.status === 202){
+                setTimeout(function(){pollArchiveOnReady(data);}, 1000);
+            }
+            if(response.status === 200){
+                clearTimeout(pollArchiveOnReady);
+                state.archiveUrl = response.data.url;
+                state.isArchiveInProgress = false;
+                state.isArchiveDone = true;
+            }
+      });
     },
     async permanentRemoveSubject (id) {
       try {

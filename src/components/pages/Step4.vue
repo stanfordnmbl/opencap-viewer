@@ -5,7 +5,7 @@
     :step="4"
     :rightDisabled="busy || disabledNextButton"
     :rightSpinner="busy && !imgs"
-    @left="$router.push('/step2')"
+    @left="$router.push(`/${session.id}/step2`)"
     @right="onNext"
   >
     <v-card v-if="imgs" class="step-4-1 pa-2 d-flex flex-column">
@@ -35,6 +35,7 @@
         </v-card-title>
         <v-card-text>
           <v-select
+              @click="reloadSubjects"
               @change="isAllInputsValid"
               class="cursor-pointer"
               required
@@ -450,9 +451,9 @@ export default {
       },
       ageRule: (v) => {
         if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 5 && v <= 100) return true;
+        if (!isNaN(parseFloat(v)) && v >= 1 && v <= 100) return true;
         if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
-        if(!isNaN(parseFloat(v)) && v < 5) return "It is unlikely that the age of subject is lower than 5 years. Are you using the right units? Age should be in years.";
+        if(!isNaN(parseFloat(v)) && v < 1) return "It is unlikely that the age of subject is lower than 1 years. Are you using the right units? Age should be in years.";
       },
       checkboxRule: (v) => !!v || 'The subject must agree to continue!'
     };
@@ -530,17 +531,23 @@ export default {
     },
   },
   mounted() {
+    this.loadSession(this.$route.params.id)
+    this.loadSubjects()
     if (this.$route.query.autoRecord) {
       this.onNext();
     }
   },
   methods: {
     ...mapMutations("data", ["setStep4", "setStep3"]),
-    ...mapActions("data", ["loadSubjects"]),
+    ...mapActions("data", ["loadSubjects", "loadSession"]),
     isSomeInputInvalid(state, input) {
       setTimeout(() => {
         this.formErrors[input] = state;
       },0)
+    },
+    reloadSubjects() {
+      console.log('reloading subjects')
+      this.loadSubjects()
     },
     isAllInputsValid() {
         console.log(this.subject)

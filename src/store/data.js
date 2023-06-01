@@ -53,7 +53,8 @@ export default {
       "transgender": "Transgender",
       "non-binary": "Non-Binary/Non-Conforming",
       "prefer-not-respond": "Prefer not to respond",
-    }
+    },
+    isSyncDownloadAllowed: JSON.parse(localStorage.getItem("isSyncDownloadAllowed"))
   },
   mutations: {
     setSession (state, session) {
@@ -234,6 +235,7 @@ export default {
 
       if (reroute) {
         if (state.sessions.length > 0) {
+          console.log('rerouting to select session')
           router.push({ name: 'SelectSession' })
         } else {
           router.push({ name: 'Step1' })

@@ -13,6 +13,8 @@
                 <v-btn v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
                 </v-btn>
+                <p v-if="state === 'recording'">Videos are recording, do not refresh</p>
+                <p v-if="state === 'processing'">Videos are uploading, do not refresh</p>
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
@@ -166,87 +168,141 @@
                 </div>
             </div>
 
-           <div>
-             <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed trials"></v-checkbox>
-           </div>
-
-            <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'"
-                @click="newSessionSameSetup">New session, same setup
+            <v-btn class="mt-4 w-100" @click="toggleSessionMenuButtons()">
+                <v-icon v-if="showSessionMenuButtons">mdi-menu-down</v-icon>
+                <v-icon v-else>mdi-menu-up</v-icon>
             </v-btn>
+            <div v-if="showSessionMenuButtons">
+                <div>
+                    <v-checkbox v-model="show_trashed" class="ml-2 m-2" label="Show removed trials"></v-checkbox>
+                </div>
 
-            <v-btn class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'" @click="newSession">New
-                session
-            </v-btn>
+                <v-btn small class="w-100" v-show="show_controls" :disabled="busy || state !== 'ready'"
+                    @click="newSessionSameSetup">New session, same setup
+                </v-btn>
 
-            <v-dialog v-model="dialog" width="500">
-                <template v-slot:activator="{ on, attrs }">
+                <v-btn small class="mt-4 w-100" v-show="show_controls" :disabled="busy || state !== 'ready'" @click="newSession">New
+                    session
+                </v-btn>
 
-                    <v-btn class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="show_controls">Share on <v-icon
-                            aria-hidden="false">
-                            mdi-facebook
-                        </v-icon> <v-icon aria-hidden="false">
-                            mdi-twitter
-                        </v-icon> <v-icon aria-hidden="false">
-                            mdi-linkedin
-                        </v-icon>
-                    </v-btn>
-                </template>
+                <v-dialog v-model="dialog" width="500">
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn small class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="show_controls">Share session publicly</v-btn>
+                    </template>
 
-                <v-card>
-                    <v-card-title class="text-h5">
-                        Share on social media
-                    </v-card-title>
+                    <v-card>
+                        <v-card-title class="text-h5">
+                            Share session publicly
+                        </v-card-title>
 
-                    <v-card-text>
-                        <v-checkbox id="session-public" v-model="session.public" name="session-public"
-                            label="Make session public" @change="setPublic($event)" />
-                        <v-container v-show="session.public">
-                            <h3 class="mb-2">Share on</h3>
-                            <ShareNetwork network="facebook" class="mr-2" style="text-decoration: none;"
-                                :url="sessionUrl" title="OpenCap session">
-                                <v-btn><v-icon aria-hidden="false">mdi-facebook</v-icon> &nbsp;Facebook</v-btn>
-                            </ShareNetwork>
-                            <ShareNetwork network="twitter" class="mr-2" style="text-decoration: none;"
-                                :url="sessionUrl" title="OpenCap session">
-                                <v-btn><v-icon aria-hidden="false">mdi-twitter</v-icon> &nbsp;Twitter</v-btn>
-                            </ShareNetwork>
-                            <ShareNetwork network="linkedin" :url="sessionUrl" style="text-decoration: none;"
-                                title="OpenCap session">
-                                <v-btn><v-icon aria-hidden="false">mdi-linkedin</v-icon> &nbsp;LinkedIn</v-btn>
-                            </ShareNetwork>
+                        <v-card-text>
+                            <v-checkbox id="session-public" v-model="session.public" name="session-public"
+                                label="Make session public" @change="setPublic($event)" />
+                            <v-container v-show="session.public">
+                                <h3 class="mb-2">Share on</h3>
+                                <ShareNetwork network="facebook" class="mr-2" style="text-decoration: none;"
+                                    :url="sessionUrl" title="OpenCap session">
+                                    <v-btn><v-icon aria-hidden="false">mdi-facebook</v-icon> &nbsp;Facebook</v-btn>
+                                </ShareNetwork>
+                                <ShareNetwork network="twitter" class="mr-2" style="text-decoration: none;"
+                                    :url="sessionUrl" title="OpenCap session">
+                                    <v-btn><v-icon aria-hidden="false">mdi-twitter</v-icon> &nbsp;Twitter</v-btn>
+                                </ShareNetwork>
+                                <ShareNetwork network="linkedin" :url="sessionUrl" style="text-decoration: none;"
+                                    title="OpenCap session">
+                                    <v-btn><v-icon aria-hidden="false">mdi-linkedin</v-icon> &nbsp;LinkedIn</v-btn>
+                                </ShareNetwork>
 
-                            <v-text-field label="Alternatively, copy the session link and share on social media"
-                                v-model="sessionUrl" class="mt-5" readonly></v-text-field>
-                        </v-container>
+                                <v-text-field label="Alternatively, copy the session link and share on social media"
+                                    v-model="sessionUrl" class="mt-5" readonly></v-text-field>
+                            </v-container>
 
-                    </v-card-text>
+                        </v-card-text>
 
-                    <v-divider></v-divider>
+                        <v-divider></v-divider>
 
-                    <v-card-actions>
-                        <v-spacer></v-spacer>
-                        <v-btn color="primary" text @click="dialog = false">
-                            Close
-                        </v-btn>
-                    </v-card-actions>
-                </v-card>
-            </v-dialog>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="dialog = false">
+                                Close
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+                
 
+                <!-- Archive session -->
+                <v-btn small class="mt-4 w-100" @click="showArchiveDialog = true">
+                    Download data
+                </v-btn>
+                <v-dialog
+                    v-model="showArchiveDialog"
+                    max-width="500">
+                    <v-card>
+                        <v-card-text class="pt-4">
+                            <v-row class="m-0">
+                            <v-col cols="2">
+                                <v-icon x-large color="green">mdi-download</v-icon>
+                            </v-col>
+                            <v-col cols="10">
+                                <p v-if="isArchiveInProgress & !isArchiveDone">
+                                    <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                                    Download in progress...
+                                </p>
+                                <p v-if="!(isArchiveInProgress || isArchiveDone)">
+                                    Do you want to download all the data from session <code>{{session.id}}</code>? 
+                                    (This can take several minutes).
+                                </p>
+                                <p v-if="isArchiveDone">
+                                    The archive has been successfully generated. Click on data.zip to download.
+                                </p>
+                            </v-col>
+                            </v-row>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn
+                                color="blue darken-1"
+                                text
+                                @click="showArchiveDialog = false;"
+                            >
+                                Cancel
+                            </v-btn>
+                            <v-btn 
+                                v-if="isArchiveDone"
+                                :href="archiveUrl"
+                                download="data.zip"
+                            >
+                                data.zip
+                            </v-btn>
+                            <v-btn
+                                v-else
+                                color="green darken-1"
+                                text
+                                :disabled="isArchiveInProgress"
+                                @click="downloadSessionArchive(session.id)"
+                            >
+                                Download
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+                <!-- End archive session -->
 
-            <v-btn class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
-                <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
+                <v-btn small v-if="isSyncDownloadAllowed" class="mt-4 w-100" :disabled="downloading" @click="onDownloadData">
+                    <v-progress-circular v-if="downloading" indeterminate class="mr-2" color="grey" size="14" width="2" />
+                    Download data (old)
+                </v-btn>
 
-                Download data
-            </v-btn>
+                <v-btn small class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
+                    Analysis Dashboard
+                </v-btn>
 
-            <v-btn class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
-                Analysis Dashboard
-            </v-btn>
-
-            <v-btn class="mt-4 w-100" v-show="show_controls" @click="$router.push({ name: 'SelectSession'})"
-                  :disabled="busy || state !== 'ready'">
-                Back to session list
-            </v-btn>
+                <v-btn small class="mt-4 w-100" v-show="show_controls" @click="$router.push({ name: 'SelectSession'})"
+                    :disabled="busy || state !== 'ready'">
+                    Back to session list
+                </v-btn>
+            </div>
         </div>
 
         <div class="viewer flex-grow-1">
@@ -333,7 +389,7 @@ export default {
             startButtonCaptions: {
                 ready: 'Start recording',
                 recording: 'Stop recording',
-                processing: 'Cancel trial'
+                processing: 'Cancel Upload'
             },
             rename_dialog: false,
             remove_dialog: false,
@@ -348,6 +404,11 @@ export default {
             statusPoll: null,
             downloading: false,
             dialog: null,
+
+            showArchiveDialog: false,
+            isArchiveInProgress: false,
+            isArchiveDone: false,
+            archiveUrl: "#",
 
             trialInProcess: null,
             trial: null,
@@ -376,7 +437,8 @@ export default {
             recordingTimePassed: 0,
             recordingTimer: null,
 
-            trialsPoll: null
+            trialsPoll: null,
+            showSessionMenuButtons: true
         }
     },
     computed: {
@@ -395,7 +457,8 @@ export default {
             identifier: state => state.data.identifier,
             weight: state => state.data.weight,
             height: state => state.data.height,
-            gender: state => state.data.gender
+            gender: state => state.data.gender,
+            isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
         }),
         sessionUrl() {
             return "https://app.opencap.ai/session/" + this.session.id;
@@ -461,6 +524,13 @@ export default {
             this.eachVideo(videoElement => {
                 videoElement.playbackRate = this.playSpeed
             })
+        },
+        showArchiveDialog(newShowArchiveDialog, oldShowArchiveDialog){
+            if(!newShowArchiveDialog){
+                this.isArchiveDone = false;
+                this.isArchiveInProgress = false;
+                this.archiveUrl = "#";
+            }
         }
     },
     methods: {
@@ -568,6 +638,27 @@ export default {
                 this.downloading = false
             }
         },
+        async downloadSessionArchive(id){
+            this.isArchiveInProgress = true;
+            this.isArchiveDone = false;
+            let state = this;
+            const startArchiveDownloadUrl = new URL(`/sessions/${id}/async-download/`, axios.defaults.baseURL);
+            await axios.get(startArchiveDownloadUrl).then(
+                async function pollArchiveOnReady(data){
+                    const taskID = data.data.task_id;
+                    const downloadArchiveOnReadyURL = new URL(`/logs/${taskID}/on-ready/`, axios.defaults.baseURL);
+                    const response = await axios.get(downloadArchiveOnReadyURL);
+                    if(response.status === 202){
+                        setTimeout(function(){pollArchiveOnReady(data);}, 1000);
+                    }
+                    if(response.status === 200){
+                        clearTimeout(pollArchiveOnReady);
+                        state.archiveUrl = response.data.url;
+                        state.isArchiveInProgress = false;
+                        state.isArchiveDone = true;
+                    }
+            });
+            },
         newSession() {
             this.clearAll()
             this.$router.push({ name: 'Step1' })
@@ -578,7 +669,7 @@ export default {
         },
         async newSessionSameSetup() {
             await this.initSessionSameSetup()
-            this.$router.push({ name: 'Step4' })
+            this.$router.push({ name: 'Step4', params: { id: this.session.id } })
         },
         startPoll() {
             this.statusPoll = window.setTimeout(async () => {
@@ -997,6 +1088,9 @@ export default {
             }
 
             return timelimit
+        },
+        toggleSessionMenuButtons(){
+            this.showSessionMenuButtons = !this.showSessionMenuButtons;
         }
     }
 }

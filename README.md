@@ -7,6 +7,9 @@ npm install
 
 ### Compiles and hot-reloads for development
 ```
+If you're running the api locally, on main.js change api port to axios.defaults.baseURL = "http://localhost:8000/"
+MAKE SURE NOT TO COMMMIT THIS.
+
 npm run serve
 ```
 
