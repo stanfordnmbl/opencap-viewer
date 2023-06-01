@@ -32,7 +32,7 @@ export default {
     data_sharing: '',
     pose_model: 'openpose',
     framerate: 60,
-    msk_model: 'LaiUhlrich2022',
+    openSimModel: 'LaiUhlrich2022',
 
     // step 5
     trialName: '',
@@ -107,7 +107,7 @@ export default {
     setStep3 (state, trialId) {
       state.trialId = trialId
     },
-    setStep4 (state, { subject, data_sharing, pose_model, msk_model }) {
+    setStep4 (state, { subject, data_sharing, pose_model, openSimModel }) {
       // state.identifier = identifier
       // state.weight = weight
       // state.height = height
@@ -116,7 +116,7 @@ export default {
       state.subject = subject
       state.data_sharing = data_sharing
       state.pose_model = pose_model
-      state.msk_model = msk_model
+      state.openSimModel = openSimModel
     },
     setStep5 (state, { trialName }) {
       state.trialName = trialName
@@ -138,7 +138,7 @@ export default {
       state.gender = 'woman'
       state.data_sharing = ''
       state.pose_model = 'openpose'
-      state.msk_model = 'LaiUhlrich2022'
+      state.openSimModel = 'LaiUhlrich2022'
       // step 5
       state.trialName = ''       
     },

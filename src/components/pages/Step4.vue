@@ -272,9 +272,9 @@
       <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
 
         <v-select
-            v-model="msk_model"
+            v-model="openSimModel"
             label="Musculoskeletal model"
-            v-bind:items="msk_models"
+            v-bind:items="openSimModels"
           />
 
       </v-card-text>
@@ -423,8 +423,8 @@ export default {
       framerates_available: [
         {"text": "60fps (max recording time: 60s, default)", "value": 60},
       ],
-      msk_model: 'LaiUhlrich2022',
-      msk_models: [
+      openSimModel: 'LaiUhlrich2022',
+      openSimModels: [
         {"text": "Default (Full body model)", "value": "LaiUhlrich2022"},
         {"text": "Full body model with ISB shoulder (In beta, feedback welcome!)", "value": "LaiUhlrich2022_shoulder"},
       ],
@@ -606,7 +606,7 @@ export default {
             data_sharing: this.data_sharing,
             pose_model: this.pose_model,
             framerate: this.framerate,
-            msk_model: this.msk_model,
+            openSimModel: this.openSimModel,
           });
           try {
             const resUpdate = await axios.get(
@@ -621,7 +621,7 @@ export default {
                   settings_data_sharing: this.data_sharing,
                   settings_pose_model: this.pose_model,
                   settings_framerate: this.framerate,
-                  settings_msk_model: this.msk_model,
+                  settings_openSimModel: this.openSimModel,
                 },
               }
             );
