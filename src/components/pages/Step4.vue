@@ -416,7 +416,7 @@ export default {
       ],
       pose_model: 'openpose',
       pose_models: [
-        {"text": "OpenPose (recommended, non-commercial research use only)", "value": "openpose"},
+        {"text": "OpenPose (recommended, non-commercial research use only, default)", "value": "openpose"},
         {"text": "HRNet", "value": "hrnet"},
       ],
       framerate: 60,
@@ -425,7 +425,7 @@ export default {
       ],
       openSimModel: 'LaiUhlrich2022',
       openSimModels: [
-        {"text": "Default (Full body model)", "value": "LaiUhlrich2022"},
+        {"text": "Full body model (default)", "value": "LaiUhlrich2022"},
         {"text": "Full body model with ISB shoulder (In beta, feedback welcome!)", "value": "LaiUhlrich2022_shoulder"},
       ],
       busy: false,
