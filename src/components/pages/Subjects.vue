@@ -224,6 +224,7 @@
                         </v-dialog>
                       </v-list-item>
                       <!-- Download archive -->
+                      <!--
                       <v-list-item link v-if="!item.trashed">
                         <v-dialog
                                 v-model="showArchiveDialog"
@@ -283,6 +284,7 @@
                           </v-card>
                         </v-dialog>
                       </v-list-item>
+                      -->
                     </v-list>
                   </v-menu>
                 </div>
