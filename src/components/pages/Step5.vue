@@ -43,7 +43,7 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Rename...</v-list-item-title>
+                                <v-list-item-title v-on="on">Rename</v-list-item-title>
                               </template>
 
                               <v-card>
@@ -82,7 +82,7 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Remove...</v-list-item-title>
+                                <v-list-item-title v-on="on">Remove</v-list-item-title>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -125,7 +125,7 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Restore...</v-list-item-title>
+                                <v-list-item-title v-on="on">Restore</v-list-item-title>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -247,7 +247,7 @@
                             <v-col cols="10">
                                 <p v-if="isArchiveInProgress & !isArchiveDone">
                                     <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
-                                    Download in progress...
+                                    Download in progress
                                 </p>
                                 <p v-if="!(isArchiveInProgress || isArchiveDone)">
                                     Do you want to download all the data from session <code>{{session.id}}</code>? 

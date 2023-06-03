@@ -51,7 +51,7 @@
                       <v-list-item link v-if="!item.trashed">
                         <v-list-item-title
                           @click="item.isMenuOpen = false; editSubject(item)"
-                          >Edit...</v-list-item-title>
+                          >Edit</v-list-item-title>
                       </v-list-item>
                       <v-list-item link v-if="!item.trashed">
                         <v-dialog
@@ -59,7 +59,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Remove...</v-list-item-title>
+                            <v-list-item-title v-on="on">Remove</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -102,7 +102,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Restore...</v-list-item-title>
+                            <v-list-item-title v-on="on">Restore</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -143,7 +143,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
+                            <v-list-item-title v-on="on">Remove permanently</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -185,7 +185,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Download data (old)...</v-list-item-title>
+                            <v-list-item-title v-on="on">Download data (old)</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -231,7 +231,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Download data...</v-list-item-title>
+                            <v-list-item-title v-on="on">Download data</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -242,7 +242,7 @@
                                 <v-col cols="10">
                                   <p v-if="isArchiveInProgress & !isArchiveDone">
                                     <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
-                                    Download in progress...
+                                    Download in progress
                                   </p>
                                   <p v-if="!(isArchiveInProgress || isArchiveDone)">
                                     Do you want to download all the data from subject <code>{{item.name}}</code>?
