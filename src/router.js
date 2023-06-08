@@ -110,6 +110,7 @@ const routesWithOutAuth = [
   'ResetPassword',
   'NewPassword',
   'Dashboard'
+  
 ]
 
 const routesRequireSession = [
