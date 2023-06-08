@@ -71,7 +71,7 @@
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Rename...</v-list-item-title>
+                    <v-list-item-title v-on="on">Rename</v-list-item-title>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">
