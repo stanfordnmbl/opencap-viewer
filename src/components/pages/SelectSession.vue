@@ -64,6 +64,50 @@
                   @click="$router.push({ name: 'Dashboard' })"
                   >Dashboard</v-list-item-title>
               </v-list-item>
+
+              <v-list-item link>
+                <v-dialog
+                        v-model="rename_dialog"
+                        v-click-outside="clickOutsideDialogSessionHideMenu"
+                        max-width="500">
+                  <template v-slot:activator="{ on }">
+                    <v-list-item-title v-on="on">Rename...</v-list-item-title>
+                  </template>
+                  <v-card>
+                    <v-card-text class="pt-4">
+                      <v-row class="m-0">
+                        <v-col cols="2">
+                          <v-icon x-large color="orange">mdi-rename-box</v-icon>
+                        </v-col>
+                        <v-col cols="10">
+                          <p class="mb-1">
+                            Insert a new name for session {{item.sessionName}}:
+                          </p>
+                          <small class="mt-0">
+                            Only alphanumeric characters and underscores are allowed.
+                          </small>
+                          <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
+                            <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Session name">
+
+                                <v-text-field v-model="sessionNewName" label="Session new name" class="flex-grow-0"
+                                    dark :error="errors.length > 0" :error-messages="errors[0]" >
+
+                                </v-text-field>
+                            </ValidationProvider>
+
+                            <v-spacer></v-spacer>
+
+                            <v-btn class="text-right" :disabled="invalid" @click="item.isMenuOpen = false; remove_dialog = false; renameSession(item, sessionNewName);">
+                                Rename Session
+                            </v-btn>
+                          </ValidationObserver>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                  </v-card>
+                </v-dialog>
+              </v-list-item>
+
               <v-list-item link v-if="!item.trashed">
                 <v-dialog
                         v-model="remove_dialog"
@@ -170,6 +214,8 @@
 import { mapActions, mapState } from 'vuex'
 import { apiInfo, apiError } from '@/util/ErrorMessage.js'
 import { formatDate } from '@/util/DateFormat.js'
+import axios from 'axios'
+import Vue from 'vue'
 
 export default {
   name: 'SelectSession',
@@ -179,16 +225,20 @@ export default {
   data () {
     return {
       remove_dialog: false,
+      rename_dialog: false,
       restore_dialog: false,
+      sessionName: '',
+      sessionNewName: '',
       show_trashed: false,
       headers: [
         {
-          text: 'ID',
+          text: 'Session ID',
           align: 'start',
           sortable: false,
           value: 'id',
         },
-        { text: 'Name', value: 'name' },
+        { text: 'Session Name', value: 'sessionName' },
+        { text: 'Subject Name', value: 'name' },
         { text: 'Number of trials', align: 'center', value: 'trials_count' },
         { text: 'Date', value: 'created_at' }
       ],
@@ -206,6 +256,7 @@ export default {
       return this.sessions.map(s => ({
         id: s.id,
         name: s.name,
+        sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
         trials_count: s.trials.filter(function (trial, i){
                 return trial.name !== 'calibration';
             }).length,
@@ -268,7 +319,27 @@ export default {
       } catch (error) {
         apiError(error)
       }
+    },
+    async renameSession(session, sessionNewName) {
+      try {
+        let oldName = session.sessionName;
+        console.log(oldName + " will be renamed to " + sessionNewName);
+        const { data } = await axios.post(`/sessions/${session.id}/rename/`, {sessionNewName});
+        await this.updateSessionWithData(session, data.data);
+      } catch (error) {
+        apiError(error)
+      }
+    },
+    async updateSessionWithData(session, data) {
+      const index = this.sessions.findIndex(x => x.id === session.id);
+      if (index >= 0) {
+        Vue.set(this.sessions, index, data);
+        const sessionIndex = this.sessions.findIndex(x => x.id === session.id);
+        Vue.set(this.sessions, sessionIndex, data);
+        data.created_at = formatDate(data.created_at);
+      }
     }
+
   }
 }
 </script>
