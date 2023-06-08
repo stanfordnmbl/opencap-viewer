@@ -77,15 +77,16 @@ export default {
       state.sessions = sessions
 
     },
-    updateExistingSessions (state, session) {
+    updateExistingSessions (state, sessions) {
       let old_session_ids = state.sessions.map(s => s.id);
 
-      for(let i = 0; i < session.length; i++) {
-        if(old_session_ids.includes(session[i].id)) {
-          let index = old_session_ids.indexOf(session[i].id);
-          state.sessions.splice(index, 1, session[i]);
+      for(let i = 0; i < sessions.length; i++) {
+        sessions[i].created_at = formatDate(sessions[i].created_at)
+        if(old_session_ids.includes(sessions[i].id)) {
+          let index = old_session_ids.indexOf(sessions[i].id);
+          state.sessions.splice(index, 1, sessions[i]);
         } else {
-          state.sessions.push(session[i]);
+          state.sessions.push(sessions[i]);
         }
       }
     },

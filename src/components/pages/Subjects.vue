@@ -51,7 +51,7 @@
                       <v-list-item link v-if="!item.trashed">
                         <v-list-item-title
                           @click="item.isMenuOpen = false; editSubject(item)"
-                          >Edit...</v-list-item-title>
+                          >Edit</v-list-item-title>
                       </v-list-item>
                       <v-list-item link v-if="!item.trashed">
                         <v-dialog
@@ -59,7 +59,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Remove...</v-list-item-title>
+                            <v-list-item-title v-on="on">Remove</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -102,7 +102,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Restore...</v-list-item-title>
+                            <v-list-item-title v-on="on">Restore</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -143,7 +143,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
+                            <v-list-item-title v-on="on">Remove permanently</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -185,7 +185,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Download data (old)...</v-list-item-title>
+                            <v-list-item-title v-on="on">Download data (old)</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -224,13 +224,14 @@
                         </v-dialog>
                       </v-list-item>
                       <!-- Download archive -->
+                      <!--
                       <v-list-item link v-if="!item.trashed">
                         <v-dialog
                                 v-model="showArchiveDialog"
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Download data...</v-list-item-title>
+                            <v-list-item-title v-on="on">Download data</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -241,7 +242,7 @@
                                 <v-col cols="10">
                                   <p v-if="isArchiveInProgress & !isArchiveDone">
                                     <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
-                                    Download in progress...
+                                    Download in progress
                                   </p>
                                   <p v-if="!(isArchiveInProgress || isArchiveDone)">
                                     Do you want to download all the data from subject <code>{{item.name}}</code>?
@@ -283,6 +284,7 @@
                           </v-card>
                         </v-dialog>
                       </v-list-item>
+                      -->
                     </v-list>
                   </v-menu>
                 </div>
@@ -309,6 +311,9 @@
                 <tr>
                   <th class="text-left">
                     Session ID
+                  </th>
+                  <th class="text-left">
+                    Session Name
                   </th>
                   <th class="text-left">
                     Trials
@@ -452,6 +457,7 @@ export default {
       ],
       sessionHeaders: [
         { text: 'Session ID', value: 'id' },
+        { text: 'Session Name', value: 'sessionName' },
         { text: 'Trials', value: 'trials.length' },
         { text: 'Date', value: 'created_at' },
       ],
@@ -514,7 +520,19 @@ export default {
       return Object.entries(this.genders).map((s) => ({ text: s[1], value: s[0] }))
     },
     selectedSessions () {
-      return this.sessions.filter(s => s.subject === this.selected.id)
+      return this.sessions.map(s => ({
+        id: s.id,
+        sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
+        name: s.name,
+        trials_count: String(s.trials.length),
+        trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+        trials: s.trials,
+        created_at: s.created_at,
+        trashed: s.trashed,
+        trashed_at: s.trashed_at,
+        isMenuOpen: false,
+        subject: s.subject
+      })).filter((s => s.trashed || s.trashed_trials_count > 0) && (s => s.subject === this.selected.id))
     }
   },
   mounted () {

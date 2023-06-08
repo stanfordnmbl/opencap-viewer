@@ -29,9 +29,10 @@
     </v-card>
 
     <div v-else class="step-4-1 d-flex flex-column">
+
       <v-card class="mb-4">
         <v-card-title class="justify-center subject-title">
-          Select Subject
+          Session Info
         </v-card-title>
         <v-card-text>
           <v-select
@@ -46,8 +47,17 @@
               :items="subjectSelectorChoices"
               return-object
           ></v-select>
+          <v-text-field
+            v-model="sessionName"
+            label="Session Name (optional)"
+            type="text"
+            required
+            :error="formErrors.name != null"
+            :error-messages="formErrors.name"
+          ></v-text-field>
         </v-card-text>
       </v-card>
+
       <v-card class="mb-4">
         <div class="d-flex justify-center">
           <v-card-title class="justify-center data-title">
@@ -400,6 +410,7 @@ export default {
       selected: null,
       empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
 
+      sessionName: "",
       subject: null,
       identifier: "",
       weight: 70,
@@ -467,7 +478,7 @@ export default {
       sexes: state => state.data.sexes,
     }),
     subjectSelectorChoices() {
-      return [{'id':'new', 'display_name': 'New subject...'}].concat(this.subjectsMapped);
+      return [{'id':'new', 'display_name': 'New subject'}].concat(this.subjectsMapped);
     },
     subjectsMapped () {
       return this.subjects.map(s => ({
@@ -621,7 +632,8 @@ export default {
                   settings_data_sharing: this.data_sharing,
                   settings_pose_model: this.pose_model,
                   settings_framerate: this.framerate,
-                  settings_openSimModel: this.openSimModel,
+                  settings_session_name: this.sessionName,
+                  settings_openSimModel: this.openSimModel                  
                 },
               }
             );
@@ -783,7 +795,7 @@ export default {
     },
     async getAvailableFramerates() {
       const session_settings = await axios.get(`/sessions/${this.session.id}/get_session_settings/`)
-      // If the session has framerates...
+      // If the session has framerates.
       if('data' in session_settings && 'framerates' in session_settings.data) {
         this.framerates_available = []
         // Push them to available framerates

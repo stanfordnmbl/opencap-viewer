@@ -51,7 +51,7 @@
                                 v-click-outside="clickOutsideDialogSessionHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Restore...</v-list-item-title>
+                            <v-list-item-title v-on="on">Restore</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -92,7 +92,7 @@
                                 v-click-outside="clickOutsideDialogSessionHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
+                            <v-list-item-title v-on="on">Remove permanently</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -181,7 +181,7 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Restore...</v-list-item-title>
+                                <v-list-item-title v-on="on">Restore</v-list-item-title>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -222,7 +222,7 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
+                                <v-list-item-title v-on="on">Remove permanently</v-list-item-title>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -335,7 +335,8 @@ export default {
           sortable: false,
           value: 'id',
         },
-        { text: 'Name', value: 'name' },
+        { text: 'Session Name', value: 'sessionName' },
+        { text: 'Subject Name', value: 'name' },
         { text: 'Number of trials', align: 'center', value: 'trials_count' },
         { text: 'Date', value: 'created_at' }
       ],
@@ -349,6 +350,7 @@ export default {
     sessionsMapped () {
       return this.sessions.map(s => ({
         id: s.id,
+        sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
         name: s.name,
         trials_count: String(s.trials.length),
         trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
