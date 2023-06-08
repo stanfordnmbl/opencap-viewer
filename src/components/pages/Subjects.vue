@@ -51,7 +51,7 @@
                       <v-list-item link v-if="!item.trashed">
                         <v-list-item-title
                           @click="item.isMenuOpen = false; editSubject(item)"
-                          >Edit...</v-list-item-title>
+                          >Edit</v-list-item-title>
                       </v-list-item>
                       <v-list-item link v-if="!item.trashed">
                         <v-dialog
@@ -59,7 +59,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Remove...</v-list-item-title>
+                            <v-list-item-title v-on="on">Remove</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -102,7 +102,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Restore...</v-list-item-title>
+                            <v-list-item-title v-on="on">Restore</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -143,7 +143,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Remove permanently...</v-list-item-title>
+                            <v-list-item-title v-on="on">Remove permanently</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -179,13 +179,13 @@
                           </v-card>
                         </v-dialog>
                       </v-list-item>
-                      <v-list-item link v-if="!item.trashed">
+                      <v-list-item link v-if="!item.trashed & isSyncDownloadAllowed">
                         <v-dialog
                                 v-model="download_dialog"
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Download data...</v-list-item-title>
+                            <v-list-item-title v-on="on">Download data (old)</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -202,7 +202,7 @@
                                 </v-col>
                               </v-row>
                             </v-card-text>
-                            <v-card-actions>
+                            <v-card-actions class="d-flex justify-center">
                               <v-spacer></v-spacer>
                               <v-btn
                                 color="blue darken-1"
@@ -223,7 +223,68 @@
                           </v-card>
                         </v-dialog>
                       </v-list-item>
-
+                      <!-- Download archive -->
+                      <!--
+                      <v-list-item link v-if="!item.trashed">
+                        <v-dialog
+                                v-model="showArchiveDialog"
+                                v-click-outside="clickOutsideDialogSubjectHideMenu"
+                                max-width="500">
+                          <template v-slot:activator="{ on }">
+                            <v-list-item-title v-on="on">Download data</v-list-item-title>
+                          </template>
+                          <v-card>
+                            <v-card-text class="pt-4">
+                              <v-row class="m-0">
+                                <v-col cols="2">
+                                  <v-icon x-large color="green">mdi-download</v-icon>
+                                </v-col>
+                                <v-col cols="10">
+                                  <p v-if="isArchiveInProgress & !isArchiveDone">
+                                    <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                                    Download in progress
+                                  </p>
+                                  <p v-if="!(isArchiveInProgress || isArchiveDone)">
+                                    Do you want to download all the data from subject <code>{{item.name}}</code>?
+                                    (This can take several minutes).
+                                  </p>
+                                  <p v-if="isArchiveDone">
+                                    The archive has been successfully generated. Click on data.zip to download.
+                                  </p>
+                                </v-col>
+                              </v-row>
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    @click="item.isMenuOpen = false;showArchiveDialog = false;"
+                                >
+                                    Cancel
+                                </v-btn>
+                                
+                                <v-btn 
+                                    v-if="isArchiveDone"
+                                    :href="archiveUrl"
+                                    download="data.zip"
+                                >
+                                    data.zip
+                                </v-btn>
+                                <v-btn
+                                    v-else
+                                    color="green darken-1"
+                                    text
+                                    :disabled="isArchiveInProgress"
+                                    @click="downloadSubjectArchive(item.id)"
+                                >
+                                    Download
+                                </v-btn>
+                            </v-card-actions>
+                          </v-card>
+                        </v-dialog>
+                      </v-list-item>
+                      -->
                     </v-list>
                   </v-menu>
                 </div>
@@ -373,6 +434,10 @@ export default {
       edit_dialog: false,
       show_trashed: false,
       downloading: false,
+      isArchiveInProgress: false,
+      isArchiveDone: false,
+      showArchiveDialog: false,
+      archiveUrl: "#",
       delay: 300,
       clicks: 0,
       timer: null,
@@ -426,6 +491,7 @@ export default {
       subjects: state => state.data.subjects,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
+      isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
     }),
     subjectsMapped () {
       return this.subjects.map(s => ({
@@ -471,6 +537,15 @@ export default {
   },
   mounted () {
     this.loadSubjects()
+  },
+  watch:{
+    showArchiveDialog(newShowArchiveDialog, oldShowArchiveDialog){
+      if(!newShowArchiveDialog){
+        this.isArchiveDone = false;
+        this.isArchiveInProgress = false;
+        this.archiveUrl = "#";
+      }
+    }
   },
   methods: {
     ...mapActions('data', [
@@ -607,6 +682,28 @@ export default {
             apiError(error)
             this.downloading = false
         }
+    },
+    async downloadSubjectArchive(id){
+      this.downloading = true;
+      this.isArchiveInProgress = true;
+      this.isArchiveDone = false;
+      let state = this;
+      const startArchiveDownloadUrl = new URL(`/subjects/${id}/async-download/`, axios.defaults.baseURL);
+      await axios.get(startArchiveDownloadUrl).then(
+        async function pollArchiveOnReady(data){
+            const taskID = data.data.task_id;
+            const downloadArchiveOnReadyURL = new URL(`/logs/${taskID}/on-ready/`, axios.defaults.baseURL);
+            const response = await axios.get(downloadArchiveOnReadyURL);
+            if(response.status === 202){
+                setTimeout(function(){pollArchiveOnReady(data);}, 1000);
+            }
+            if(response.status === 200){
+                clearTimeout(pollArchiveOnReady);
+                state.archiveUrl = response.data.url;
+                state.isArchiveInProgress = false;
+                state.isArchiveDone = true;
+            }
+      });
     },
     async permanentRemoveSubject (id) {
       try {
