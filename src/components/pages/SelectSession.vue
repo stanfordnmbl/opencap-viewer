@@ -57,12 +57,12 @@
               <v-list-item link>
                 <v-list-item-title
                     @click="$router.push({ name: 'Session', params: { id: item.id }})"
-                    >Load...</v-list-item-title>
+                    >Load</v-list-item-title>
               </v-list-item>
               <v-list-item link>
                 <v-list-item-title
                   @click="$router.push({ name: 'Dashboard' })"
-                  >Dashboard...</v-list-item-title>
+                  >Dashboard</v-list-item-title>
               </v-list-item>
               <v-list-item link v-if="!item.trashed">
                 <v-dialog
@@ -70,7 +70,7 @@
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Remove...</v-list-item-title>
+                    <v-list-item-title v-on="on">Remove</v-list-item-title>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">
@@ -113,7 +113,7 @@
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Restore...</v-list-item-title>
+                    <v-list-item-title v-on="on">Restore</v-list-item-title>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">

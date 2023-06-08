@@ -436,7 +436,7 @@ export default {
       sexes: state => state.data.sexes,
     }),
     subjectSelectorChoices() {
-      return [{'id':'new', 'display_name': 'New subject...'}].concat(this.subjectsMapped);
+      return [{'id':'new', 'display_name': 'New subject'}].concat(this.subjectsMapped);
     },
     subjectsMapped () {
       return this.subjects.map(s => ({
@@ -750,7 +750,7 @@ export default {
     },
     async getAvailableFramerates() {
       const session_settings = await axios.get(`/sessions/${this.session.id}/get_session_settings/`)
-      // If the session has framerates...
+      // If the session has framerates.
       if('data' in session_settings && 'framerates' in session_settings.data) {
         this.framerates_available = []
         // Push them to available framerates
