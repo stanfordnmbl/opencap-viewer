@@ -168,10 +168,8 @@
                   <template v-slot:activator="{ on }">
                     <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
                   </template>
-                  TODO: adapt description.
-                  The default full body model (https://pubmed.ncbi.nlm.nih.gov/27392337/) models the shoulder joint as a sequence of three rotations (flexion-adduction-rotation) defined as a sequence of Euler angles (Z-X-Y).
-                  This definition does not repsect the ISB conventions (https://pubmed.ncbi.nlm.nih.gov/15844264/). 
-                  OpenCap therefore supports a new model, referred to as full body model with ISB shoulder, that models the shoulder joint as as a sequence of three rotations (flexion-adduction-rotation) defined as a sequence of Euler angles (Y-X-Y).
+                  Full body model: Musculoskeletal model with 33 degrees of freedom from Lai et al. 2017 (https://pubmed.ncbi.nlm.nih.gov/28900782/) with modified hip abductor muscle paths from Uhlrich et al. 2022 (https://pubmed.ncbi.nlm.nih.gov/35798755/). Recommended for primarily lower extremity tasks (e.g., gait).
+                  Full body model with ISB shoulder: Incorporates a 6 degree-of-freedom shoulder complex joint. It incorporates a scapulothoracic body with 3 translational degrees of freedom relative to the torso. The glenohumoral joint uses the Y-X-Y rotation sequence (elevation plane, elevation, rotation) recommended by the ISB (https://pubmed.ncbi.nlm.nih.gov/15844264/). Recommended for upper extremity tasks (e.g., pitching).
                 </v-tooltip>
               </v-card-title>
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
