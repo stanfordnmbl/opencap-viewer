@@ -109,7 +109,8 @@ const routesWithOutAuth = [
   'Session',
   'ResetPassword',
   'NewPassword',
-  'Dashboard'
+  'Dashboard',
+  // 'Step4'
   
 ]
 
