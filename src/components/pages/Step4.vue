@@ -109,14 +109,81 @@
         </v-card-text>
       </v-card>
  
-       <div class="d-flex justify-center">
-        <v-btn
-          class="mt-4 mb-4 ml-4 mr-4"
-          @click="openAdvancedSettings">
-          Advanced Settings
-        </v-btn>
-      </div>
+    <div class="d-flex justify-center">
+        <template>
+        <div class="text-center">
+          <v-btn
+            color="primary-dark"
+            class="mt-4 mb-4 ml-4 mr-4"
+            @click="advancedSettingsDialog=true"
+          >
+            Advanced Settings
+          </v-btn>
 
+          <v-dialog
+            v-model="advancedSettingsDialog"
+            scrollable
+            width="700px"
+            max-height="400px"
+          >
+            <v-card height="fit-content">
+              <v-card-actions class="justify-end">
+                <v-btn color="primary-dark" @click="advancedSettingsDialog = false">✖</v-btn>
+              </v-card-actions>
+              <v-card-title class="justify-center data-title">
+                <span class="mr-2">Select human pose estimation model</span>
+                <v-tooltip bottom="" max-width="500px">
+                  <template v-slot:activator="{ on }">
+                    <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                  </template>
+                  OpenCap supports two human pose estimation models: OpenPose and HRNet. We recommend using OpenPose for computation speed, but both models provide similar accuracy.
+                  OpenPose is restricted to academic or non-profit organization non-commercial research use (consult the license at https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/LICENSE).
+                  HRNet, as implemented by Open-MMLab, has a permissive Apache 2.0 license (consult the license at https://github.com/open-mmlab/mmpose/blob/master/LICENSE).
+                  Please ensure that you have the rights to use the model you select. The OpenCap authors deny any responsibility regarding license infringement.
+                </v-tooltip>
+              </v-card-title>
+
+              <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+                <v-select
+                    v-model="pose_model"
+                    label="Human pose estimation model"
+                    v-bind:items="pose_models"
+                  />
+              </v-card-text>
+  
+              <v-card-title class="justify-center data-title">
+                Select framerate
+              </v-card-title>
+              <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+                <v-select
+                    v-model="framerate"
+                    label="Framerate"
+                    v-bind:items="framerates_available"
+                  />
+              </v-card-text>
+
+              <v-card-title class="justify-center data-title">
+                <span class="mr-2">Select musculoskeletal model</span>
+                <v-tooltip bottom="" max-width="500px">
+                  <template v-slot:activator="{ on }">
+                    <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                  </template>
+                  Full body model: Musculoskeletal model with 33 degrees of freedom from Lai et al. 2017 (https://pubmed.ncbi.nlm.nih.gov/28900782/) with modified hip abductor muscle paths from Uhlrich et al. 2022 (https://pubmed.ncbi.nlm.nih.gov/35798755/). Recommended for primarily lower extremity tasks (e.g., gait).
+                  Full body model with ISB shoulder: Incorporates a 6 degree-of-freedom shoulder complex joint. It incorporates a scapulothoracic body with 3 translational degrees of freedom relative to the torso. The glenohumoral joint uses the Y-X-Y rotation sequence (elevation plane, elevation, rotation) recommended by the ISB (https://pubmed.ncbi.nlm.nih.gov/15844264/). Recommended for upper extremity tasks (e.g., pitching).
+                </v-tooltip>
+              </v-card-title>
+              <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+                <v-select
+                    v-model="openSimModel"
+                    label="Musculoskeletal model"
+                    v-bind:items="openSimModels"
+                  />
+              </v-card-text>
+            </v-card>
+          </v-dialog>
+        </div>
+      </template>
+    </div>
     </div>
 
     <v-card class="step-4-2 ml-4 d-flex images-box">
@@ -211,60 +278,7 @@
         </div>
       </v-card-text>
     </v-card>
-    
-    
-    <div id="overlay-panel" class="overlay-panel" v-on:click="closeAdvancedSettings"></div>
-
-    <v-card id="advanced-settings-menu" class="centered-settings">
-      <div class="pt-4 pr-4 text-right">
-        <v-btn
-          @click="closeAdvancedSettings">
-                ✖
-        </v-btn>
-      </div>
-      <div class="d-flex justify-center">
-        <v-card-title class="justify-center data-title">
-          Select human pose estimation model
-        </v-card-title>
-        <v-tooltip bottom="">
-          <template v-slot:activator="{ on }">
-            <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
-          </template>
-          OpenCap supports two human pose estimation models: OpenPose and HRNet. We recommend using OpenPose for computation speed, but both models provide similar accuracy.
-          OpenPose is restricted to academic or non-profit organization non-commercial research use (consult the license at https://github.com/CMU-Perceptual-Computing-Lab/openpose/blob/master/LICENSE).
-          HRNet, as implemented by Open-MMLab, has a permissive Apache 2.0 license (consult the license at https://github.com/open-mmlab/mmpose/blob/master/LICENSE).
-          Please ensure that you have the rights to use the model you select. The OpenCap authors deny any responsibility regarding license infringement.
-        </v-tooltip>
-      </div>
-
-      <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
-
-        <v-select
-            v-model="pose_model"
-            label="Human pose estimation model"
-            v-bind:items="pose_models"
-          />
-
-      </v-card-text>
-
-      <div class="d-flex justify-center">
-        <v-card-title class="justify-center data-title">
-          Select framerate
-        </v-card-title>
-      </div>
-
-
-      <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
-
-        <v-select
-            v-model="framerate"
-            label="Framerate"
-            v-bind:items="framerates_available"
-          />
-
-      </v-card-text>
-    </v-card>
-
+  
     <v-dialog v-model="new_subject_dialog" width="500">
       <v-form>
       <v-card>
@@ -379,6 +393,7 @@ export default {
         age: null,
         data_sharing_agreement: null,
       },
+      advancedSettingsDialog: false,
       new_subject_dialog: false,
       edited_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
       selected: null,
@@ -401,12 +416,17 @@ export default {
       ],
       pose_model: 'openpose',
       pose_models: [
-        {"text": "OpenPose (recommended, non-commercial research use only)", "value": "openpose"},
+        {"text": "OpenPose (recommended, non-commercial research use only, default)", "value": "openpose"},
         {"text": "HRNet", "value": "hrnet"},
       ],
       framerate: 60,
       framerates_available: [
         {"text": "60fps (max recording time: 60s, default)", "value": 60},
+      ],
+      openSimModel: 'LaiUhlrich2022',
+      openSimModels: [
+        {"text": "Full body model (default)", "value": "LaiUhlrich2022"},
+        {"text": "Full body model with ISB shoulder (In beta, feedback welcome!)", "value": "LaiUhlrich2022_shoulder"},
       ],
       busy: false,
       disabledNextButton: true,
@@ -585,7 +605,8 @@ export default {
             // gender: this.gender,
             data_sharing: this.data_sharing,
             pose_model: this.pose_model,
-            framerate: this.framerate
+            framerate: this.framerate,
+            openSimModel: this.openSimModel,
           });
           try {
             const resUpdate = await axios.get(
@@ -600,7 +621,8 @@ export default {
                   settings_data_sharing: this.data_sharing,
                   settings_pose_model: this.pose_model,
                   settings_framerate: this.framerate,
-                  settings_session_name: this.sessionName
+                  settings_session_name: this.sessionName,
+                  settings_openSimModel: this.openSimModel                  
                 },
               }
             );
@@ -690,15 +712,6 @@ export default {
       } catch (error) {
         apiError(error);
       }
-    },
-    openAdvancedSettings() {
-      document.getElementById("overlay-panel").style.display = "inline-block";
-      document.getElementById("advanced-settings-menu").style.display = "inline-block";
-      this.getAvailableFramerates()
-    },
-    closeAdvancedSettings() {
-      document.getElementById("overlay-panel").style.display = "none";
-      document.getElementById("advanced-settings-menu").style.display = "none";
     },
     async cancelSubjectForm() {
       this.new_subject_dialog = false;
