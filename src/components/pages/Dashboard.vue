@@ -101,6 +101,8 @@
 
           <v-text-field v-model="chartOptions.scales.y.title.text" label="V. Axis Title" outlined dense></v-text-field>
 
+          <v-text-field v-model="chart_line_width" label="Line Width" outlined dense type="number" v-on:change="drawChart"></v-text-field>
+
           <v-select v-model="chartOptions.plugins.legend.position" v-bind:items="chart_legend_position" label="Legend Position"
             outlined dense v-on:change="placeholderFunction"></v-select>
 
@@ -297,6 +299,7 @@ export default {
               dataset["label"] = this.y_quantities_selected[j];
               dataset["backgroundColor"] = colors[j];
               dataset["borderColor"] = colors[j];
+              dataset["borderWidth"] = this.chart_line_width;
 
               this.chartData.datasets.push(dataset);
             }
@@ -506,6 +509,7 @@ export default {
           data: [],
         }]
       },
+      chart_line_width: 1,
       chartOptions: {
         responsive: true,
         maintainAspectRatio: false,
