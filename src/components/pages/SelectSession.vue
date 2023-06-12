@@ -61,7 +61,7 @@
               </v-list-item>
               <v-list-item link>
                 <v-list-item-title
-                  @click="$router.push({ name: 'Dashboard' })"
+                  @click="$router.push({ name: 'Dashboard', params: { id: item.id }})"
                   >Dashboard</v-list-item-title>
               </v-list-item>
 
