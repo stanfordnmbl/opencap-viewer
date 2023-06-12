@@ -160,6 +160,48 @@
                               </v-card>
                             </v-dialog>
                           </v-list-item>
+                          <v-list-item link v-if="!t.trashed">
+                            <v-dialog
+                                    v-model="permanent_delete_dialog"
+                                    v-click-outside="clickOutsideDialogTrialHideMenu"
+                                    max-width="500">
+                              <template v-slot:activator="{ on }">
+                                <v-list-item-title v-on="on">Delete</v-list-item-title>
+                              </template>
+                              <v-card>
+                                <v-card-text class="pt-4">
+                                  <v-row class="m-0">
+                                    <v-col cols="2">
+                                      <v-icon x-large color="red">mdi-close-circle</v-icon>
+                                    </v-col>
+                                    <v-col cols="10">
+                                      <p>
+                                        Do you want to permanently delete trial {{t.name}}?
+                                        This action cannot be undone. Use Trash to keep the ability to restore the trial.
+                                      </p>
+                                    </v-col>
+                                  </v-row>
+                                </v-card-text>
+                                <v-card-actions>
+                                  <v-spacer></v-spacer>
+                                  <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    @click="t.isMenuOpen = false; permanent_delete_dialog = false"
+                                  >
+                                    No
+                                  </v-btn>
+                                  <v-btn
+                                    color="red darken-1"
+                                    text
+                                    @click="t.isMenuOpen = false; permanent_delete_dialog = false; permanentDeleteTrial(t)"
+                                  >
+                                    Yes
+                                  </v-btn>
+                                </v-card-actions>
+                              </v-card>
+                            </v-dialog>
+                          </v-list-item>
                         </v-list>
                       </v-menu>
                     </div>
@@ -394,6 +436,7 @@ export default {
             rename_dialog: false,
             remove_dialog: false,
             restore_dialog: false,
+            permanent_delete_dialog: false,
             show_trashed: false,
             menu: [],
             busy: false,
@@ -756,6 +799,14 @@ export default {
           } catch (error) {
             apiError(error)
           }
+        },
+        async permanentDeleteTrial(trial){
+            try {
+                const { data } = await axios.post(`/trials/${trial.id}/permanent_remove/`);
+                await this.loadSession(data.session);
+            } catch (error) {
+                apiError(error)
+            }
         },
         async restoreTrial(trial) {
           try {
