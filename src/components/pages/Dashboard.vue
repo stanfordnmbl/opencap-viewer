@@ -136,9 +136,6 @@ export default {
           }
         });
       }
-
-    // Set session as current session.
-    this.current_session_id = this.$route.params.id;
   },
   methods: {
     ...mapActions('data', ['loadSession']),
@@ -531,6 +528,8 @@ export default {
     }
   },
   async mounted () {
+    // Set session as current session.
+    this.current_session_id = this.$route.params.id;
     // If not logged in, load session from params and show trials.
     if(!this.session_owned) {
       await this.loadSession(this.$route.params.id)
