@@ -70,7 +70,7 @@
             The information on this page as well as videos of your movement are
             uploaded to a secure cloud server for processing. Please have the
             subject select their data sharing preferences below. Identified
-            videos do no have the face blurred, de-identified videos have faces
+            videos do not have the face blurred, de-identified videos have faces
             blurred, and processed data (e.g., joint angles) is de-identified.
             Please read our privacy terms for details.
           </v-tooltip>
