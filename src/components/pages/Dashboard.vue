@@ -170,9 +170,6 @@ export default {
           }
         });
       }
-
-    // Set session as current session.
-    this.current_session_id = this.$route.params.id;
   },
   methods: {
     ...mapActions('data', ['loadSession']),
@@ -602,6 +599,8 @@ export default {
     }
   },
   async mounted () {
+    // Set session as current session.
+    this.current_session_id = this.$route.params.id;
     // Show spinner and hide chart until finished.
     document.getElementById("spinner-layer").style.display = "block";
     document.getElementById("chart").style.display = "None";
