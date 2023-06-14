@@ -114,7 +114,7 @@
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Remove</v-list-item-title>
+                    <v-list-item-title v-on="on">Trash</v-list-item-title>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">
@@ -124,7 +124,7 @@
                         </v-col>
                         <v-col cols="10">
                           <p>
-                            Do you want to remove session <code>{{item.id}}</code>?
+                            Do you want to trash session <code>{{item.id}}</code>?
                             You will be able to restore it for 30 days. After that,
                             this session will be permanently removed.
                           </p>
