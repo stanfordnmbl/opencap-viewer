@@ -1,6 +1,7 @@
 <template>
   <MainLayout
     leftButton="Back"
+    :centerText="centerText"
     :rightButton="rightButtonCaption"
     :step="4"
     :rightDisabled="busy || disabledNextButton"
@@ -456,17 +457,33 @@ export default {
         if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
         if(!isNaN(parseFloat(v)) && v < 1) return "It is unlikely that the age of subject is lower than 1 years. Are you using the right units? Age should be in years.";
       },
-      checkboxRule: (v) => !!v || 'The subject must agree to continue!'
+      checkboxRule: (v) => !!v || 'The subject must agree to continue!',
+
+      num_expected_devices: 0
     };
   },
   computed: {
     ...mapState({
       subjects: (state) => state.data.subjects,
       session: (state) => state.data.session,
+      sessions: state => state.data.sessions,
       trialId: (state) => state.data.trialId,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
     }),
+    centerText() {
+      var num_expected_cameras = undefined
+
+      // Get calibration trial.
+      var calibration_trial = this.get_calibration_trial(this.session)
+
+      if (calibration_trial != undefined) {
+        num_expected_cameras = calibration_trial.videos.length
+      }
+
+      // Return text with num of expected cameras. If not found, return undefined.
+      return "Expected Devices: " + num_expected_cameras;
+    },
     subjectSelectorChoices() {
       return [{'id':'new', 'display_name': 'New subject'}].concat(this.subjectsMapped);
     },
@@ -545,6 +562,46 @@ export default {
       setTimeout(() => {
         this.formErrors[input] = state;
       },0)
+    },
+    get_calibration_trial(session) {
+      // Check if there is a calibration trial.
+      var i = 0;
+      var calibration_trial = undefined
+      for(i = 0; i < session.trials.length; i++) {
+        if (session.trials[i].name == 'calibration')
+          calibration_trial = session.trials[0];
+      }
+
+      // If no calibration trial, recursively look for parent with calibration trial
+      if (calibration_trial == undefined) {
+        var parent_id = undefined
+        if ("meta" in session) {
+          if ("sessionWithCalibration" in session.meta) {
+            if ("id" in session.meta.sessionWithCalibration) {
+              parent_id = session.meta.sessionWithCalibration.id
+            }
+          }
+        }
+
+        if (parent_id != undefined) {
+          // Extract session with that ID and recursive call.
+          i = 0;
+          for (i = 0; i < this.sessions.length; i++) {
+            if (this.sessions[i].id == parent_id) {
+              calibration_trial = this.get_calibration_trial(this.sessions[i]);
+              break;
+            }
+          }
+        } else {
+          calibration_trial = undefined;
+        }
+      }
+
+      // return obtained calibration trial.
+      return calibration_trial;
+    },
+    get_num_expected_cameras(calibration_trial) {
+      return calibration_trial.videos.length;
     },
     reloadSubjects() {
       console.log('reloading subjects')

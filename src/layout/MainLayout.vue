@@ -22,6 +22,12 @@
           name="left"/>
       </div>
 
+      <div class="slot d-flex justify-center">
+
+          {{ centerText }}
+
+      </div>
+
       <div class="slot d-flex justify-end">
         <v-btn
           v-if="rightButton"
@@ -66,6 +72,10 @@ export default {
       default: ''
     },
     rightButton: {
+      type: String,
+      default: ''
+    },
+    centerText: {
       type: String,
       default: ''
     },
