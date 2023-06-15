@@ -784,17 +784,14 @@ export default {
           }
         },
         async updateTrialWithData(trial, data) {
-            console.log(trial)
-            console.log(data)
             const index = this.session.trials.findIndex(x => x.id === trial.id)
-            console.log(index)
             if (index >= 0) {
                 const session_index = this.sessions.findIndex(x => x.id === trial.session);
                 const idx = this.sessions[session_index].trials.findIndex(x => x.id === trial.id)
                 if(Object.keys(data).length === 0){
                     // if permanent remove was done
-                    this.session.trials.splice(idx, 1);
-                    this.sessions[session_index].trials.splice(idx, 1);
+                    this.session.trials.splice(idx -1 , 1);
+                    this.sessions[session_index].trials.splice(idx - 1, 1);
                 } else {
                     Vue.set(this.session.trials, index, data);
                     Vue.set(this.sessions[session_index].trials, idx, data);
@@ -814,7 +811,8 @@ export default {
                 const { data } = await axios.post(`/trials/${trial.id}/permanent_remove/`);
                 await this.updateTrialWithData(trial, data);
             } catch (error) {
-                apiError(error)
+                apiError(error);
+                await this.updateTrialWithData(trial, {});
             }
         },
         async restoreTrial(trial) {
