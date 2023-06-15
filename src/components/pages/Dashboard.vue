@@ -294,6 +294,7 @@ export default {
       this.trial_selected = trialName;
       var index = this.trial_names.indexOf(this.trial_selected);
       var id = this.trial_ids[index];
+      this.$router.push({ name: 'Dashboard', params: { id: id } })
 
       try {
         const { data } = await axios.get(`/trials/${id}/`);
