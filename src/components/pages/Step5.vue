@@ -1,7 +1,7 @@
 <template>
     <div class="step-5 d-flex">
         <div class="left d-flex flex-column pa-2">
-
+            {{ expectedCamerasText }}
             <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
 
                 <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
@@ -438,7 +438,9 @@ export default {
             recordingTimer: null,
 
             trialsPoll: null,
-            showSessionMenuButtons: true
+            showSessionMenuButtons: true,
+
+            num_expected_devices: 0
         }
     },
     computed: {
@@ -460,6 +462,19 @@ export default {
             gender: state => state.data.gender,
             isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
         }),
+        expectedCamerasText() {
+          var num_expected_cameras = undefined
+
+          // Get calibration trial.
+          var calibration_trial = this.get_calibration_trial(this.session)
+
+          if (calibration_trial != undefined) {
+            num_expected_cameras = calibration_trial.videos.length
+          }
+
+          // Return text with num of expected cameras. If not found, return undefined.
+          return "Expected Devices: " + num_expected_cameras;
+        },
         sessionUrl() {
             return "https://app.opencap.ai/session/" + this.session.id;
         },
@@ -602,6 +617,46 @@ export default {
                     break
                 }
             }
+        },
+        get_calibration_trial(session) {
+          // Check if there is a calibration trial.
+          var i = 0;
+          var calibration_trial = undefined
+          for(i = 0; i < session.trials.length; i++) {
+            if (session.trials[i].name == 'calibration')
+              calibration_trial = session.trials[0];
+          }
+
+          // If no calibration trial, recursively look for parent with calibration trial
+          if (calibration_trial == undefined) {
+            var parent_id = undefined
+            if ("meta" in session) {
+              if ("sessionWithCalibration" in session.meta) {
+                if ("id" in session.meta.sessionWithCalibration) {
+                  parent_id = session.meta.sessionWithCalibration.id
+                }
+              }
+            }
+
+            if (parent_id != undefined) {
+              // Extract session with that ID and recursive call.
+              i = 0;
+              for (i = 0; i < this.sessions.length; i++) {
+                if (this.sessions[i].id == parent_id) {
+                  calibration_trial = this.get_calibration_trial(this.sessions[i]);
+                  break;
+                }
+              }
+            } else {
+              calibration_trial = undefined;
+            }
+          }
+
+          // return obtained calibration trial.
+          return calibration_trial;
+        },
+        get_num_expected_cameras(calibration_trial) {
+          return calibration_trial.videos.length;
         },
         recordTimerHandler() {
             this.recordingTimePassed = moment().diff(this.recordingStarted, 'seconds')

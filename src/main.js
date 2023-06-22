@@ -64,7 +64,7 @@ Vue.config.productionTip = false
 
 axios.defaults.baseURL = process.env.VUE_APP_API_SERVER //"https://api.opencap.ai/"
 // axios.defaults.baseURL = "http://34.219.192.107/"
-// axios.defaults.baseURL = "http://localhost:8000/"
+axios.defaults.baseURL = "http://localhost:8000/"
 
 store.dispatch('auth/checkToken').then(() => {
   new Vue({
