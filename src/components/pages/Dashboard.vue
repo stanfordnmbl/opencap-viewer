@@ -35,6 +35,11 @@
             <v-select v-model="session_selected" v-bind:items="sessionsIds" label="Select session" outlined dense
               v-on:change="onSessionSelected"></v-select>
           </div>
+          <div v-else>
+                <p>
+                    This session belongs to another user. To explore your own sessions you should go back to your session list.
+                </p>
+          </div>
           
           <v-select v-model="trial_selected" v-bind:items="trial_names" label="Select trial" outlined dense
             v-on:change="onTrialSelected"></v-select>
@@ -263,8 +268,9 @@ export default {
       if (sessionIdSelected !== null) {
         sessionIdSelected = sessionIdSelected.pop();
 
-        this.current_session_id = sessionIdSelected;
+        this.$router.push({ name: 'Dashboard', params: { id: sessionIdSelected } })
 
+        this.current_session_id = sessionIdSelected;
 
         var session = this.sessions.filter(function (obj) {
           if (obj.id === sessionIdSelected) {
@@ -294,7 +300,6 @@ export default {
       this.trial_selected = trialName;
       var index = this.trial_names.indexOf(this.trial_selected);
       var id = this.trial_ids[index];
-      this.$router.push({ name: 'Dashboard', params: { id: id } })
 
       try {
         const { data } = await axios.get(`/trials/${id}/`);
