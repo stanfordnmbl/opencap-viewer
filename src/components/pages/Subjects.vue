@@ -143,7 +143,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Remove permanently</v-list-item-title>
+                            <v-list-item-title v-on="on">Delete permanently</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
