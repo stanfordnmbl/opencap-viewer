@@ -76,7 +76,7 @@
                             </v-dialog>
 
                           </v-list-item>
-                          <v-list-item ink v-if="!t.trashed">
+                          <v-list-item link v-if="!t.trashed">
                             <v-dialog
                                     v-model="showAnalysisDialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
@@ -91,7 +91,7 @@
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
-                                                <v-btn @click="invokeAnalysisFunction(func.id, t.name)" :disabled="isInvokeInProgress">
+                                                <v-btn small @click="invokeAnalysisFunction(func.id, t.name)" :disabled="isInvokeInProgress">
                                                 <span v-if="func.id === invokedFunctionId & isInvokeInProgress & !isInvokeDone">
                                                     <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
                                                     Calculating...
@@ -99,6 +99,7 @@
                                                 <span v-if="func.id !== invokedFunctionId || !invokedFunctionId || !(isInvokeInProgress || isInvokeDone)">Start</span>
                                                 <span v-if="func.id === invokedFunctionId & isInvokeDone">{{analysisResult.state}}</span>
                                                 </v-btn>
+                                                <v-btn small v-if="func.id === invokedFunctionId & isInvokeDone" @click="showAnalysisResultDialog=true">Open details</v-btn>
                                             </v-col>
                                         </v-row>
                                     </v-card-text>
@@ -122,6 +123,36 @@
                                     </v-card-actions>
                                 </v-card>
                             </v-dialog>
+
+                            <v-dialog
+                                v-model="showAnalysisResultDialog"
+                                width="auto"
+                            >
+                                <v-card>
+                                <v-card-title>{{ analysisResult.analysis_function.title }}</v-card-title>
+                                <v-card-text>
+                                    <v-row>
+                                        <v-col cols="4">Message</v-col>
+                                        <v-col cols="8">{{analysisResult.result.message || analysisResult.result.error}}</v-col>
+                                    </v-row>
+                                    <v-row>
+                                        <v-col cols="4">Status</v-col>
+                                        <v-col cols="8">{{analysisResult.status}}</v-col>
+                                    </v-row>
+                                </v-card-text>
+                                <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    @click="showAnalysisResultDialog=false"
+                                    >
+                                    Close
+                                    </v-btn>
+                                </v-card-actions>
+                                </v-card>
+                            </v-dialog>
+
                           </v-list-item>
                           <v-list-item link v-if="!t.trashed">
                             <v-dialog
@@ -502,9 +533,10 @@ export default {
             archiveUrl: "#",
 
             showAnalysisDialog: false,
+            showAnalysisResultDialog: false,
             isInvokeInProgress: false,
             isInvokeDone: false,
-            analysisResult: {},
+            analysisResult: {analysis_function: {}, result: {}},
             invokedFunctionId: null,
 
             trialInProcess: null,
@@ -635,7 +667,7 @@ export default {
             if(!newShowAnalysisDialog){
                 this.isInvokeInProgress = false;
                 this.isInvokeDone = false;
-                this.analysisResult = {};
+                this.analysisResult = {analysis_function: {}, result: {}};
                 this.invokedFunctionId = null;
             }
         }
