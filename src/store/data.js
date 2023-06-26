@@ -36,6 +36,7 @@ export default {
 
     // step 5
     trialName: '',
+    analysisFunctions: [],
 
     subjects: [],
     sexes: {
@@ -96,6 +97,9 @@ export default {
       }
       state.subjects = subjects
       console.log(state.subjects)
+    },
+    setAnalysisFunctions(state, functions){
+      state.analysisFunctions = functions;
     },
     setStep1 (state, { cameras }) {
       state.cameras = cameras
@@ -246,6 +250,10 @@ export default {
     async loadSubjects ({ state, commit }) {
       const res = await axios.get('/subjects/')
       commit('setSubjects', res.data)
+    },
+    async loadAnalysisFunctions({ state, commit }){
+      const response = await axios.get('/analysis-functions/');
+      commit('setAnalysisFunctions', response.data);
     },
     async trashExistingSubject ({ state, commit }, id) {
       const subjectId = id

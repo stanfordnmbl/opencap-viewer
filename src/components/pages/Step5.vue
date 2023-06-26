@@ -76,6 +76,53 @@
                             </v-dialog>
 
                           </v-list-item>
+                          <v-list-item ink v-if="!t.trashed">
+                            <v-dialog
+                                    v-model="showAnalysisDialog"
+                                    v-click-outside="clickOutsideDialogTrialHideMenu"
+                                    max-width="800">
+                                <template v-slot:activator="{ on }">
+                                    <v-list-item-title v-on="on">Analysis</v-list-item-title>
+                                </template>
+                                <v-card>
+                                    <v-card-title>Advanced Analysis</v-card-title>
+                                    <v-card-text>
+                                        <v-row v-for="func in analysisFunctions" :key="func.id">
+                                            <v-col cols="3">{{ func.title }}</v-col>
+                                            <v-col cols="5">{{ func.description }}</v-col>
+                                            <v-col cols="4">
+                                                <v-btn @click="invokeAnalysisFunction(func.id, t.name)" :disabled="isInvokeInProgress">
+                                                <span v-if="func.id === invokedFunctionId & isInvokeInProgress & !isInvokeDone">
+                                                    <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                                                    Calculating...
+                                                </span>
+                                                <span v-if="func.id !== invokedFunctionId || !invokedFunctionId || !(isInvokeInProgress || isInvokeDone)">Start</span>
+                                                <span v-if="func.id === invokedFunctionId & isInvokeDone">{{analysisResult.state}}</span>
+                                                </v-btn>
+                                            </v-col>
+                                        </v-row>
+                                    </v-card-text>
+                                    <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    :disabled="isInvokeInProgress"
+                                    @click="isInvokeInProgress = false; isInvokeDone = false;"
+                                  >
+                                    Reset results
+                                  </v-btn>
+                                  <v-btn
+                                    color="red darken-1"
+                                    text
+                                    @click="t.isMenuOpen = false; showAnalysisDialog = false;"
+                                  >
+                                    Close
+                                  </v-btn>
+                                    </v-card-actions>
+                                </v-card>
+                            </v-dialog>
+                          </v-list-item>
                           <v-list-item link v-if="!t.trashed">
                             <v-dialog
                                     v-model="remove_dialog"
@@ -189,7 +236,7 @@
                                     text
                                     @click="t.isMenuOpen = false; permanent_delete_dialog = false"
                                   >
-                                    No
+                                    No++'
                                   </v-btn>
                                   <v-btn
                                     color="red darken-1"
@@ -433,6 +480,7 @@ export default {
                 recording: 'Stop recording',
                 processing: 'Cancel Upload'
             },
+            
             rename_dialog: false,
             remove_dialog: false,
             restore_dialog: false,
@@ -452,6 +500,12 @@ export default {
             isArchiveInProgress: false,
             isArchiveDone: false,
             archiveUrl: "#",
+
+            showAnalysisDialog: false,
+            isInvokeInProgress: false,
+            isInvokeDone: false,
+            analysisResult: {},
+            invokedFunctionId: null,
 
             trialInProcess: null,
             trial: null,
@@ -488,6 +542,7 @@ export default {
         ...mapState({
             session: state => state.data.session,
             sessions: state => state.data.sessions,
+            analysisFunctions: state => state.data.analysisFunctions,
 
             user_id: state => state.auth.user_id,
 
@@ -531,6 +586,7 @@ export default {
     },
     async mounted() {
         await this.loadSession(this.$route.params.id)
+        await this.loadAnalysisFunctions()
         console.log(this.user_id)
         console.log(this.session.user)
         this.show_controls = (this.user_id == this.session.user)
@@ -574,6 +630,14 @@ export default {
                 this.isArchiveInProgress = false;
                 this.archiveUrl = "#";
             }
+        },
+        showAnalysisDialog(newShowAnalysisDialog, oldShowAnalysisDialog){
+            if(!newShowAnalysisDialog){
+                this.isInvokeInProgress = false;
+                this.isInvokeDone = false;
+                this.analysisResult = {};
+                this.invokedFunctionId = null;
+            }
         }
     },
     methods: {
@@ -582,9 +646,9 @@ export default {
             'clearAll',
             'setSessionId',
             'addTrial',
-            'updateTrial'
+            'updateTrial',
         ]),
-        ...mapActions('data', ['loadSession', 'initSessionSameSetup']),
+        ...mapActions('data', ['loadSession', 'initSessionSameSetup', 'loadAnalysisFunctions']),
         async changeState() {
             switch (this.state) {
                 case 'ready': {
@@ -701,7 +765,31 @@ export default {
                         state.isArchiveDone = true;
                     }
             });
-            },
+        },
+        async invokeAnalysisFunction(functionId, trialName){
+            this.isInvokeInProgress = true;
+            this.isInvokeDone = false;
+            this.invokedFunctionId = functionId;
+            let state = this;
+            const invokeAnalysisFunctionUrl = new URL(`/analysis-functions/${functionId}/invoke/`, axios.defaults.baseURL);
+            const invokeData = {session_id: this.session.id, specific_trial_names: [trialName]};
+            await axios.post(invokeAnalysisFunctionUrl, invokeData).then(
+                async function pollResultOnReady(data){
+                    const taskID = data.data.task_id;
+                    const getResultOnReadyURL = new URL(`/analysis-result/${taskID}/`, axios.defaults.baseURL);
+                    const response = await axios.get(getResultOnReadyURL);
+                    if(response.status === 202){
+                        setTimeout(function(){pollResultOnReady(data);}, 1000);
+                    }
+                    if(response.status === 200){
+                        console.log("Analysis result:", response.data)
+                        clearTimeout(pollResultOnReady);
+                        state.analysisResult = response.data;
+                        state.isInvokeInProgress = false;
+                        state.isInvokeDone = true;
+                    }
+            });
+        },
         newSession() {
             this.clearAll()
             this.$router.push({ name: 'Step1' })
