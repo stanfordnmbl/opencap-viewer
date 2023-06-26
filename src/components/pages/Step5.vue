@@ -86,8 +86,8 @@
                                 </template>
                                 <v-card>
                                     <v-card-title>Advanced Analysis</v-card-title>
-                                    <v-card-text>
-                                        <v-row v-for="func in analysisFunctions" :key="func.id">
+                                    <v-card-text v-if="analysisFunctions.length > 0">
+                                        <v-row  v-for="func in analysisFunctions" :key="func.id">
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
@@ -103,11 +103,15 @@
                                             </v-col>
                                         </v-row>
                                     </v-card-text>
+                                    <v-card-text v-else>
+                                        <p>Sorry, there are no available functions.</p>
+                                    </v-card-text>
                                     <v-card-actions>
                                     <v-spacer></v-spacer>
                                     <v-btn
                                     color="blue darken-1"
                                     text
+                                    v-if="analysisFunctions.length > 0"
                                     :disabled="isInvokeInProgress"
                                     @click="isInvokeInProgress = false; isInvokeDone = false;"
                                   >
