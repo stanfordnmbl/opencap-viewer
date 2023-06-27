@@ -137,7 +137,7 @@
                                 <v-card-text>
                                     <v-row>
                                         <v-col cols="4">Message</v-col>
-                                        <v-col cols="8">{{analysisResult.result.body.message || analysisResult.result.error}}</v-col>
+                                        <v-col cols="8">{{analysisResult.result.body.message || analysisResult.result.body.error || analysisResult.result.error}}</v-col>
                                     </v-row>
                                     <v-row>
                                         <v-col cols="4">Status</v-col>
