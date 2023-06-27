@@ -120,7 +120,7 @@
                                   <v-btn
                                     color="red darken-1"
                                     text
-                                    @click="t.isMenuOpen = false; showAnalysisDialog = false;"
+                                    @click="t.isMenuOpen = false; showAnalysisDialog = false"
                                   >
                                     Close
                                   </v-btn>
@@ -137,11 +137,11 @@
                                 <v-card-text>
                                     <v-row>
                                         <v-col cols="4">Message</v-col>
-                                        <v-col cols="8">{{analysisResult.result.message || analysisResult.result.error}}</v-col>
+                                        <v-col cols="8">{{analysisResult.result.body.message || analysisResult.result.error}}</v-col>
                                     </v-row>
                                     <v-row>
                                         <v-col cols="4">Status</v-col>
-                                        <v-col cols="8">{{analysisResult.status}}</v-col>
+                                        <v-col cols="8">{{analysisResult.result.statusCode}}</v-col>
                                     </v-row>
                                 </v-card-text>
                                 <v-card-actions>
@@ -540,7 +540,7 @@ export default {
             showAnalysisResultDialog: false,
             isInvokeInProgress: false,
             isInvokeDone: false,
-            analysisResult: {analysis_function: {}, result: {}},
+            analysisResult: {analysis_function: {}, result: { body: {}}},
             invokedFunctionId: null,
 
             trialInProcess: null,
@@ -671,7 +671,7 @@ export default {
             if(!newShowAnalysisDialog){
                 this.isInvokeInProgress = false;
                 this.isInvokeDone = false;
-                this.analysisResult = {analysis_function: {}, result: {}};
+                this.analysisResult = {analysis_function: {}, result: {body: {}}};
                 this.invokedFunctionId = null;
             }
         }
