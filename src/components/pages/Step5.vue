@@ -790,8 +790,8 @@ export default {
                 const idx = this.sessions[sessionIndex].trials.findIndex(x => x.id === trial.id)
                 if(Object.keys(data).length === 0){
                     // if permanent remove was done
-                    this.session.trials.splice(index, 1);
-                    this.sessions[sessionIndex].trials.splice(idx, 1);
+                    Vue.delete(this.session.trials, index);
+                    Vue.delete(this.sessions[sessionIndex].trials, idx);
                 } else {
                     Vue.set(this.session.trials, index, data);
                     Vue.set(this.sessions[sessionIndex].trials, idx, data);
