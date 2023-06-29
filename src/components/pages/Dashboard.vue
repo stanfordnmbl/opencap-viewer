@@ -114,7 +114,7 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import axios from 'axios'
-import { apiError } from '@/util/ErrorMessage.js'
+import { apiError, apiInfo, apiWarning } from '@/util/ErrorMessage.js'
 import Vue from 'vue'
 import VueGoogleCharts from "vue3-googl-chart"
 import { jsPDF } from 'jspdf'
@@ -280,15 +280,20 @@ export default {
         var trials = session[0]['trials'];
         // Filter trials by name.
         trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
-        this.trial_names = [];
-        trials.forEach(element => {
-          this.trial_names.push(element.name);
-          this.trial_ids.push(element.id)
-        });
-        this.trial_selected = this.trial_names[0];
 
-        // Load data from this trial.
-        this.onTrialSelected(this.trial_selected);
+        if (trials.length > 0) {
+            this.trial_names = [];
+            trials.forEach(element => {
+              this.trial_names.push(element.name);
+              this.trial_ids.push(element.id)
+            });
+            this.trial_selected = this.trial_names[0];
+
+            // Load data from this trial.
+            this.onTrialSelected(this.trial_selected);
+        } else {
+            apiWarning("There are no trials associated to this session. Record a new trial in order to plot information.")
+        }
 
       }
     },
@@ -496,6 +501,7 @@ export default {
     ...mapState({
       sessions: state => state.data.sessions,
       session: state => state.data.session,
+      subjects: state => state.data.subjects,
       loggedIn: state => state.auth.verified,
     }),
     sessionsNames() {
@@ -503,7 +509,7 @@ export default {
         // Check that there are valid trials
         var trials = obj['trials'];
         // Filter trials by name and status.
-        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
+        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
 
         if (trials.length > 0) {
           return obj.name;
@@ -522,10 +528,10 @@ export default {
         // Check that there are valid trials
         var trials = obj['trials'];
         // Filter trials by name and status.
-        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
+        trials = trials.filter(trial => trial.status === 'done'&& trial.name !== 'calibration')
 
         if (trials.length > 0) {
-          return obj.meta.subject.id + " (" + obj.id + ")";
+          return  obj.name + " (" + obj.id + ")";
         } else {
           return "";
         }
@@ -543,7 +549,7 @@ export default {
 
       var trials = this.session['trials'];
       // Filter trials by name.
-      trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
+      trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
       this.trial_names = [];
       trials.forEach(element => {
         this.trial_names.push(element.name);

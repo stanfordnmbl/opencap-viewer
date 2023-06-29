@@ -10,7 +10,7 @@
                         :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
                 </ValidationProvider>
 
-                <v-btn v-show="show_controls" :disabled="busy || invalid" @click="changeState">
+                <v-btn class="mb-4 w-100" v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
                 </v-btn>
                 <p v-if="state === 'recording'">Videos are recording, do not refresh</p>
