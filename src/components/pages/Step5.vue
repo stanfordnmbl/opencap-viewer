@@ -18,7 +18,12 @@
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
-                <div v-for="(t, index) in filteredTrialsWithMenu" :key="`trial-${index}`" :ref="`trial-${index}`" class="my-1 trial d-flex justify-content-between"
+                <div v-for="(t, index) in filteredTrialsWithMenu"
+                    v-bind:item="t"
+                    v-bind:index="index"
+                    v-bind:key="t.id"
+                    :ref="t.id"
+                    class="my-1 trial d-flex justify-content-between"
                     :class="{ selected: isSelected(t) }">
                     <Status :value="t" :class="trialClasses(t)" @click="loadTrial(t)" />
                     <div class="">
