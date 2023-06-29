@@ -531,7 +531,11 @@ export default {
         trials = trials.filter(trial => trial.status === 'done'&& trial.name !== 'calibration')
 
         if (trials.length > 0) {
-          return  obj.name + " (" + obj.id + ")";
+          if (obj.name)
+            return  obj.name + " (" + obj.id + ")";
+          else
+            if (obj.meta && obj.meta.subject && obj.meta.subject.id)
+                return obj.meta.subject.id + " (" + obj.id + ")";
         } else {
           return "";
         }
