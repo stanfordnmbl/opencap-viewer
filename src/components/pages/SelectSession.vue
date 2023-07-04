@@ -221,6 +221,7 @@ export default {
   name: 'SelectSession',
   created: function () {
       this.loadSubjects()
+      this.loadExistingSessions({reroute: false, quantity: -1})
   },
   data () {
     return {
