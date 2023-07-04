@@ -221,6 +221,7 @@ export default {
   name: 'SelectSession',
   created: function () {
       this.loadSubjects()
+      this.loadExistingSessions({reroute: false, quantity: -1})
   },
   data () {
     return {
@@ -256,7 +257,7 @@ export default {
       return this.sessions.map(s => ({
         id: s.id,
         name: s.name,
-        sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
+        sessionName: s.meta !== null && s.meta["sessionName"] ? s.meta["sessionName"] : "",
         trials_count: s.trials.filter(function (trial, i){
                 return trial.name !== 'calibration';
             }).length,

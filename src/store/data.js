@@ -58,7 +58,12 @@ export default {
   },
   mutations: {
     setSession (state, session) {
-      state.session = session
+      session.created_at = formatDate(session.created_at); 
+      state.session = session;
+      const sessionIds = state.sessions.map(session => session.id);
+      if(!sessionIds.includes(session.id)){
+        state.sessions.unshift(session);
+      }
     },
     setSessionId (state, id) {
 
