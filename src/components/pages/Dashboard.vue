@@ -37,7 +37,7 @@
           </div>
           <div v-else>
                 <p>
-                    This session belongs to another user. To explore your own sessions you should go back to your session list.
+                    This is a public session. To load your sessions, launch the dashboard from your session list.
                 </p>
           </div>
           
