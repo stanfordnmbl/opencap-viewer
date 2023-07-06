@@ -289,7 +289,7 @@ export default {
             // Load data from this trial.
             this.onTrialSelected(this.trial_selected);
         } else {
-            apiWarning("There are no trials associated to this session. Record a new trial in order to plot information.")
+            apiWarning("There are no dynamic trials associated with this session, thereby nothing to plot.")
         }
 
       }
