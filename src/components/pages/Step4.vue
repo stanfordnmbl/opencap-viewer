@@ -190,12 +190,12 @@
                   OpenCap uses an LSTM model, also called marker augmenter model, to predict the 3D position of 43 anatomical markers from the 3D position of 20 video keypoints (https://www.biorxiv.org/content/10.1101/2022.07.07.499061v1). 
                   The anatomical markers are used as input to OpenSim to compute joint angles using inverse kinematics.
                   <br><br>
-                  The default model (v0.2) underwent training using 708 hours of motion capture data, yielding an RMSE of 4.8 +/- 0.2 (OpenPose and HRNet) degrees for joint angles across 18 degrees of freedom. 
+                  The default model (v0.2) underwent training using 708 hours of motion capture data, yielding an RMSE of 4.8 +/- 0.2 deg (OpenPose and HRNet) for joint angles across 18 degrees of freedom. 
                   <br><br>
-                  The latest model (v0.3) was trained on 1475 hours of motion capture data and resulted in an RMSE of 4.4 +/- 0.3 (OpenPose) and 4.1 +/- 0.3 (HRnet) deg for joint angles across 18 degrees of freedom.
+                  The latest model (v0.3) was trained on 1475 hours of motion capture data and resulted in an RMSE of 4.4 +/- 0.3 deg (OpenPose) and 4.1 +/- 0.3 deg (HRnet) for joint angles across 18 degrees of freedom.
                   <br><br>
-                  The performance evaluation was conducted in comparison to marker-based motion capture using data from 10 subjects performing 4 different tasks (walking, squatting, sit-to-stand, and drop jumps). 
-                  The dataset used for training the latest model (v0.3) contains data from more subjects and from a more diverse set of tasks; model v0.3 is therefore expected to better generalize to new tasks and to yield more accurate results overall. 
+                  The performance evaluation was conducted in comparison to marker-based motion capture using data from 10 subjects performing 4 different types of activities (walking, squatting, sit-to-stand, and drop jumps). 
+                  The dataset used for training the latest model (v0.3) contains data from more subjects and from a more diverse set of tasks; model v0.3 is therefore expected to better generalize to new tasks and to yield more accurate results. 
                   It has however been less tested and we welcome feedback from users regarding its performance. We recommend using the latest model (v0.3) for new data collection but warn users that we might still adjust the model in the future.
                   The older model (v0.2) is still the default model.
                 </v-tooltip>
@@ -454,12 +454,12 @@ export default {
       openSimModel: 'LaiUhlrich2022',
       openSimModels: [
         {"text": "Full body model (default)", "value": "LaiUhlrich2022"},
-        {"text": "Full body model with ISB shoulder (In beta, feedback welcome!)", "value": "LaiUhlrich2022_shoulder"},
+        {"text": "Full body model with ISB shoulder (in beta, feedback welcome)", "value": "LaiUhlrich2022_shoulder"},
       ],
       augmenter_model: 'v0.2',
       augmenter_models: [
         {"text": "v0.2 (default)", "value": "v0.2"},
-        {"text": "v0.3 (In beta, feedback welcome!)", "value": "v0.3"},
+        {"text": "v0.3 (in beta, feedback welcome)", "value": "v0.3"},
       ],
       busy: false,
       disabledNextButton: true,
