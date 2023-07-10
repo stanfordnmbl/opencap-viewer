@@ -37,7 +37,7 @@
           </div>
           <div v-else>
                 <p>
-                    This session belongs to another user. To explore your own sessions you should go back to your session list.
+                    This is a public session. To load your sessions, launch the dashboard from your session list.
                 </p>
           </div>
           
@@ -141,9 +141,6 @@ export default {
           }
         });
       }
-
-    // Set session as current session.
-    this.current_session_id = this.$route.params.id;
   },
   methods: {
     ...mapActions('data', ['loadSession']),
@@ -295,7 +292,7 @@ export default {
             this.onTrialSelected(this.trial_selected);
         } else {
             this.trial_names = []
-            apiWarning("There are no trials associated to this session. Record a new trial in order to plot information.")
+            apiWarning("There are no dynamic trials associated with this session, thereby nothing to plot.")
         }
 
       }
@@ -550,6 +547,8 @@ export default {
     }
   },
   async mounted () {
+    // Set session as current session.
+    this.current_session_id = this.$route.params.id;
     // If not logged in, load session from params and show trials.
     if(!this.session_owned) {
       await this.loadSession(this.$route.params.id)

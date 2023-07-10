@@ -6,11 +6,15 @@
 
       <router-link
         v-if="showLink"
-        :to="{ name: 'SelectSession' }"
-        class="logo-link">OpenCap</router-link>
-      <h1
-        v-else
-        class="logo">OpenCap</h1>
+        :to="{ name: 'SelectSession' }">
+          <img height="59px" class="logo" src="/images/opencap-logo-dark.png"/>
+        </router-link>
+
+      <router-link
+      v-else
+      :to="{ name: '#' }">
+        <img height="59px" class="logo" src="/images/opencap-logo-dark.png"/>
+      </router-link>
       <v-spacer></v-spacer>
 
       <QRCodeDialog/>
@@ -91,17 +95,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.logo-link {
-  font-size: 32px;
-  font-weight: 700;
-  text-decoration: none;
-
-  &:hover {
-    color: rgba(255, 255, 255, 0.7);
-  }
-}
-
 .logo {
   user-select: none;
+  margin-top: 10px;
 }
 </style>
