@@ -515,7 +515,7 @@ export default {
         trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
 
         if (trials.length > 0) {
-          return obj.name;
+          return  obj.name + " (" + obj.id + ")";
         } else {
           return "";
         }
@@ -531,7 +531,7 @@ export default {
         // Check that there are valid trials
         var trials = obj['trials'];
         // Filter trials by name and status.
-        trials = trials.filter(trial => trial.status === 'done'&& trial.name !== 'calibration')
+        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
 
         if (trials.length > 0) {
           if (obj.name)
@@ -556,16 +556,23 @@ export default {
 
       var trials = this.session['trials'];
       // Filter trials by name.
-      trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
-      this.trial_names = [];
-      trials.forEach(element => {
-        this.trial_names.push(element.name);
-        this.trial_ids.push(element.id)
-      });
-      this.trial_selected = this.trial_names[0];
+      trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral'  && trial.name !== 'calibration')
+      if (trials.length > 0) {
+          this.trial_names = [];
+          trials.forEach(element => {
+            this.trial_names.push(element.name);
+            this.trial_ids.push(element.id)
+          });
+          this.trial_selected = this.trial_names[0];
 
-      // Load data from this trial.
-      this.onTrialSelected(this.trial_selected);
+          // Load data from this trial.
+          this.onTrialSelected(this.trial_selected);
+
+        } else {
+            this.trial_names = []
+            apiWarning("There are no trials associated to this session. Record a new trial in order to plot information.")
+        }
+
     }
   },
 }
