@@ -119,11 +119,16 @@ function apiErrorRes (axiosRes, defaultText) {
   }
 }
 
+function clearToastMessages() {
+    Vue.toasted.clear()
+}
+
 export {
   processErrorMessage,
   apiError,
   apiSuccess,
   apiWarning,
   apiErrorRes,
-  apiInfo
+  apiInfo,
+  clearToastMessages
 }

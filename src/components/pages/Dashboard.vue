@@ -114,7 +114,7 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import axios from 'axios'
-import { apiError, apiInfo, apiWarning } from '@/util/ErrorMessage.js'
+import { apiError, apiInfo, apiWarning, clearToastMessages } from '@/util/ErrorMessage.js'
 import Vue from 'vue'
 import VueGoogleCharts from "vue3-googl-chart"
 import { jsPDF } from 'jspdf'
@@ -262,6 +262,8 @@ export default {
     },
     // Get trials and update trials select when a sessin is selected.
     onSessionSelected(sessionName) {
+      // Clear previous toast messages
+      clearToastMessages()
 
       // Get value between parentheses (session id).
       var sessionIdSelected = sessionName.match(/\((.*)\)/);
@@ -292,6 +294,7 @@ export default {
             // Load data from this trial.
             this.onTrialSelected(this.trial_selected);
         } else {
+            this.trial_names = []
             apiWarning("There are no trials associated to this session. Record a new trial in order to plot information.")
         }
 
