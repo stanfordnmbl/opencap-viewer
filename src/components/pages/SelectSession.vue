@@ -259,7 +259,7 @@ export default {
         name: s.name,
         sessionName: s.meta !== null && s.meta["sessionName"] ? s.meta["sessionName"] : "",
         trials_count: s.trials.filter(function (trial, i){
-                return trial.name !== 'calibration';
+                return (trial.status === 'done' && trial.name === 'neutral') || trial.name !== 'calibration' && (trial.name !== 'neutral');
             }).length,
         created_at: s.created_at,
         trashed: s.trashed,
