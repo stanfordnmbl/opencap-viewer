@@ -33,6 +33,7 @@ export default {
     pose_model: 'openpose',
     framerate: 60,
     openSimModel: 'LaiUhlrich2022',
+    augmenter_model: 'v0.2',
 
     // step 5
     trialName: '',
@@ -113,7 +114,7 @@ export default {
     setStep3 (state, trialId) {
       state.trialId = trialId
     },
-    setStep4 (state, { subject, data_sharing, pose_model, openSimModel }) {
+    setStep4 (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model }) {
       // state.identifier = identifier
       // state.weight = weight
       // state.height = height
@@ -123,6 +124,7 @@ export default {
       state.data_sharing = data_sharing
       state.pose_model = pose_model
       state.openSimModel = openSimModel
+      state.augmenter_model = augmenter_model
     },
     setStep5 (state, { trialName }) {
       state.trialName = trialName
@@ -145,6 +147,7 @@ export default {
       state.data_sharing = ''
       state.pose_model = 'openpose'
       state.openSimModel = 'LaiUhlrich2022'
+      state.augmenter_model = 'v0.2'
       // step 5
       state.trialName = ''       
     },

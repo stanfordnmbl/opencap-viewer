@@ -35,6 +35,11 @@
             <v-select v-model="session_selected" v-bind:items="sessionsIds" label="Select session" outlined dense
               v-on:change="onSessionSelected"></v-select>
           </div>
+          <div v-else>
+                <p>
+                    This is a public session. To load your sessions, launch the dashboard from your session list.
+                </p>
+          </div>
           
           <v-select v-model="trial_selected" v-bind:items="trial_names" label="Select trial" outlined dense
             v-on:change="onTrialSelected"></v-select>
@@ -109,7 +114,7 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import axios from 'axios'
-import { apiError } from '@/util/ErrorMessage.js'
+import { apiError, apiInfo, apiWarning, clearToastMessages } from '@/util/ErrorMessage.js'
 import Vue from 'vue'
 import VueGoogleCharts from "vue3-googl-chart"
 import { jsPDF } from 'jspdf'
@@ -254,14 +259,17 @@ export default {
     },
     // Get trials and update trials select when a sessin is selected.
     onSessionSelected(sessionName) {
+      // Clear previous toast messages
+      clearToastMessages()
 
       // Get value between parentheses (session id).
       var sessionIdSelected = sessionName.match(/\((.*)\)/);
       if (sessionIdSelected !== null) {
         sessionIdSelected = sessionIdSelected.pop();
 
-        this.current_session_id = sessionIdSelected;
+        this.$router.push({ name: 'Dashboard', params: { id: sessionIdSelected } })
 
+        this.current_session_id = sessionIdSelected;
 
         var session = this.sessions.filter(function (obj) {
           if (obj.id === sessionIdSelected) {
@@ -271,15 +279,21 @@ export default {
         var trials = session[0]['trials'];
         // Filter trials by name.
         trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
-        this.trial_names = [];
-        trials.forEach(element => {
-          this.trial_names.push(element.name);
-          this.trial_ids.push(element.id)
-        });
-        this.trial_selected = this.trial_names[0];
 
-        // Load data from this trial.
-        this.onTrialSelected(this.trial_selected);
+        if (trials.length > 0) {
+            this.trial_names = [];
+            trials.forEach(element => {
+              this.trial_names.push(element.name);
+              this.trial_ids.push(element.id)
+            });
+            this.trial_selected = this.trial_names[0];
+
+            // Load data from this trial.
+            this.onTrialSelected(this.trial_selected);
+        } else {
+            this.trial_names = []
+            apiWarning("There are no dynamic trials associated with this session, thereby nothing to plot.")
+        }
 
       }
     },
@@ -487,6 +501,7 @@ export default {
     ...mapState({
       sessions: state => state.data.sessions,
       session: state => state.data.session,
+      subjects: state => state.data.subjects,
       loggedIn: state => state.auth.verified,
     }),
     sessionsNames() {
@@ -494,10 +509,10 @@ export default {
         // Check that there are valid trials
         var trials = obj['trials'];
         // Filter trials by name and status.
-        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
+        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
 
         if (trials.length > 0) {
-          return obj.name;
+          return  obj.name + " (" + obj.id + ")";
         } else {
           return "";
         }
@@ -513,10 +528,14 @@ export default {
         // Check that there are valid trials
         var trials = obj['trials'];
         // Filter trials by name and status.
-        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
+        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
 
         if (trials.length > 0) {
-          return obj.meta.subject.id + " (" + obj.id + ")";
+          if (obj.name)
+            return  obj.name + " (" + obj.id + ")";
+          else
+            if (obj.meta && obj.meta.subject && obj.meta.subject.id)
+                return obj.meta.subject.id + " (" + obj.id + ")";
         } else {
           return "";
         }
@@ -536,16 +555,23 @@ export default {
 
       var trials = this.session['trials'];
       // Filter trials by name.
-      trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
-      this.trial_names = [];
-      trials.forEach(element => {
-        this.trial_names.push(element.name);
-        this.trial_ids.push(element.id)
-      });
-      this.trial_selected = this.trial_names[0];
+      trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral'  && trial.name !== 'calibration')
+      if (trials.length > 0) {
+          this.trial_names = [];
+          trials.forEach(element => {
+            this.trial_names.push(element.name);
+            this.trial_ids.push(element.id)
+          });
+          this.trial_selected = this.trial_names[0];
 
-      // Load data from this trial.
-      this.onTrialSelected(this.trial_selected);
+          // Load data from this trial.
+          this.onTrialSelected(this.trial_selected);
+
+        } else {
+            this.trial_names = []
+            apiWarning("There are no trials associated to this session. Record a new trial in order to plot information.")
+        }
+
     }
   },
 }
