@@ -362,14 +362,14 @@
             :error-messages="formErrors.height"
           ></v-text-field>
           <v-text-field
-            v-model="edited_subject.age"
-            label="Age (y)"
+            v-model="edited_subject.birth_year"
+            label="Birth year (y)"
             type="number"
             hide-spin-buttons
             required
-            :rules="[ageRule]"
-            :error="formErrors.age != null"
-            :error-messages="formErrors.age"
+            :rules="[birthYearRule]"
+            :error="formErrors.birth_year != null"
+            :error-messages="formErrors.birth_year"
           ></v-text-field>
           <v-select
               clearable
@@ -444,13 +444,13 @@ export default {
       formErrors: {
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       },
       headers: [
         { text: 'Name', value: 'name' },
         { text: 'Weight', value: 'weight' },
         { text: 'Height', value: 'height' },
-        { text: 'Age', value: 'age' },
+        { text: 'Birth year', value: 'birth_year' },
         { text: 'Sex', value: 'sex_display' },
         { text: 'Gender', value: 'gender_display' },
         { text: 'Characteristics', value: 'characteristics' }
@@ -461,9 +461,9 @@ export default {
         { text: 'Trials', value: 'trials.length' },
         { text: 'Date', value: 'created_at' },
       ],
-      edited_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
       selected: null,
-      empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
       heightRule: (v) => {
         if (!v.trim()) return true;
         if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0) return true;
@@ -476,11 +476,12 @@ export default {
         if(!isNaN(parseFloat(v)) && v > 200.0) return "It is unlikely that the weight of subject is higher than 200 kg. Are you using the right units? Weight should be in kg.";
         if(!isNaN(parseFloat(v)) && v < 1) return "It is unlikely that the weight of subject is lower than 1 kg. Are you using the right units? Weight should be in kg.";
       },
-      ageRule: (v) => {
-        if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 0 && v <= 100) return true;
-        if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
-        if(!isNaN(parseFloat(v)) && v < 0) return "It is not possible that the age of subject is lower than 0 years. Are you using the right units? Age should be in years.";
+      birthYearRule: (v) => {
+        const currentYear = new Date().getFullYear();
+        if (!v) return true;
+        if (!isNaN(parseFloat(v)) && v >= 1900 && v <= currentYear) return true;
+        if(!isNaN(parseFloat(v)) && v > currentYear) return `It is unlikely that the birth year of subject is set to the future. Are you using the right units? Birth year should be less than ${currentYear}.`;
+        if(!isNaN(parseFloat(v)) && v < 1900) return "It is unlikely that the age of the subject is higher than 100 years. Are you using the right units? Birth year should be in years.";
       }
 
     }
@@ -497,7 +498,7 @@ export default {
       return this.subjects.map(s => ({
         id: s.id,
         name: s.name,
-        age: s.age,
+        birth_year: s.birth_year,
         characteristics: s.characteristics,
         gender: s.gender,
         gender_display: this.genders[s.gender],
@@ -590,7 +591,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
       console.log('add subject')
     },
@@ -601,7 +602,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
       console.log('edit subject', subject)
     },
@@ -612,7 +613,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
     },
     async submitSubjectForm() {
@@ -621,7 +622,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
 
       if(this.edited_subject.id) {
