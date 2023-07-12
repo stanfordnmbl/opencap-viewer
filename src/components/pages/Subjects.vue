@@ -363,7 +363,7 @@
           ></v-text-field>
           <v-text-field
             v-model="edited_subject.birth_year"
-            label="Birth year (y)"
+            label="Birth year (yyyy)"
             type="number"
             hide-spin-buttons
             required
@@ -467,21 +467,21 @@ export default {
       heightRule: (v) => {
         if (!v.trim()) return true;
         if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0) return true;
-        if(!isNaN(parseFloat(v)) && v > 3.0) return "It is unlikely that the height of subject is higher than 3 m. Are you using the right units? Height should be in m.";
-        if(!isNaN(parseFloat(v)) && v < .1) return "It is unlikely that the subject is shorter than .1 m. Are you using the right units? Height should be in m.";
+        if(!isNaN(parseFloat(v)) && v > 3.0) return "It seems unlikely that the subject's height exceeds 3 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
+        if(!isNaN(parseFloat(v)) && v < .1) return "It seems unlikely that the subject's height is less than 0.1 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
       },
       weightRule: (v) => {
         if (!v.trim()) return true;
         if (!isNaN(parseFloat(v)) && v >= 1 && v <= 200.0) return true;
-        if(!isNaN(parseFloat(v)) && v > 200.0) return "It is unlikely that the weight of subject is higher than 200 kg. Are you using the right units? Weight should be in kg.";
-        if(!isNaN(parseFloat(v)) && v < 1) return "It is unlikely that the weight of subject is lower than 1 kg. Are you using the right units? Weight should be in kg.";
+        if(!isNaN(parseFloat(v)) && v > 200.0) return "It seems unlikely that the subject's weight exceeds 200 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
+        if(!isNaN(parseFloat(v)) && v < 1) return "It seems unlikely that the subject's weight is less than 1 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
       },
       birthYearRule: (v) => {
         const currentYear = new Date().getFullYear();
         if (!v) return true;
         if (!isNaN(parseFloat(v)) && v >= 1900 && v <= currentYear) return true;
-        if(!isNaN(parseFloat(v)) && v > currentYear) return `It is unlikely that the birth year of subject is set to the future. Are you using the right units? Birth year should be less than ${currentYear}.`;
-        if(!isNaN(parseFloat(v)) && v < 1900) return "It is unlikely that the age of the subject is higher than 100 years. Are you using the right units? Birth year should be in years.";
+        if(!isNaN(parseFloat(v)) && v > currentYear) return `The subject's birth year cannot be set in the future. Please ensure that you are using the correct units. The birth year should be earlier than the current year ${currentYear} and specified in years (yyyy) format.`;
+        if(!isNaN(parseFloat(v)) && v < 1900) return "It seems unlikely that the subject's birth year predates 1900. Please ensure that you are using the correct units. The birth year should be specified in years (yyyy) format.";
       }
 
     }
