@@ -60,6 +60,15 @@ Vue.use(Toasted, {
   }
 })
 
+Vue.toasted.register('warning', (message) => {
+  Vue.toasted.show(message, {
+    type: 'warning',
+    theme: 'toasted-primary',
+    position: 'top-right',
+    className: 'warning-toast'
+  });
+});
+
 Vue.config.productionTip = false
 
 axios.defaults.baseURL = process.env.VUE_APP_API_SERVER //"https://api.opencap.ai/"
