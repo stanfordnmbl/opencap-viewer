@@ -17,6 +17,7 @@
         :chart-options="chartOptions"
         :chart-data="chartData"
         style="position: relative; width: 100%; height: 100%;"
+        ref="chartRef"
       />
     </div>
 
@@ -116,6 +117,10 @@
           <v-select v-model="chart_color_scales_selected" v-bind:items="chart_color_scales_options"
             label="Color Scale" outlined dense v-on:change="drawChart"></v-select>
 
+            <v-btn class="w-100" @click="onResetZoom">
+              Reset Zoom
+            </v-btn>
+
         </div>
 
       </v-card-text>
@@ -133,6 +138,7 @@ import Vue from 'vue'
 import store from '@/store/store.js'
 import chroma from 'chroma-js';
 import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
+import zoomPlugin from 'chartjs-plugin-zoom';
 
 import {
   Chart as ChartJS,
@@ -153,7 +159,8 @@ ChartJS.register(
   LineElement,
   LinearScale,
   CategoryScale,
-  PointElement)
+  PointElement,
+  zoomPlugin)
 
 export default {
   name: 'ChartPage',
@@ -327,8 +334,12 @@ export default {
         apiError(error)
         this.trialLoading = false
       }
-
-
+    },
+    onResetZoom() {
+        const chart = this.$refs.chartRef.getCurrentChart();
+        if (chart) {
+          chart.resetZoom();
+        }
     },
     // Get trials and update trials select when a session is selected.
     onSessionSelected(sessionName) {
@@ -491,7 +502,6 @@ export default {
       x_data: [],
       placeholder: [],
       chart_download_format_selected: 'png',
-      chart_object: undefined,
       chart_color_scales_selected: "Viridis",
       chart_color_scales_options: [
         { text: 'Viridis (recommended)', value: 'Viridis' },
@@ -561,6 +571,23 @@ export default {
               font: {
                 size: 15
               },
+            }
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'xy',
+              modifierKey: 'ctrl',
+            },
+            zoom: {
+              mode: 'xy',
+              overScaleMode: 'xy',
+              drag: {
+                enabled: true,
+              },
+              wheel: {
+                enabled: true,
+              }
             }
           }
         },
