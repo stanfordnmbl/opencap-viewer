@@ -357,9 +357,14 @@
 
                 <div id="mocap" ref="mocap" class="flex-grow-1" />
 
-                <div v-if="!videoControlsDisabled">
+
+                <div v-if="!videoControlsDisabled" style="display: flex; flex-wrap: wrap; align-items: center;">
+                    <v-text-field label="Time (s)" type="number" :step="0.01" :value="time"
+                        :disabled="state !== 'ready'" dark style="flex: 0.1; margin-right: 5px;" @change="onChangeTime"/>
+                    <v-text-field label="Frame (s)" type="number" :step="0.01" :value="frame"
+                        :disabled="state !== 'ready'" dark style="flex: 0.1; margin-right: 5px;" @change="onNavigate"/>
                     <v-slider :value="frame" :min="0" :max="frames.length - 1" @input="onNavigate" hide-details
-                        class="mb-2" />
+                        class="mb-2" style="flex: 1;" />
                 </div>
             </div>
 
@@ -474,6 +479,7 @@ export default {
             pose_bones: [],
             meshes: {},
             frame: 0,
+            time: 0,
             playing: false,
             playSpeed: 1,
 
@@ -532,7 +538,7 @@ export default {
                     return this.startButtonCaptions[this.state]
                 }
             }
-        }
+        },
     },
     async mounted() {
         await this.loadSession(this.$route.params.id)
@@ -876,6 +882,7 @@ export default {
 
                     if (this.videos.length === 0) {
                         this.frame = 0
+                        this.time = 0
                     }
 
                     if (this.frames.length > 0) {
@@ -1026,39 +1033,44 @@ export default {
             let cframe
 
             let frames = this.frames.length
-            let duration = this.vid0().duration
-            if (!isNaN(this.vid0().duration)) {
+            let duration = 0
+            if (this.vid0()) duration = this.vid0().duration
+            if (this.vid0() && !isNaN(this.vid0().duration)) {
                 let framerate = frames / duration
 
                 if (this.videos.length > 0) {
                     let t = 0
                     if (this.vid0()) t = this.vid0().currentTime;
-                    cframe = (Math.round(t * framerate)) % this.frames.length
+                    cframe = (Math.round(t * framerate)) > this.frames.length ? this.frames.length - 1 : (Math.round(t * framerate))
                     this.frame = cframe
+                    if (this.vid0()) this.time = this.vid0().currentTime.toFixed(2)
                 } else {
                     cframe = this.frame++
 
                     if (this.frame >= this.frames.length) {
-                        this.frame = 0
+                        this.frame = this.frames.length - 1
+                        this.time = this.vid0().duration
                     }
                 }
 
-                // display the frame
-                let json = this.animation_json;
-                for (let body in json.bodies) {
-                    json.bodies[body].attachedGeometries.forEach((geom) => {
-                        if (this.meshes[body + geom]) {
-                            this.meshes[body + geom].position.set(
-                                json.bodies[body].translation[cframe][0],
-                                json.bodies[body].translation[cframe][1],
-                                json.bodies[body].translation[cframe][2])
-                            var euler = new THREE.Euler(
-                                json.bodies[body].rotation[cframe][0],
-                                json.bodies[body].rotation[cframe][1],
-                                json.bodies[body].rotation[cframe][2]);
-                            this.meshes[body + geom].quaternion.setFromEuler(euler)
-                        }
-                    })
+                if (cframe < this.frames.length) {
+                    // display the frame
+                    let json = this.animation_json;
+                    for (let body in json.bodies) {
+                        json.bodies[body].attachedGeometries.forEach((geom) => {
+                            if (this.meshes[body + geom]) {
+                                this.meshes[body + geom].position.set(
+                                    json.bodies[body].translation[cframe][0],
+                                    json.bodies[body].translation[cframe][1],
+                                    json.bodies[body].translation[cframe][2])
+                                var euler = new THREE.Euler(
+                                    json.bodies[body].rotation[cframe][0],
+                                    json.bodies[body].rotation[cframe][1],
+                                    json.bodies[body].rotation[cframe][2]);
+                                this.meshes[body + geom].quaternion.setFromEuler(euler)
+                            }
+                        })
+                    }
                 }
 
                 this.renderer.render(this.scene, this.camera)
@@ -1127,8 +1139,7 @@ export default {
             }
         },
         onNavigate(frame) {
-            const vid0 = this.videoElement(0)
-            const step = vid0.duration / this.frames.length
+            const step = this.vid0().duration / this.frames.length
             const newPosition = frame * step
 
             this.eachVideo(videoElement => {
@@ -1136,6 +1147,16 @@ export default {
             })
 
             this.animateOneFrame()
+        },
+        onChangeTime(time) {
+            this.eachVideo(videoElement => {
+                videoElement.currentTime = time
+            })
+
+            this.animateOneFrame()
+        },
+        maxVideoDuration() {
+            return this.vid0() ? (this.vid0().duration - 1) : 0
         },
         recordingTimeLimit() {
             // Default value is 60.
