@@ -361,7 +361,7 @@
                 <div v-if="!videoControlsDisabled" style="display: flex; flex-wrap: wrap; align-items: center;">
                     <v-text-field label="Time (s)" type="number" :step="0.01" :value="time"
                         :disabled="state !== 'ready'" dark style="flex: 0.1; margin-right: 5px;" @change="onChangeTime"/>
-                    <v-text-field label="Frame (s)" type="number" :step="0.01" :value="frame"
+                    <v-text-field label="Frame" type="number" :step="1" :value="frame"
                         :disabled="state !== 'ready'" dark style="flex: 0.1; margin-right: 5px;" @change="onNavigate"/>
                     <v-slider :value="frame" :min="0" :max="frames.length - 1" @input="onNavigate" hide-details
                         class="mb-2" style="flex: 1;" />
