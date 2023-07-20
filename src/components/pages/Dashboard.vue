@@ -281,6 +281,7 @@ export default {
         trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
 
         if (trials.length > 0) {
+            this.trial_ids = []
             this.trial_names = [];
             trials.forEach(element => {
               this.trial_names.push(element.name);
@@ -557,6 +558,7 @@ export default {
       // Filter trials by name.
       trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral'  && trial.name !== 'calibration')
       if (trials.length > 0) {
+          this.trial_ids = []
           this.trial_names = [];
           trials.forEach(element => {
             this.trial_names.push(element.name);
