@@ -360,9 +360,7 @@
 
                 <div v-if="!videoControlsDisabled" style="display: flex; flex-wrap: wrap; align-items: center;">
                     <v-text-field label="Time (s)" type="number" :step="0.01" :value="time"
-                        :disabled="state !== 'ready'" dark style="flex: 0.1; margin-right: 5px;" @change="onChangeTime"/>
-                    <v-text-field label="Frame" type="number" :step="1" :value="frame"
-                        :disabled="state !== 'ready'" dark style="flex: 0.1; margin-right: 5px;" @change="onNavigate"/>
+                        :disabled="state !== 'ready'" dark style="flex: 0.1; margin-right: 5px;" @input="onChangeTime"/>
                     <v-slider :value="frame" :min="0" :max="frames.length - 1" @input="onNavigate" hide-details
                         class="mb-2" style="flex: 1;" />
                 </div>
@@ -1043,7 +1041,7 @@ export default {
                     if (this.vid0()) t = this.vid0().currentTime;
                     cframe = (Math.round(t * framerate)) > this.frames.length ? this.frames.length - 1 : (Math.round(t * framerate))
                     this.frame = cframe
-                    if (this.vid0()) this.time = this.vid0().currentTime.toFixed(2)
+                    if (this.vid0()) this.time = parseFloat(this.vid0().currentTime.toFixed(2))
                 } else {
                     cframe = this.frame++
 
