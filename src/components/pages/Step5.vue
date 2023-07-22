@@ -833,6 +833,7 @@ export default {
         },
         async loadTrial(trial) {
             console.log('loadTrial')
+            this.time = 0
 
             if (!this.trialLoading) {
                 this.frame = 0
@@ -1041,7 +1042,7 @@ export default {
                     if (this.vid0()) t = this.vid0().currentTime;
                     cframe = (Math.round(t * framerate)) > this.frames.length ? this.frames.length - 1 : (Math.round(t * framerate))
                     this.frame = cframe
-                    if (this.vid0()) this.time = parseFloat(this.vid0().currentTime.toFixed(2))
+                    if (this.vid0()) this.time = this.frame == 0 ? 0 : parseFloat(this.vid0().currentTime.toFixed(2))
                 } else {
                     cframe = this.frame++
 
