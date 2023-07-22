@@ -106,7 +106,12 @@
 
           <v-text-field v-model="chartOptions.scales.y.title.text" label="V. Axis Title" outlined dense></v-text-field>
 
-          <v-text-field v-model="chart_line_width" label="Line Width" outlined dense type="number" v-on:change="drawChart"></v-text-field>
+          <v-text-field v-model="chart_line_width" label="Line Width" outlined dense type="number" @input="drawChart"></v-text-field>
+
+          <v-select v-model="chart_point_style" v-bind:items="chart_point_style_options" label="Point Style"
+            outlined dense v-on:change="drawChart"></v-select>
+
+          <v-text-field v-model="chart_point_radius" label="Point Size" outlined dense type="number" @input="drawChart"></v-text-field>
 
           <v-select v-model="chartOptions.plugins.legend.position" v-bind:items="chart_legend_position" label="Legend Position"
             outlined dense v-on:change="placeholderFunction"></v-select>
@@ -308,7 +313,11 @@ export default {
               dataset["backgroundColor"] = colors[j];
               dataset["borderColor"] = colors[j];
               dataset["borderWidth"] = this.chart_line_width;
+              dataset["pointStyle"] = this.chart_point_style;
+              dataset["pointRadius"] = this.chart_point_radius
 
+
+              console.log(dataset)
               this.chartData.datasets.push(dataset);
             }
 
@@ -521,6 +530,9 @@ export default {
         }]
       },
       chart_line_width: 1,
+      chart_point_style_options: ["circle", "cross", "crossRot", "dash", "line", "rect", "rectRounded", "rectRot", "star", "triangle"],
+      chart_point_style: 'circle',
+      chart_point_radius: 12,
       chartOptions: {
         responsive: true,
         maintainAspectRatio: false,
