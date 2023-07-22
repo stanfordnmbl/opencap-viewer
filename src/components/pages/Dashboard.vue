@@ -316,8 +316,6 @@ export default {
               dataset["pointStyle"] = this.chart_point_style;
               dataset["pointRadius"] = this.chart_point_radius
 
-
-              console.log(dataset)
               this.chartData.datasets.push(dataset);
             }
 
