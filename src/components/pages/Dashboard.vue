@@ -117,9 +117,22 @@
           <v-select v-model="chart_color_scales_selected" v-bind:items="chart_color_scales_options"
             label="Color Scale" outlined dense v-on:change="drawChart"></v-select>
 
-            <v-btn class="w-100" @click="onResetZoom">
-              Reset Zoom
-            </v-btn>
+          <v-btn class="w-100" @click="onResetZoom">
+            Reset Zoom
+          </v-btn>
+
+          <icon-tooltip
+            tooltip-text="
+                Zoom instructions:</br>
+                 - <b>Zoom</b>: Click and Drag over a zone.</br>
+                 - <b>Move</b>: CTRL + Click and move mouse.</br>
+                 - <b>Zoom on X</b>: Mouse wheel on X axis.</br>
+                 - <b>Zoom on Y</b>: Mouse wheel on Y axis.</br>
+            "
+            iconClass="fas fa-question-circle"
+            >
+          </icon-tooltip>
+
 
         </div>
 
@@ -139,6 +152,7 @@ import store from '@/store/store.js'
 import chroma from 'chroma-js';
 import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
 import zoomPlugin from 'chartjs-plugin-zoom';
+import IconTooltip from '@/components/ui/IconTooltip.vue';
 
 import {
   Chart as ChartJS,
@@ -164,7 +178,10 @@ ChartJS.register(
 
 export default {
   name: 'ChartPage',
-  components: { LineChartGenerator  },
+  components: {
+    LineChartGenerator,
+    IconTooltip,
+   },
   // This function is executed once the page has been loaded.
   created: function () {
       // Indicates if the current logged in user owns the session.
