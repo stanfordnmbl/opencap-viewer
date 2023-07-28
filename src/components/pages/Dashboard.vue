@@ -549,7 +549,7 @@ export default {
           data: [],
         }]
       },
-      chart_line_width: 1,
+      chart_line_width: 5,
       chart_point_style_options: ["none", "circle", "cross", "crossRot", "dash", "line", "rect", "rectRounded", "rectRot", "star", "triangle"],
       chart_point_style: 'none',
       chart_point_radius: 12,
