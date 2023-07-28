@@ -36,12 +36,12 @@ export default {
 }
 .tooltip {
   position: absolute;
-  top: 20px; /* Adjust the distance from the icon as needed */
-  left: 0;
-  background-color: #333;
+  top: -130px; /* Adjust the distance from the icon as needed */
+  right: 0;
+  background-color: #555;
   color: #fff;
   padding: 5px;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 12px;
   white-space: nowrap;
 }
