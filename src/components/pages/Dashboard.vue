@@ -331,13 +331,12 @@ export default {
               dataset["borderColor"] = colors[j];
               dataset["borderWidth"] = this.chart_line_width;
               // Handle "none" option to remove points
-              // if (this.chart_point_style === "none") {
-              //   dataset["pointStyle"] = false;
-              // } else {
-              //   dataset["pointStyle"] = this.chart_point_style;
-              // }
-              dataset["pointStyle"] = null;
-              dataset["pointRadius"] = this.chart_point_radius
+              dataset["pointStyle"] = this.chart_point_style;
+              if (this.chart_point_style === "none") {
+                dataset["pointRadius"] = 0;
+              } else {
+                dataset["pointRadius"] = this.chart_point_radius;
+              }              
 
               this.chartData.datasets.push(dataset);
             }
