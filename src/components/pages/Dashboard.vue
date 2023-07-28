@@ -8,7 +8,7 @@
           <div class="spinner"></div>
         </div>
         <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; color:black">
-          <h3>Loading Chart...</h3>
+          <h3>Loading Chart</h3>
         </div>
       </div>
 
