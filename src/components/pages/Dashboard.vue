@@ -330,7 +330,12 @@ export default {
               dataset["backgroundColor"] = colors[j];
               dataset["borderColor"] = colors[j];
               dataset["borderWidth"] = this.chart_line_width;
-              dataset["pointStyle"] = this.chart_point_style;
+              // Handle "none" option to remove points
+              if (this.chart_point_style === "none") {
+                dataset["pointStyle"] = false;
+              } else {
+                dataset["pointStyle"] = this.chart_point_style;
+              }
               dataset["pointRadius"] = this.chart_point_radius
 
               this.chartData.datasets.push(dataset);
@@ -545,8 +550,8 @@ export default {
         }]
       },
       chart_line_width: 1,
-      chart_point_style_options: ["circle", "cross", "crossRot", "dash", "line", "rect", "rectRounded", "rectRot", "star", "triangle"],
-      chart_point_style: 'circle',
+      chart_point_style_options: ["none", "circle", "cross", "crossRot", "dash", "line", "rect", "rectRounded", "rectRot", "star", "triangle"],
+      chart_point_style: 'none',
       chart_point_radius: 12,
       chartOptions: {
         responsive: true,
