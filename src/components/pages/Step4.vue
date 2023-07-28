@@ -403,7 +403,7 @@
 <script>
 import axios from "axios";
 import { mapMutations, mapActions, mapState } from "vuex";
-import { apiError, apiSuccess, apiErrorRes, apiInfo } from "@/util/ErrorMessage.js";
+import { apiError, apiSuccess, apiErrorRes, apiInfo, clearToastMessages } from "@/util/ErrorMessage.js";
 import MainLayout from "@/layout/MainLayout";
 import ExampleImage from "@/components/ui/ExampleImage";
 
@@ -565,6 +565,7 @@ export default {
     },
   },
   mounted() {
+    apiInfo("The default marker augmentation model changed to v0.3 as it is more accurate and robust. If you would like to use the model that was default prior to [change data], you can select augmenter model v0.2 in Advanced Settings.", 30000);
     this.loadSession(this.$route.params.id)
     this.loadSubjects()
     if (this.$route.query.autoRecord) {
