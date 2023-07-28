@@ -134,7 +134,7 @@
                  - <b>Zoom on X</b>: Mouse wheel on X axis.</br>
                  - <b>Zoom on Y</b>: Mouse wheel on Y axis.</br>
             "
-            iconClass="far fa-question-circle"
+            iconClass="fas fa-question-circle"
             >
           </icon-tooltip>
 

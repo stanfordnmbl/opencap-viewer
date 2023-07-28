@@ -21,7 +21,7 @@ export default {
     },
     iconClass: {
       type: String,
-      default: "far fa-question-circle", // Default icon class if none is provided
+      default: "fas fa-question-circle", // Default icon class if none is provided
     },
   },
 };
