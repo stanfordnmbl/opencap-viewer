@@ -742,7 +742,7 @@ export default {
         },
         async startTrialsPoll() {
             this.trialsPoll = window.setTimeout(async () => {
-                const trials = this.filteredTrials.filter(trial => trial.status === 'stopped' || trial.status === 'processing')
+                const trials = this.filteredTrials.filter(trial => trial.status === 'stopped' || trial.status === 'processing' || || trial.status === 'reprocess')
 
                 if (trials.length > 0) {
                     const res = await axios.get(`/sessions/${this.session.id}/status/?ret_session=true`)
