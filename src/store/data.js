@@ -33,7 +33,7 @@ export default {
     pose_model: 'openpose',
     framerate: 60,
     openSimModel: 'LaiUhlrich2022',
-    augmenter_model: 'v0.2',
+    augmenter_model: 'v0.3',
 
     // step 5
     trialName: '',
@@ -147,7 +147,7 @@ export default {
       state.data_sharing = ''
       state.pose_model = 'openpose'
       state.openSimModel = 'LaiUhlrich2022'
-      state.augmenter_model = 'v0.2'
+      state.augmenter_model = 'v0.3'
       // step 5
       state.trialName = ''       
     },

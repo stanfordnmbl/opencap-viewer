@@ -190,15 +190,15 @@
                   OpenCap uses an LSTM model, also called marker augmenter model, to predict the 3D position of 43 anatomical markers from the 3D position of 20 video keypoints (https://www.biorxiv.org/content/10.1101/2022.07.07.499061v1). 
                   The anatomical markers are used as input to OpenSim to compute joint angles using inverse kinematics.
                   <br><br>
-                  The default model (v0.2) underwent training using 708 hours of motion capture data, yielding an RMSE of 4.8 +/- 0.2 deg (OpenPose and HRNet) for joint angles across 18 degrees of freedom. 
-                  <br><br>
-                  The latest model (v0.3) is more accurate and more robust to different activities than v0.2. We recommend using it for new studies; it should become the default model in the future. 
+                  The latest model (v0.3, default) is more accurate and more robust to different activities than v0.2. We recommend using it for new studies. 
                   It was trained on 1475 hours of motion capture data and resulted in an RMSE of 4.4 +/- 0.3 deg (OpenPose) and 4.1 +/- 0.3 deg (HRnet) for joint angles across 18 degrees of freedom.
+                  <br><br>                  
+                  The original model (v0.2) underwent training using 708 hours of motion capture data, yielding an RMSE of 4.8 +/- 0.2 deg (OpenPose and HRNet) for joint angles across 18 degrees of freedom. 
                   <br><br>
                   The performance evaluation was conducted in comparison to marker-based motion capture using data from 10 subjects performing 4 different types of activities (walking, squatting, sit-to-stand, and drop jumps). 
                   The dataset used for training the latest model (v0.3) contains data from more subjects and from a more diverse set of tasks; model v0.3 is therefore expected to be more accurate for a wider variety of tasks and to yield more accurate results.
-                  It has however been less tested and we welcome feedback from users regarding its performance. We recommend using v0.3 for new studies but warn users that we might still adjust the model in the future. 
-                  The older model (v0.2) is still the default model.
+                  We recommend using v0.3 for new studies but warn users that we might still adjust the model in the future. 
+                  If you would like to use the model that was default prior to 07-30-2023, select v0.2.
                 </v-tooltip>
               </v-card-title>
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
@@ -457,10 +457,10 @@ export default {
         {"text": "Full body model (default)", "value": "LaiUhlrich2022"},
         {"text": "Full body model with ISB shoulder (in beta, feedback welcome)", "value": "LaiUhlrich2022_shoulder"},
       ],
-      augmenter_model: 'v0.2',
-      augmenter_models: [
-        {"text": "v0.2 (default)", "value": "v0.2"},
-        {"text": "v0.3 (in beta, feedback welcome)", "value": "v0.3"},
+      augmenter_model: 'v0.3',
+      augmenter_models: [        
+        {"text": "v0.3 (default)", "value": "v0.3"},
+        {"text": "v0.2 (old model, default until 07-30-2023)", "value": "v0.2"},
       ],
       busy: false,
       disabledNextButton: true,
@@ -565,7 +565,7 @@ export default {
     },
   },
   mounted() {
-    apiInfo("The default marker augmentation model changed to v0.3 as it is more accurate and robust. If you would like to use the model that was default prior to [change data], you can select augmenter model v0.2 in Advanced Settings.", 30000);
+    apiInfo("The default marker augmenter model was upgraded (from v0.2 to v0.3). The new model (v0.3) should be more accurate and more robust to different activities. If you would like to use the model that was default prior to 07-30-2023, select v0.2 under 'Marker augmenter model' in 'Advanced Settings'.", 30000);
     this.loadSession(this.$route.params.id)
     this.loadSubjects()
     if (this.$route.query.autoRecord) {
