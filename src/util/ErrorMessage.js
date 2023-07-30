@@ -97,8 +97,8 @@ function apiSuccess (text) {
  * Shorthand for info toast message
  * @param {String} text - message text
  */
- function apiInfo (text) {
-  Vue.toasted.info(text, {duration: null})
+ function apiInfo (text, time=null) {
+  Vue.toasted.info(text, {duration: time})
 }
 /**
  * Shorthand for info toast message
