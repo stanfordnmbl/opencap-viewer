@@ -31,6 +31,11 @@ export default {
           apiInfo('Trial is in the queue to be processed.')
           break          
         }
+
+        case 'reprocess': {
+          apiInfo('Trial is in the queue to be reprocessed.')
+          break          
+        }
         
         case 'error': {
           const res = await axios.get(`/trials/${this.value.id}/`)
@@ -71,7 +76,7 @@ export default {
     color: white;    
   }
 
-  &.st-processing, &.st-stopped {
+  &.st-processing, &.st-stopped, &.st-reprocess {
     div {
       background-color: orange;
     }
