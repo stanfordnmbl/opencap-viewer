@@ -15,6 +15,9 @@ registerFilters(Vue)
 import { ValidationProvider, ValidationObserver, extend } from "vee-validate";
 import { required, confirmed, min, email, alpha_dash } from "vee-validate/dist/rules";
 
+// fa-icons
+import '@fortawesome/fontawesome-free/css/all.css';
+
 import VueSocialSharing from 'vue-social-sharing'
 
 Vue.use(VueSocialSharing);
@@ -59,6 +62,15 @@ Vue.use(Toasted, {
     }
   }
 })
+
+Vue.toasted.register('warning', (message) => {
+  Vue.toasted.show(message, {
+    type: 'warning',
+    theme: 'toasted-primary',
+    position: 'top-right',
+    className: 'warning-toast'
+  });
+});
 
 Vue.config.productionTip = false
 

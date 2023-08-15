@@ -180,6 +180,34 @@
                     v-bind:items="openSimModels"
                   />
               </v-card-text>
+
+              <v-card-title class="justify-center data-title">
+                <span class="mr-2">Select marker augmenter model</span>
+                <v-tooltip bottom="" max-width="500px">
+                  <template v-slot:activator="{ on }">
+                    <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                  </template>
+                  OpenCap uses an LSTM model, also called marker augmenter model, to predict the 3D position of 43 anatomical markers from the 3D position of 20 video keypoints (https://www.biorxiv.org/content/10.1101/2022.07.07.499061v1). 
+                  The anatomical markers are used as input to OpenSim to compute joint angles using inverse kinematics.
+                  <br><br>
+                  The latest model (v0.3, default) is more accurate and more robust to different activities than v0.2. We recommend using it for new studies. 
+                  It was trained on 1475 hours of motion capture data and resulted in an RMSE of 4.4 +/- 0.3 deg (OpenPose) and 4.1 +/- 0.3 deg (HRnet) for joint angles across 18 degrees of freedom.
+                  <br><br>                  
+                  The original model (v0.2) underwent training using 708 hours of motion capture data, yielding an RMSE of 4.8 +/- 0.2 deg (OpenPose and HRNet) for joint angles across 18 degrees of freedom. 
+                  <br><br>
+                  The performance evaluation was conducted in comparison to marker-based motion capture using data from 10 subjects performing 4 different types of activities (walking, squatting, sit-to-stand, and drop jumps). 
+                  The dataset used for training the latest model (v0.3) contains data from more subjects and from a more diverse set of tasks; model v0.3 is therefore expected to be more accurate for a wider variety of tasks and to yield more accurate results.
+                  We recommend using v0.3 for new studies but warn users that we might still adjust the model in the future. 
+                  If you would like to use the model that was default prior to 07-30-2023, select v0.2.
+                </v-tooltip>
+              </v-card-title>
+              <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+                <v-select
+                    v-model="augmenter_model"
+                    label="Marker augmenter model"
+                    v-bind:items="augmenter_models"
+                  />
+              </v-card-text>
             </v-card>
           </v-dialog>
         </div>
@@ -316,14 +344,14 @@
             :error-messages="formErrors.height"
           ></v-text-field>
           <v-text-field
-            v-model="edited_subject.age"
-            label="Age (y)"
+            v-model="edited_subject.birth_year"
+            label="Birth year (yyyy)"
             type="number"
             hide-spin-buttons
             required
-            :rules="[ageRule]"
-            :error="formErrors.age != null"
-            :error-messages="formErrors.age"
+            :rules="[birthYearRule]"
+            :error="formErrors.birth_year != null"
+            :error-messages="formErrors.birth_year"
           ></v-text-field>
           <v-select
               clearable
@@ -375,7 +403,7 @@
 <script>
 import axios from "axios";
 import { mapMutations, mapActions, mapState } from "vuex";
-import { apiError, apiSuccess, apiErrorRes, apiInfo } from "@/util/ErrorMessage.js";
+import { apiError, apiSuccess, apiErrorRes, apiInfo, clearToastMessages } from "@/util/ErrorMessage.js";
 import MainLayout from "@/layout/MainLayout";
 import ExampleImage from "@/components/ui/ExampleImage";
 
@@ -391,14 +419,14 @@ export default {
         name: null,
         weight: null,
         height: null,
-        age: null,
+        birth_year: null,
         data_sharing_agreement: null,
       },
       advancedSettingsDialog: false,
       new_subject_dialog: false,
-      edited_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
       selected: null,
-      empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
 
       sessionName: "",
       subject: null,
@@ -406,6 +434,7 @@ export default {
       weight: 70,
       height: 1.8,
       data_sharing_0: false,
+      birth_year: "",
       data_sharing: "",
       sex: "",
       gender: "",
@@ -427,7 +456,12 @@ export default {
       openSimModel: 'LaiUhlrich2022',
       openSimModels: [
         {"text": "Full body model (default)", "value": "LaiUhlrich2022"},
-        {"text": "Full body model with ISB shoulder (In beta, feedback welcome!)", "value": "LaiUhlrich2022_shoulder"},
+        {"text": "Full body model with ISB shoulder (in beta, feedback welcome)", "value": "LaiUhlrich2022_shoulder"},
+      ],
+      augmenter_model: 'v0.3',
+      augmenter_models: [        
+        {"text": "v0.3 (default)", "value": "v0.3"},
+        {"text": "v0.2 (old model, default until 07-30-2023)", "value": "v0.2"},
       ],
       busy: false,
       disabledNextButton: true,
@@ -442,19 +476,22 @@ export default {
       },
       heightRule: (v) => {
         if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 0 && v <= 3.0) return true;
-        return "It is unlikely that the subject is taller than 3 m, are you using the right units? Height should be in m.";
+        if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0) return true;
+        if(!isNaN(parseFloat(v)) && v > 3.0) return "It seems unlikely that the subject's height exceeds 3 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
+        if(!isNaN(parseFloat(v)) && v < .1) return "It seems unlikely that the subject's height is less than 0.1 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
       },
       weightRule: (v) => {
         if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 0 && v <= 200.0) return true;
-        return "It is unlikely that the subject is heavier than 200 kg, are you using the right units? Weight should be in kg.";
+        if (!isNaN(parseFloat(v)) && v >= 1 && v <= 200.0) return true;
+        if(!isNaN(parseFloat(v)) && v > 200.0) return "It seems unlikely that the subject's weight exceeds 200 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
+        if(!isNaN(parseFloat(v)) && v < 1) return "It seems unlikely that the subject's weight is less than 1 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
       },
-      ageRule: (v) => {
-        if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 1 && v <= 100) return true;
-        if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
-        if(!isNaN(parseFloat(v)) && v < 1) return "It is unlikely that the age of subject is lower than 1 years. Are you using the right units? Age should be in years.";
+      birthYearRule: (v) => {
+        const currentYear = new Date().getFullYear();
+        if (!v) return true;
+        if (!isNaN(parseFloat(v)) && v >= 1900 && v <= currentYear) return true;
+        if(!isNaN(parseFloat(v)) && v > currentYear) return `The subject's birth year cannot be set in the future. Please ensure that you are using the correct units. The birth year should be earlier than the current year ${currentYear} and specified in years (yyyy) format.`;
+        if(!isNaN(parseFloat(v)) && v < 1900) return "It seems unlikely that the subject's birth year predates 1900. Please ensure that you are using the correct units. The birth year should be specified in years (yyyy) format.";
       },
       checkboxRule: (v) => !!v || 'The subject must agree to continue!'
     };
@@ -473,9 +510,9 @@ export default {
     subjectsMapped () {
       return this.subjects.map(s => ({
         id: s.id,
-        display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.age} years)`,
+        display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.birth_year})`,
         name: s.name,
-        age: s.age,
+        birth_year: s.birth_year,
         characteristics: s.characteristics,
         gender: s.gender,
         gender_display: this.genders[s.gender],
@@ -532,6 +569,7 @@ export default {
     },
   },
   mounted() {
+    apiInfo("The default marker augmenter model was upgraded (from v0.2 to v0.3). The new model (v0.3) should be more accurate and more robust to different activities. If you would like to use the model that was default prior to 07-30-2023, select v0.2 under 'Marker augmenter model' under 'Advanced Settings'.", 30000);
     this.loadSession(this.$route.params.id)
     this.loadSubjects()
     if (this.$route.query.autoRecord) {
@@ -556,7 +594,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
       if(this.subject != null && this.subject.id === 'new') {
         this.new_subject_dialog = true
@@ -608,6 +646,7 @@ export default {
             pose_model: this.pose_model,
             framerate: this.framerate,
             openSimModel: this.openSimModel,
+            augmenter_model: this.augmenter_model,
           });
           try {
             const resUpdate = await axios.get(
@@ -623,7 +662,8 @@ export default {
                   settings_pose_model: this.pose_model,
                   settings_framerate: this.framerate,
                   settings_session_name: this.sessionName,
-                  settings_openSimModel: this.openSimModel                  
+                  settings_openSimModel: this.openSimModel,
+                  settings_augmenter_model: this.augmenter_model,                
                 },
               }
             );
@@ -726,7 +766,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
     },
     async submitSubjectForm() {
@@ -735,7 +775,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
       console.log(this.edited_subject)
 

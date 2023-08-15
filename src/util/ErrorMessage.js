@@ -97,8 +97,15 @@ function apiSuccess (text) {
  * Shorthand for info toast message
  * @param {String} text - message text
  */
- function apiInfo (text) {
-  Vue.toasted.info(text, {duration: null})
+ function apiInfo (text, time=null) {
+  Vue.toasted.info(text, {duration: time})
+}
+/**
+ * Shorthand for info toast message
+ * @param {String} text - message text
+ */
+ function apiWarning (text) {
+  Vue.toasted.global.warning(text, {duration: null})
 }
 
 /**
@@ -112,10 +119,16 @@ function apiErrorRes (axiosRes, defaultText) {
   }
 }
 
+function clearToastMessages() {
+    Vue.toasted.clear()
+}
+
 export {
   processErrorMessage,
   apiError,
   apiSuccess,
+  apiWarning,
   apiErrorRes,
-  apiInfo
+  apiInfo,
+  clearToastMessages
 }
