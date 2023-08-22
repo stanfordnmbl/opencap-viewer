@@ -8,7 +8,7 @@
 
       <v-btn
         class="ml-2"
-        @click="$router.push({ name: 'Dashboard' })">
+        @click="$router.push({ name: 'Dashboard', params: { id: '' } })">
         Analysis Dashboard
       </v-btn>
 
@@ -61,7 +61,7 @@
               </v-list-item>
               <v-list-item link>
                 <v-list-item-title
-                  @click="$router.push({ name: 'Dashboard' })"
+                  @click="$router.push({ name: 'Dashboard', params: { id: item.id } })"
                   >Dashboard</v-list-item-title>
               </v-list-item>
 
@@ -114,7 +114,7 @@
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Remove</v-list-item-title>
+                    <v-list-item-title v-on="on">Trash</v-list-item-title>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">
@@ -124,7 +124,7 @@
                         </v-col>
                         <v-col cols="10">
                           <p>
-                            Do you want to remove session <code>{{item.id}}</code>?
+                            Do you want to trash session <code>{{item.id}}</code>?
                             You will be able to restore it for 30 days. After that,
                             this session will be permanently removed.
                           </p>
@@ -221,6 +221,7 @@ export default {
   name: 'SelectSession',
   created: function () {
       this.loadSubjects()
+      this.loadExistingSessions({reroute: false, quantity: -1})
   },
   data () {
     return {
@@ -256,9 +257,9 @@ export default {
       return this.sessions.map(s => ({
         id: s.id,
         name: s.name,
-        sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
+        sessionName: s.meta !== null && s.meta["sessionName"] ? s.meta["sessionName"] : "",
         trials_count: s.trials.filter(function (trial, i){
-                return trial.name !== 'calibration';
+                return (trial.status === 'done' && trial.name === 'neutral') || trial.name !== 'calibration' && (trial.name !== 'neutral');
             }).length,
         created_at: s.created_at,
         trashed: s.trashed,

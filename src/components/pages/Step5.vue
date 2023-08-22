@@ -10,7 +10,7 @@
                         :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
                 </ValidationProvider>
 
-                <v-btn v-show="show_controls" :disabled="busy || invalid" @click="changeState">
+                <v-btn class="mb-4 w-100" v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
                 </v-btn>
                 <p v-if="state === 'recording'">Videos are recording, do not refresh</p>
@@ -18,7 +18,12 @@
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
-                <div v-for="(t, index) in filteredTrialsWithMenu" :key="`trial-${index}`" :ref="`trial-${index}`" class="my-1 trial d-flex justify-content-between"
+                <div v-for="(t, index) in filteredTrialsWithMenu"
+                    v-bind:item="t"
+                    v-bind:index="index"
+                    v-bind:key="t.id"
+                    :ref="t.id"
+                    class="my-1 trial d-flex justify-content-between"
                     :class="{ selected: isSelected(t) }">
                     <Status :value="t" :class="trialClasses(t)" @click="loadTrial(t)" />
                     <div class="">
@@ -82,7 +87,7 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Remove</v-list-item-title>
+                                <v-list-item-title v-on="on">Trash</v-list-item-title>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -92,7 +97,7 @@
                                     </v-col>
                                     <v-col cols="10">
                                       <p>
-                                        Do you want to remove trial {{t.name}}?
+                                        Do you want to trash trial {{t.name}}?
                                         You will be able to restore it for 30 days. After that,
                                         this trial will be permanently removed.
                                       </p>
@@ -153,6 +158,48 @@
                                     color="green darken-1"
                                     text
                                     @click="t.isMenuOpen = false; restore_dialog = false; restoreTrial(t)"
+                                  >
+                                    Yes
+                                  </v-btn>
+                                </v-card-actions>
+                              </v-card>
+                            </v-dialog>
+                          </v-list-item>
+                          <v-list-item link v-if="!t.trashed">
+                            <v-dialog
+                                    v-model="permanent_delete_dialog"
+                                    v-click-outside="clickOutsideDialogTrialHideMenu"
+                                    max-width="500">
+                              <template v-slot:activator="{ on }">
+                                <v-list-item-title v-on="on">Delete</v-list-item-title>
+                              </template>
+                              <v-card>
+                                <v-card-text class="pt-4">
+                                  <v-row class="m-0">
+                                    <v-col cols="2">
+                                      <v-icon x-large color="red">mdi-close-circle</v-icon>
+                                    </v-col>
+                                    <v-col cols="10">
+                                      <p>
+                                        Do you want to permanently delete trial {{t.name}}?
+                                        This action cannot be undone. Use Trash to keep the ability to restore the trial.
+                                      </p>
+                                    </v-col>
+                                  </v-row>
+                                </v-card-text>
+                                <v-card-actions>
+                                  <v-spacer></v-spacer>
+                                  <v-btn
+                                    color="blue darken-1"
+                                    text
+                                    @click="t.isMenuOpen = false; permanent_delete_dialog = false"
+                                  >
+                                    No
+                                  </v-btn>
+                                  <v-btn
+                                    color="red darken-1"
+                                    text
+                                    @click="t.isMenuOpen = false; permanent_delete_dialog = false; permanentDeleteTrial(t)"
                                   >
                                     Yes
                                   </v-btn>
@@ -310,9 +357,12 @@
 
                 <div id="mocap" ref="mocap" class="flex-grow-1" />
 
-                <div v-if="!videoControlsDisabled">
+
+                <div v-if="!videoControlsDisabled" style="display: flex; flex-wrap: wrap; align-items: center;">
+                    <v-text-field label="Time (s)" type="number" :step="0.01" :value="time"
+                        :disabled="state !== 'ready'" dark style="flex: 0.1; margin-right: 5px;" @input="onChangeTime"/>
                     <v-slider :value="frame" :min="0" :max="frames.length - 1" @input="onNavigate" hide-details
-                        class="mb-2" />
+                        class="mb-2" style="flex: 1;" />
                 </div>
             </div>
 
@@ -394,6 +444,7 @@ export default {
             rename_dialog: false,
             remove_dialog: false,
             restore_dialog: false,
+            permanent_delete_dialog: false,
             show_trashed: false,
             menu: [],
             busy: false,
@@ -426,6 +477,7 @@ export default {
             pose_bones: [],
             meshes: {},
             frame: 0,
+            time: 0,
             playing: false,
             playSpeed: 1,
 
@@ -499,7 +551,7 @@ export default {
                     return this.startButtonCaptions[this.state]
                 }
             }
-        }
+        },
     },
     async mounted() {
         await this.loadSession(this.$route.params.id)
@@ -749,7 +801,7 @@ export default {
         },
         async startTrialsPoll() {
             this.trialsPoll = window.setTimeout(async () => {
-                const trials = this.filteredTrials.filter(trial => trial.status === 'stopped' || trial.status === 'processing')
+                const trials = this.filteredTrials.filter(trial => trial.status === 'stopped' || trial.status === 'processing' || trial.status === 'reprocess')
 
                 if (trials.length > 0) {
                     const res = await axios.get(`/sessions/${this.session.id}/status/?ret_session=true`)
@@ -798,10 +850,16 @@ export default {
         async updateTrialWithData(trial, data) {
             const index = this.session.trials.findIndex(x => x.id === trial.id)
             if (index >= 0) {
-                Vue.set(this.session.trials, index, data);
-                const session_index = this.sessions.findIndex(x => x.id === trial.session);
-                const idx = this.sessions[session_index].trials.findIndex(x => x.id === trial.id)
-                Vue.set(this.sessions[session_index].trials, idx, data);
+                const sessionIndex = this.sessions.findIndex(x => x.id === trial.session);
+                const idx = this.sessions[sessionIndex].trials.findIndex(x => x.id === trial.id)
+                if(Object.keys(data).length === 0){
+                    // if permanent remove was done
+                    Vue.delete(this.session.trials, index);
+                    Vue.delete(this.sessions[sessionIndex].trials, idx);
+                } else {
+                    Vue.set(this.session.trials, index, data);
+                    Vue.set(this.sessions[sessionIndex].trials, idx, data);
+                }
             }
         },
         async trashTrial(trial) {
@@ -811,6 +869,14 @@ export default {
           } catch (error) {
             apiError(error)
           }
+        },
+        async permanentDeleteTrial(trial){
+            try {
+                await axios.post(`/trials/${trial.id}/permanent_remove/`);
+            } catch (error) {
+                apiError(error);
+            }
+            await this.updateTrialWithData(trial, {});
         },
         async restoreTrial(trial) {
           try {
@@ -822,6 +888,7 @@ export default {
         },
         async loadTrial(trial) {
             console.log('loadTrial')
+            this.time = 0
 
             if (!this.trialLoading) {
                 this.frame = 0
@@ -869,6 +936,7 @@ export default {
 
                     if (this.videos.length === 0) {
                         this.frame = 0
+                        this.time = 0
                     }
 
                     if (this.frames.length > 0) {
@@ -1019,39 +1087,44 @@ export default {
             let cframe
 
             let frames = this.frames.length
-            let duration = this.vid0().duration
-            if (!isNaN(this.vid0().duration)) {
+            let duration = 0
+            if (this.vid0()) duration = this.vid0().duration
+            if (this.vid0() && !isNaN(this.vid0().duration)) {
                 let framerate = frames / duration
 
                 if (this.videos.length > 0) {
                     let t = 0
                     if (this.vid0()) t = this.vid0().currentTime;
-                    cframe = (Math.round(t * framerate)) % this.frames.length
+                    cframe = (Math.round(t * framerate)) > this.frames.length ? this.frames.length - 1 : (Math.round(t * framerate))
                     this.frame = cframe
+                    if (this.vid0()) this.time = this.frame == 0 ? 0 : parseFloat(this.vid0().currentTime.toFixed(2))
                 } else {
                     cframe = this.frame++
 
                     if (this.frame >= this.frames.length) {
-                        this.frame = 0
+                        this.frame = this.frames.length - 1
+                        this.time = this.vid0().duration
                     }
                 }
 
-                // display the frame
-                let json = this.animation_json;
-                for (let body in json.bodies) {
-                    json.bodies[body].attachedGeometries.forEach((geom) => {
-                        if (this.meshes[body + geom]) {
-                            this.meshes[body + geom].position.set(
-                                json.bodies[body].translation[cframe][0],
-                                json.bodies[body].translation[cframe][1],
-                                json.bodies[body].translation[cframe][2])
-                            var euler = new THREE.Euler(
-                                json.bodies[body].rotation[cframe][0],
-                                json.bodies[body].rotation[cframe][1],
-                                json.bodies[body].rotation[cframe][2]);
-                            this.meshes[body + geom].quaternion.setFromEuler(euler)
-                        }
-                    })
+                if (cframe < this.frames.length) {
+                    // display the frame
+                    let json = this.animation_json;
+                    for (let body in json.bodies) {
+                        json.bodies[body].attachedGeometries.forEach((geom) => {
+                            if (this.meshes[body + geom]) {
+                                this.meshes[body + geom].position.set(
+                                    json.bodies[body].translation[cframe][0],
+                                    json.bodies[body].translation[cframe][1],
+                                    json.bodies[body].translation[cframe][2])
+                                var euler = new THREE.Euler(
+                                    json.bodies[body].rotation[cframe][0],
+                                    json.bodies[body].rotation[cframe][1],
+                                    json.bodies[body].rotation[cframe][2]);
+                                this.meshes[body + geom].quaternion.setFromEuler(euler)
+                            }
+                        })
+                    }
                 }
 
                 this.renderer.render(this.scene, this.camera)
@@ -1120,8 +1193,7 @@ export default {
             }
         },
         onNavigate(frame) {
-            const vid0 = this.videoElement(0)
-            const step = vid0.duration / this.frames.length
+            const step = this.vid0().duration / this.frames.length
             const newPosition = frame * step
 
             this.eachVideo(videoElement => {
@@ -1129,6 +1201,16 @@ export default {
             })
 
             this.animateOneFrame()
+        },
+        onChangeTime(time) {
+            this.eachVideo(videoElement => {
+                videoElement.currentTime = time
+            })
+
+            this.animateOneFrame()
+        },
+        maxVideoDuration() {
+            return this.vid0() ? (this.vid0().duration - 1) : 0
         },
         recordingTimeLimit() {
             // Default value is 60.

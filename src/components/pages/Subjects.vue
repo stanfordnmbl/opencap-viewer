@@ -59,7 +59,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Remove</v-list-item-title>
+                            <v-list-item-title v-on="on">Trash</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -69,7 +69,7 @@
                                 </v-col>
                                 <v-col cols="10">
                                   <p>
-                                    Do you want to remove subject <code>{{item.name}}</code>?
+                                    Do you want to trash subject <code>{{item.name}}</code>?
                                     You will be able to restore it for 30 days. After that,
                                     this subject will be permanently removed.
                                   </p>
@@ -143,7 +143,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Remove permanently</v-list-item-title>
+                            <v-list-item-title v-on="on">Delete permanently</v-list-item-title>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -362,14 +362,14 @@
             :error-messages="formErrors.height"
           ></v-text-field>
           <v-text-field
-            v-model="edited_subject.age"
-            label="Age (y)"
+            v-model="edited_subject.birth_year"
+            label="Birth year (yyyy)"
             type="number"
             hide-spin-buttons
             required
-            :rules="[ageRule]"
-            :error="formErrors.age != null"
-            :error-messages="formErrors.age"
+            :rules="[birthYearRule]"
+            :error="formErrors.birth_year != null"
+            :error-messages="formErrors.birth_year"
           ></v-text-field>
           <v-select
               clearable
@@ -444,13 +444,13 @@ export default {
       formErrors: {
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       },
       headers: [
         { text: 'Name', value: 'name' },
         { text: 'Weight', value: 'weight' },
         { text: 'Height', value: 'height' },
-        { text: 'Age', value: 'age' },
+        { text: 'Birth year', value: 'birth_year' },
         { text: 'Sex', value: 'sex_display' },
         { text: 'Gender', value: 'gender_display' },
         { text: 'Characteristics', value: 'characteristics' }
@@ -461,26 +461,27 @@ export default {
         { text: 'Trials', value: 'trials.length' },
         { text: 'Date', value: 'created_at' },
       ],
-      edited_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
       selected: null,
-      empty_subject: {id: "", name:"", weight:"", height:"", age:"", sex_at_birth:"", gender:"", characteristics:""},
+      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
       heightRule: (v) => {
         if (!v.trim()) return true;
         if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0) return true;
-        if(!isNaN(parseFloat(v)) && v > 3.0) return "It is unlikely that the height of subject is higher than 3 m. Are you using the right units? Height should be in m.";
-        if(!isNaN(parseFloat(v)) && v < .1) return "It is unlikely that the subject is shorter than .1 m. Are you using the right units? Height should be in m.";
+        if(!isNaN(parseFloat(v)) && v > 3.0) return "It seems unlikely that the subject's height exceeds 3 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
+        if(!isNaN(parseFloat(v)) && v < .1) return "It seems unlikely that the subject's height is less than 0.1 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
       },
       weightRule: (v) => {
         if (!v.trim()) return true;
         if (!isNaN(parseFloat(v)) && v >= 1 && v <= 200.0) return true;
-        if(!isNaN(parseFloat(v)) && v > 200.0) return "It is unlikely that the weight of subject is higher than 200 kg. Are you using the right units? Weight should be in kg.";
-        if(!isNaN(parseFloat(v)) && v < 1) return "It is unlikely that the weight of subject is lower than 1 kg. Are you using the right units? Weight should be in kg.";
+        if(!isNaN(parseFloat(v)) && v > 200.0) return "It seems unlikely that the subject's weight exceeds 200 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
+        if(!isNaN(parseFloat(v)) && v < 1) return "It seems unlikely that the subject's weight is less than 1 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
       },
-      ageRule: (v) => {
-        if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 0 && v <= 100) return true;
-        if(!isNaN(parseFloat(v)) && v > 100) return "It is unlikely that the age of subject is higher than 100 years. Are you using the right units? Age should be in years.";
-        if(!isNaN(parseFloat(v)) && v < 0) return "It is not possible that the age of subject is lower than 0 years. Are you using the right units? Age should be in years.";
+      birthYearRule: (v) => {
+        const currentYear = new Date().getFullYear();
+        if (!v) return true;
+        if (!isNaN(parseFloat(v)) && v >= 1900 && v <= currentYear) return true;
+        if(!isNaN(parseFloat(v)) && v > currentYear) return `The subject's birth year cannot be set in the future. Please ensure that you are using the correct units. The birth year should be earlier than the current year ${currentYear} and specified in years (yyyy) format.`;
+        if(!isNaN(parseFloat(v)) && v < 1900) return "It seems unlikely that the subject's birth year predates 1900. Please ensure that you are using the correct units. The birth year should be specified in years (yyyy) format.";
       }
 
     }
@@ -497,7 +498,7 @@ export default {
       return this.subjects.map(s => ({
         id: s.id,
         name: s.name,
-        age: s.age,
+        birth_year: s.birth_year,
         characteristics: s.characteristics,
         gender: s.gender,
         gender_display: this.genders[s.gender],
@@ -590,7 +591,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
       console.log('add subject')
     },
@@ -601,7 +602,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
       console.log('edit subject', subject)
     },
@@ -612,7 +613,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
     },
     async submitSubjectForm() {
@@ -621,7 +622,7 @@ export default {
           name: null,
           weight: null,
           height: null,
-          age: null
+          birth_year: null
       }
 
       if(this.edited_subject.id) {

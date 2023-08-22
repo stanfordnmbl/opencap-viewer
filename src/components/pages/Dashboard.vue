@@ -3,7 +3,22 @@
 
     <!-- Google Charts container. -->
     <div class="content-chart">
-      <GChart :type="chart_type" :data="chart_data" :options="chart_options" :resizeDebounce="500" @ready="onChartReady" style="width: 100%; height: 100%;"/>
+      <div id="spinner-layer" style="position: relative; width: 100%; height: 100%; display:none;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+          <div class="spinner"></div>
+        </div>
+        <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; color:black">
+          <h3>Loading Chart</h3>
+        </div>
+      </div>
+
+      <LineChartGenerator
+        id="chart"
+        :chart-options="chartOptions"
+        :chart-data="chartData"
+        style="position: relative; width: 100%; height: 100%;"
+        ref="chartRef"
+      />
     </div>
 
     <!-- Left floating button. -->
@@ -35,11 +50,15 @@
             <v-select v-model="session_selected" v-bind:items="sessionsIds" label="Select session" outlined dense
               v-on:change="onSessionSelected"></v-select>
           </div>
-          
+          <div v-else>
+                <p>
+                    This is a public session. To load your sessions, launch the dashboard from your session list.
+                </p>
+          </div>
           <v-select v-model="trial_selected" v-bind:items="trial_names" label="Select trial" outlined dense
             v-on:change="onTrialSelected"></v-select>
 
-          <v-select v-bind:items="x_quantities" label="X Quantity" outlined dense
+          <v-select v-bind:items="x_quantities" v-model="x_quantity_selected" label="X Quantity" outlined dense
             v-on:change="onXQuantitySelected"></v-select>
 
           <v-select v-bind:items="y_quantities" label="Y Quantities" multiple outlined dense
@@ -48,11 +67,8 @@
       </v-card-text>
 
       <div class="left d-flex flex-column pa-2">
-        <v-btn class="w-100 mt-4" @click="drawChart">
-          Generate Chart
-        </v-btn>
 
-        <v-btn class="w-100 mt-4" @click="onChartDownload">
+        <v-btn class="w-100" @click="onChartDownload">
           Download Chart
         </v-btn>
 
@@ -82,23 +98,49 @@
         <v-subheader class="subheader-bold"></v-subheader>
 
         <div class="left d-flex flex-column pa-2">
-          <v-select v-model="chart_type" v-bind:items="chart_type_options" label="Chart Type" outlined dense></v-select>
+          <v-text-field v-model="chartOptions.plugins.title.text" label="Title" outlined dense></v-text-field>
 
-          <v-text-field v-model="chart_options.title" label="Title" outlined dense></v-text-field>
+          <v-text-field v-model="chartOptions.plugins.subtitle.text" label="Subtitle" outlined dense></v-text-field>
 
-          <v-text-field v-model="chart_options.hAxis.title" label="H. Axis Title" outlined dense></v-text-field>
+          <v-text-field v-model="chartOptions.scales.x.title.text" label="H. Axis Title" outlined dense></v-text-field>
 
-          <v-text-field v-model="chart_options.vAxis.title" label="V. Axis Title" outlined dense></v-text-field>
+          <v-text-field v-model="chartOptions.scales.y.title.text" label="V. Axis Title" outlined dense></v-text-field>
 
-          <v-select v-model="chart_options.legend.position" v-bind:items="chart_legend_position" label="Legend Position"
+          <v-text-field v-model="chart_line_width" label="Line Width" outlined dense type="number" @input="drawChart"></v-text-field>
+
+          <v-select v-model="chart_point_style" v-bind:items="chart_point_style_options" label="Point Style"
+            outlined dense v-on:change="drawChart"></v-select>
+
+          <v-text-field v-model="chart_point_radius" label="Point Size" outlined dense type="number" @input="drawChart"></v-text-field>
+
+          <v-select v-model="chartOptions.plugins.legend.position" v-bind:items="chart_legend_position" label="Legend Position"
             outlined dense v-on:change="placeholderFunction"></v-select>
 
-          <v-select v-model="chart_options.legend.alignment" v-bind:items="chart_legend_alignment"
+          <v-select v-model="chartOptions.plugins.legend.align" v-bind:items="chart_legend_alignment"
             label="Legend Alignment" outlined dense v-on:change="placeholderFunction"></v-select>
 
-          <v-select v-model="chart_download_format_selected" v-bind:items="chart_download_format"
-            label="Download Format" outlined dense v-on:change="placeholderFunction"></v-select>
+          <v-select v-model="chart_color_scales_selected" v-bind:items="chart_color_scales_options"
+            label="Color Scale" outlined dense v-on:change="drawChart"></v-select>
+
+          <v-btn class="w-100" @click="onResetZoom">
+            Reset Zoom
+          </v-btn>
+
+          <icon-tooltip
+            tooltip-text="
+                Zoom instructions:</br>
+                 - <b>Zoom</b>: Click and Drag over a zone.</br>
+                 - <b>Move</b>: CTRL + Click and move mouse.</br>
+                 - <b>Zoom on X</b>: Mouse wheel on X axis.</br>
+                 - <b>Zoom on Y</b>: Mouse wheel on Y axis.</br>
+            "
+            iconClass="fas fa-question-circle"
+            >
+          </icon-tooltip>
+
+
         </div>
+
       </v-card-text>
     </v-card>
 
@@ -109,22 +151,47 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import axios from 'axios'
-import { apiError } from '@/util/ErrorMessage.js'
+import { apiError, apiInfo, apiWarning, clearToastMessages } from '@/util/ErrorMessage.js'
 import Vue from 'vue'
-import VueGoogleCharts from "vue3-googl-chart"
-import { jsPDF } from 'jspdf'
-import 'svg2pdf.js'
 import store from '@/store/store.js'
+import chroma from 'chroma-js';
+import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
+import zoomPlugin from 'chartjs-plugin-zoom';
+import IconTooltip from '@/components/ui/IconTooltip.vue';
 
-Vue.use(VueGoogleCharts);
+import {
+  Chart as ChartJS,
+  Title,
+  SubTitle,
+  Tooltip,
+  Legend,
+  LineElement,
+  LinearScale,
+  CategoryScale,
+  PointElement} from 'chart.js'
+
+ChartJS.register(
+  Title,
+  SubTitle,
+  Tooltip,
+  Legend,
+  LineElement,
+  LinearScale,
+  CategoryScale,
+  PointElement,
+  zoomPlugin)
 
 export default {
   name: 'ChartPage',
+  components: {
+    LineChartGenerator,
+    IconTooltip,
+   },
   // This function is executed once the page has been loaded.
   created: function () {
       // Indicates if the current logged in user owns the session.
       this.session_owned = false
-      
+
       // If the user is logged in, select session from list of sessions.
       if(this.loggedIn) {
         // If a session id has been passed as a parameter, set it as the default session.
@@ -136,9 +203,6 @@ export default {
           }
         });
       }
-
-    // Set session as current session.
-    this.current_session_id = this.$route.params.id;
   },
   methods: {
     ...mapActions('data', ['loadSession']),
@@ -164,6 +228,10 @@ export default {
     },
     // Draw a chart. In future iterations this function should take care of compute the requested data, not only load it.
     async drawChart() {
+      // Show spinner and hide chart until finished.
+      document.getElementById("spinner-layer").style.display = "block";
+      document.getElementById("chart").style.display = "None";
+
       var index = this.trial_names.indexOf(this.trial_selected);
       var id = this.trial_ids[index];
 
@@ -207,7 +275,7 @@ export default {
           // Split file in lines.
           var lines = data.split("\n");
 
-          // Proccess line by line. First obtain number of rows and number of columns.
+          // Process line by line. First obtain number of rows and number of columns.
           var nRows = 0;
           var nColumns = 0;
           i = 0;
@@ -232,39 +300,89 @@ export default {
           columnNames.push(...this.y_quantities_selected);
           i++;
 
-          // First, add headers to chart_data, and then add information from rows.
-          var rows = [];
-          this.chart_data = [];
-          this.chart_data.push([this.x_quantity_selected]);
-          this.chart_data[0].push(...this.y_quantities_selected);
-          var j = 0;
-          var k = 0;
-          for (j = 0; j < nRows; j++) {
-            var lineArray = lines[j + i].trim().split("\t");
-            var row = [];
-            for (k = 0; k < indexes.length; k++) {
-              row.push(parseFloat(lineArray[indexes[k]].trim()));
+          // Get name of selected color scale.
+          const selectedOption = this.chart_color_scales_options.find(option => {
+            return option.value === this.chart_color_scales_selected;
+          });
+
+          const selectedText = selectedOption ? selectedOption.text : "";
+
+            // Create an empty dataset per column.
+            var j = 0;
+            this.chartData.labels = []
+            this.chartData.datasets = []
+            var colors = chroma.scale("Viridis").correctLightness().gamma(2).cache(false).colors(this.y_quantities_selected.length);
+            if (selectedText == "Spectral" || selectedText == "Rainbow" || selectedText == "Red-Yellow-Blue" || selectedText == "Yellow-Green-Blue")
+                colors = chroma.scale(this.chart_color_scales_selected).colors(this.y_quantities_selected.length);
+            else if (selectedText == "Yellow-Green")
+                colors = chroma.scale(this.chart_color_scales_selected).correctLightness().colors(this.y_quantities_selected.length);
+            else if (selectedText == "Red-Green" || selectedText == "Red-Blue" || selectedText == "Green-Blue")
+                colors = chroma.scale(this.chart_color_scales_selected).gamma(0.75).cache(false).colors(this.y_quantities_selected.length);
+            else
+                colors = chroma.scale(this.chart_color_scales_selected).correctLightness().gamma(2).cache(false).colors(this.y_quantities_selected.length);
+
+            // Add y quantities.
+            var dataset = {};
+            for(j = 0; j < this.y_quantities_selected.length; j++) {
+              dataset = {};
+              dataset["data"] = [];
+              dataset["label"] = this.y_quantities_selected[j];
+              dataset["backgroundColor"] = colors[j];
+              dataset["borderColor"] = colors[j];
+              dataset["borderWidth"] = this.chart_line_width;
+              // Handle "none" option to remove points
+              dataset["pointStyle"] = this.chart_point_style;
+              if (this.chart_point_style === "none") {
+                dataset["pointRadius"] = 0;
+              } else {
+                dataset["pointRadius"] = this.chart_point_radius;
+              }              
+
+              this.chartData.datasets.push(dataset);
             }
-            this.chart_data.push(row);
-          }
+
+            // Insert value from each row
+            j = 0;
+            var k = 0;
+            for (j = 0; j < nRows; j++) {
+                var lineArray = lines[j + i].trim().split("\t");
+                var row = [];
+                for (k = 0; k < indexes.length; k++) {
+                  if (k === 0)
+                    this.chartData["labels"].push(parseFloat(lineArray[indexes[k]].trim()));
+                  else
+                    this.chartData.datasets[k-1]["data"].push(parseFloat(lineArray[indexes[k]].trim()));
+                }
+            }
         }
 
+        // Show spinner and hide chart until finished.
+        document.getElementById("spinner-layer").style.display = "None";
+        document.getElementById("chart").style.display = "block";
       } catch (error) {
         apiError(error)
         this.trialLoading = false
       }
-
     },
-    // Get trials and update trials select when a sessin is selected.
+    onResetZoom() {
+        const chart = this.$refs.chartRef.getCurrentChart();
+        if (chart) {
+          chart.resetZoom();
+        }
+    },
+    // Get trials and update trials select when a session is selected.
     onSessionSelected(sessionName) {
+      // Clear previous toast messages
+      clearToastMessages()
 
       // Get value between parentheses (session id).
       var sessionIdSelected = sessionName.match(/\((.*)\)/);
       if (sessionIdSelected !== null) {
         sessionIdSelected = sessionIdSelected.pop();
 
-        this.current_session_id = sessionIdSelected;
+        this.$router.push({ name: 'Dashboard', params: { id: sessionIdSelected } })
 
+        this.current_session_id = sessionIdSelected;
 
         var session = this.sessions.filter(function (obj) {
           if (obj.id === sessionIdSelected) {
@@ -274,21 +392,32 @@ export default {
         var trials = session[0]['trials'];
         // Filter trials by name.
         trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
-        this.trial_names = [];
-        trials.forEach(element => {
-          this.trial_names.push(element.name);
-          this.trial_ids.push(element.id)
-        });
-        this.trial_selected = this.trial_names[0];
 
-        // Load data from this trial.
-        this.onTrialSelected(this.trial_selected);
+        if (trials.length > 0) {
+            this.trial_ids = []
+            this.trial_names = [];
+            trials.forEach(element => {
+              this.trial_names.push(element.name);
+              this.trial_ids.push(element.id)
+            });
+            this.trial_selected = this.trial_names[0];
+
+            // Load data from this trial.
+            this.onTrialSelected(this.trial_selected);
+        } else {
+            this.trial_names = []
+            apiWarning("There are no dynamic trials associated with this session, thereby nothing to plot.")
+        }
 
       }
     },
     // Get x-quantities and y-quantities and update respective selects when a trial is selected.
     async onTrialSelected(trialName) {
-      // TODO In following versions, load just available columns, and show them in the select.
+
+      // Show spinner and hide chart until finished.
+      document.getElementById("spinner-layer").style.display = "block";
+      document.getElementById("chart").style.display = "None";
+
       // Then, when generate chart is clicked, use the available data and calculate the data of
       // the columns that are not in database.
       this.trial_selected = trialName;
@@ -328,7 +457,7 @@ export default {
           // Split file in lines.
           var lines = data.split("\n");
 
-          // Proccess line by line. First obtain number of rows and number of columns.
+          // Process line by line. First obtain number of rows and number of columns.
           var i = 0;
           while (lines[i].trim() !== "endheader") {
             i++;
@@ -345,8 +474,14 @@ export default {
           this.y_quantities = this.x_quantities.slice();
           this.y_quantities.shift();
 
+          this.x_quantity_selected = this.x_quantities[0]
+
+          this.drawChart()
         }
 
+        // Show chart and hide spinner.
+        document.getElementById("spinner-layer").style.display = "None";
+        document.getElementById("chart").style.display = "block";
       } catch (error) {
         apiError(error)
         this.trialLoading = false
@@ -354,80 +489,24 @@ export default {
     },
     onXQuantitySelected(xQuantitySelected) {
       this.x_quantity_selected = xQuantitySelected;
-      this.chart_options.hAxis.title = xQuantitySelected;
+      this.chartOptions.scales.x.title.text = xQuantitySelected;
+      this.drawChart();
     },
     onYQuantitySelected(yQuantitySelected) {
       this.y_quantities_selected = yQuantitySelected;
+      this.drawChart();
     },
     onChartDownload() {
       if (this.chart_download_format_selected === 'png') {
-        // Get image URI from Google Charts object.
-        var imgUri = this.chart_reference.getImageURI();
-
-        // Open image in new window.
-        window.open(imgUri);
-
-        // Create a link element to download the image.
-        var downloadLinkPng = document.createElement("a");
-
-        // Set URI of the image.
-        downloadLinkPng.href = imgUri;
-
-        // Set name of the downloaded file.
-        downloadLinkPng.download = "chart.svg";
-
-        // Append link element, click it, and remove it.
-        document.body.appendChild(downloadLinkPng);
-        downloadLinkPng.click();
-        document.body.removeChild(downloadLinkPng);
-
-      } else if (this.chart_download_format_selected == 'svg') {
-        // Get source of the SVG element.
-        var svg = document.getElementsByTagName("svg");
-        var svgData = svg[0].outerHTML;
-        var serializer = new XMLSerializer();
-        var source = serializer.serializeToString(svg[0]);
-
-        // Add xml declaration to the svg object.
-        var svgBlob = new Blob([source], { type: "image/svg+xml;charset=utf-8" });
-        var svgUri = URL.createObjectURL(svgBlob);
-
-        // Open image in new window.
-        window.open(svgUri);
-
-        // Create a link element to download the image.
-        var downloadLinkSvg = document.createElement("a");
-
-        // Set URI of the image.
-        downloadLinkSvg.href = svgUri;
-
-        // Set name of the downloaded file.
-        downloadLinkSvg.download = "chart.svg";
-
-        // Append link element, click it, and remove it.
-        document.body.appendChild(downloadLinkSvg);
-        downloadLinkSvg.click();
-        document.body.removeChild(downloadLinkSvg);
-      } else if (this.chart_download_format_selected == 'pdf') {
-
-        // Get SVG element.
-        var svg_for_pdf = document.getElementsByTagName("svg");
-        var element = svg_for_pdf[0];
-
-        // Get dimensions of the SVG element.
-        element.getBoundingClientRect()
-        const width = element.width.baseVal.value
-        const height = element.height.baseVal.value
-
-        // Create a new PDF file with the required dimensions.
-        const doc = new jsPDF(width > height ? 'l' : 'p', 'pt', [width, height])
-
-        // Add SVG element to the PDF and download it.
-        doc.svg(element, { width, height })
-          .then(() => {
-            // save the created pdf
-            doc.save('chart.pdf')
-          })
+          const canvas = document.getElementById("chart").getElementsByTagName('canvas')[0];
+          const downloadLink = document.createElement('a');
+          downloadLink.setAttribute('download', 'chart.png');
+          canvas.toBlob(function(blob) {
+          const url = URL.createObjectURL(blob);
+          downloadLink.setAttribute('href', url);
+          downloadLink.click();
+          URL.revokeObjectURL(url);
+        }, 'image/png', 1);
       }
 
     },
@@ -452,44 +531,107 @@ export default {
       x_quantity_selected: [],
       x_data: [],
       placeholder: [],
-      chart_download_format: ['png', 'svg', 'pdf'],
       chart_download_format_selected: 'png',
-      chart_object: undefined,
-      chart_data: [['', ''],
-      ['', 0]],
-      chart_type: "LineChart",
-      chart_type_options: ["LineChart", "ScatterChart", "AreaChart", "SteppedAreaChart", "ColumnChart"], // "BarChart", "Histogram"
-      chart_legend_position: ["none", "top", "right", "bottom"],
+      chart_color_scales_selected: "Viridis",
+      chart_color_scales_options: [
+        { text: 'Viridis (recommended)', value: 'Viridis' },
+        { text: 'Hot', value: ['black', 'red', 'yellow'] },
+        { text: 'Yellow-Blue', value: ['yellow', 'blue'] },
+        { text: 'Yellow-Green', value: ['yellow', 'green'] },
+        { text: 'Grays', value: ['lightgrey', 'black'] },
+        { text: 'Blues', value: ['#add8e6', '#191970'] },
+      ],
+      chart_legend_position: ["top", "right", "bottom", "left", "chartArea"],
       chart_legend_alignment: ["start", "center", "end"],
-      chart_options: {
-        title: "Chart Title",
-        is3D: true,
-        vAxis: {
-          scaleType: 'decimal', // log
-          title: 'v-Axis'
-        },
-        hAxis: {
-          scaleType: 'decimal', // log
-          title: 'h-Axis'
-        },
-        legend: {
-          position: 'right',
-          alignment: 'start'
-        },
-        explorer: {
-          actions: ['dragToZoom', 'rightClickToReset'],
-          axis: 'horizontal',
-          keepInBounds: true,
-          maxZoomIn: 4.0
-        }
+      chartData: {
+        datasets: [{
+          label: 'Empty',
+          data: [],
+        }]
       },
-      session_owned: false
+      chart_line_width: 5,
+      chart_point_style_options: ["none", "circle", "cross", "crossRot", "dash", "line", "rect", "rectRounded", "rectRot", "star", "triangle"],
+      chart_point_style: 'none',
+      chart_point_radius: 12,
+      chartOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'X axis title',
+              font: {
+                size: 20
+              },
+            },
+            type: 'linear',
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Y axis title',
+              font: {
+                size: 20
+              },
+            },
+            type: 'linear',
+          },
+        },
+        plugins: {
+          title: {
+            display: true,
+            text: 'Chart',
+            font: {
+              size: 35
+            },
+          },
+          subtitle: {
+            display: true,
+            text: 'Subtitle',
+            font: {
+              size: 15
+            },
+            padding: {
+              top: 10,
+              bottom: 35
+            }
+          },
+          legend: {
+            position: 'right',
+            align: 'center',
+            labels: {
+              font: {
+                size: 15
+              },
+            }
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'xy',
+              modifierKey: 'ctrl',
+            },
+            zoom: {
+              mode: 'xy',
+              overScaleMode: 'xy',
+              drag: {
+                enabled: true,
+              },
+              wheel: {
+                enabled: true,
+              }
+            }
+          }
+        },
+      }
     }
   },
   computed: {
     ...mapState({
       sessions: state => state.data.sessions,
       session: state => state.data.session,
+      subjects: state => state.data.subjects,
       loggedIn: state => state.auth.verified,
     }),
     sessionsNames() {
@@ -497,10 +639,10 @@ export default {
         // Check that there are valid trials
         var trials = obj['trials'];
         // Filter trials by name and status.
-        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
+        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
 
         if (trials.length > 0) {
-          return obj.name;
+          return  obj.name + " (" + obj.id + ")";
         } else {
           return "";
         }
@@ -516,10 +658,14 @@ export default {
         // Check that there are valid trials
         var trials = obj['trials'];
         // Filter trials by name and status.
-        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
+        trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
 
         if (trials.length > 0) {
-          return obj.meta.subject.id + " (" + obj.id + ")";
+          if (obj.name)
+            return  obj.name + " (" + obj.id + ")";
+          else
+            if (obj.meta && obj.meta.subject && obj.meta.subject.id)
+                return obj.meta.subject.id + " (" + obj.id + ")";
         } else {
           return "";
         }
@@ -531,23 +677,38 @@ export default {
     }
   },
   async mounted () {
+    // Set session as current session.
+    this.current_session_id = this.$route.params.id;
+    // Show spinner and hide chart until finished.
+    document.getElementById("spinner-layer").style.display = "block";
+    document.getElementById("chart").style.display = "None";
+
     // If not logged in, load session from params and show trials.
-    if(!this.session_owned) {
       await this.loadSession(this.$route.params.id)
 
       var trials = this.session['trials'];
       // Filter trials by name.
-      trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
-      this.trial_names = [];
-      trials.forEach(element => {
-        this.trial_names.push(element.name);
-        this.trial_ids.push(element.id)
-      });
-      this.trial_selected = this.trial_names[0];
+      trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral'  && trial.name !== 'calibration')
+      if (trials.length > 0) {
+          this.trial_ids = []
+          this.trial_names = [];
+          trials.forEach(element => {
+            this.trial_names.push(element.name);
+            this.trial_ids.push(element.id)
+          });
+          this.trial_selected = this.trial_names[0];
+
+          // Load data from this trial.
+          this.onTrialSelected(this.trial_selected);
+
+        } else {
+            this.trial_names = []
+            apiWarning("There are no trials associated to this session. Record a new trial in order to plot information.")
+        }
 
       // Load data from this trial.
       this.onTrialSelected(this.trial_selected);
-    }
+
   },
 }
 </script>
@@ -559,6 +720,7 @@ export default {
   vertical-align: middle;
   width: 100%;
   height: 100%;
+  background-color: white;
 }
 
 .sidebar {
@@ -622,5 +784,19 @@ export default {
   margin: auto;
   width: 60%;
   height: 80%;
+  background-color: white;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #767676;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spinner 0.8s linear infinite;
+}
+
+@keyframes spinner {
+  to {transform: rotate(360deg);}
 }
 </style>
