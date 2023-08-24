@@ -102,7 +102,6 @@
                                                     Calculating...
                                                 </span>
                                                 <span v-if="func.id !== invokedFunctionId || !invokedFunctionId || !(isInvokeInProgress || isInvokeDone)">Start</span>
-                                                <span v-if="func.id === invokedFunctionId & isInvokeDone">{{analysisResult.state}}</span>
                                                 </v-btn>
                                                 <v-btn small v-if="func.id === invokedFunctionId & isInvokeDone" @click="showAnalysisResultDialog=true">Open details</v-btn>
                                             </v-col>
@@ -146,7 +145,7 @@
                                     </v-row>
                                     <v-row>
                                         <v-col cols="4">Status</v-col>
-                                        <v-col cols="8">{{analysisResult.result.statusCode}}</v-col>
+                                        <v-col cols="8">{{analysisResult.state}}</v-col>
                                     </v-row>
                                 </v-card-text>
                                 <v-card-actions>
