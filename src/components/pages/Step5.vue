@@ -96,7 +96,7 @@
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
-                                                <v-btn small @click="invokeAnalysisFunction(func.id, t.name)" :disabled="isInvokeInProgress || isInvokeDone">
+                                                <v-btn v-if="!isInvokeDone" small @click="invokeAnalysisFunction(func.id, t.name)" :disabled="isInvokeInProgress">
                                                     <span v-if="func.id === invokedFunctionId & isInvokeInProgress & !isInvokeDone">
                                                         <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
                                                         Calculating...
