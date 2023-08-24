@@ -96,12 +96,12 @@
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
-                                                <v-btn small @click="invokeAnalysisFunction(func.id, t.name)" :disabled="isInvokeInProgress">
-                                                <span v-if="func.id === invokedFunctionId & isInvokeInProgress & !isInvokeDone">
-                                                    <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
-                                                    Calculating...
-                                                </span>
-                                                <span v-if="func.id !== invokedFunctionId || !invokedFunctionId || !(isInvokeInProgress)">Start</span>
+                                                <v-btn small @click="invokeAnalysisFunction(func.id, t.name)" :disabled="isInvokeInProgress || isInvokeDone">
+                                                    <span v-if="func.id === invokedFunctionId & isInvokeInProgress & !isInvokeDone">
+                                                        <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                                                        Calculating...
+                                                    </span>
+                                                    <span v-if="func.id !== invokedFunctionId || !invokedFunctionId || !(isInvokeInProgress || isInvokeDone)">Start</span>
                                                 </v-btn>
                                                 <v-btn small v-if="func.id === invokedFunctionId & isInvokeDone" @click="showAnalysisResultDialog=true">Open details</v-btn>
                                             </v-col>
