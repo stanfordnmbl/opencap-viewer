@@ -101,7 +101,7 @@
                                                     <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
                                                     Calculating...
                                                 </span>
-                                                <span v-if="func.id !== invokedFunctionId || !invokedFunctionId || !(isInvokeInProgress || isInvokeDone)">Start</span>
+                                                <span v-if="func.id !== invokedFunctionId || !invokedFunctionId || !(isInvokeInProgress)">Start</span>
                                                 </v-btn>
                                                 <v-btn small v-if="func.id === invokedFunctionId & isInvokeDone" @click="showAnalysisResultDialog=true">Open details</v-btn>
                                             </v-col>
