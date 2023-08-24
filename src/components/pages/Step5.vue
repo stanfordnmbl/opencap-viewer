@@ -81,7 +81,7 @@
                             </v-dialog>
 
                           </v-list-item>
-                          <v-list-item link v-if="!t.trashed">
+                          <v-list-item link v-if="!t.trashed && t.name !== 'neutral'">
                             <v-dialog
                                     v-model="showAnalysisDialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
