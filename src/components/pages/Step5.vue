@@ -92,18 +92,42 @@
                                 <v-card>
                                     <v-card-title>Advanced Analysis</v-card-title>
                                     <v-card-text v-if="analysisFunctions.length > 0">
-                                        <v-row  v-for="func in analysisFunctions" :key="func.id">
+                                        <v-row  v-for="func in analysisFunctionsWithMenu" :key="func.id">
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
-                                                <v-btn v-if="!isInvokeDone" small @click="invokeAnalysisFunction(func.id, t.name)" :disabled="isInvokeInProgress">
-                                                    <span v-if="func.id === invokedFunctionId & isInvokeInProgress & !isInvokeDone">
+                                                <v-btn small v-if="func.id === invokedFunctionId & isInvokeInProgress" :disabled="isInvokeInProgress">
+                                                    <span >
                                                         <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
                                                         Calculating...
                                                     </span>
-                                                    <span v-if="func.id !== invokedFunctionId || !invokedFunctionId || !(isInvokeInProgress || isInvokeDone)">Start</span>
                                                 </v-btn>
-                                                <v-btn small v-if="func.id === invokedFunctionId & isInvokeDone" @click="showAnalysisResultDialog=true">Open details</v-btn>
+                                                <v-btn small v-if="func.id === invokedFunctionId & isInvokeDone">
+                                                    <span>{{ analysisResult.state }}</span>
+                                                    <v-menu v-model="func.isMenuOpen" offset-y>
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                        <v-btn icon dark v-bind="attrs" v-on="on">
+                                                            <v-icon>mdi-menu</v-icon>
+                                                        </v-btn>
+                                                        </template>
+                                                        <v-list>
+                                                            <v-list-item link
+                                                                @click="invokeAnalysisFunction(func.id, t.name)"
+                                                                :disabled="isInvokeInProgress">
+                                                                Re-run
+                                                            </v-list-item>
+                                                            <v-list-item @click="showAnalysisResultDialog=true">Details</v-list-item>
+                                                        </v-list>
+                                                    </v-menu>
+                                                </v-btn>
+                                                <v-btn
+                                                    small
+                                                    v-if="!(func.id === invokedFunctionId & (isInvokeInProgress || isInvokeDone))"
+                                                    :disabled="isInvokeInProgress"
+                                                    @click="invokeAnalysisFunction(func.id, t.name)"
+                                                    >
+                                                    Run
+                                                </v-btn>
                                             </v-col>
                                         </v-row>
                                     </v-card-text>
@@ -141,7 +165,7 @@
                                 <v-card-text>
                                     <v-row>
                                         <v-col cols="4">Message</v-col>
-                                        <v-col cols="8">{{ analysisResult.result.body ? analysisResult.result.body.message || analysisResult.result.body.error : analysisResult.result.message ? analysisResult.result.message : analysisResult.result.error }}</v-col>
+                                        <v-col cols="8">{{ analysisResult.result ? analysisResult.result.meta : analysisResult.response }}</v-col>
                                     </v-row>
                                     <v-row>
                                         <v-col cols="4">Status</v-col>
@@ -547,7 +571,7 @@ export default {
             showAnalysisResultDialog: false,
             isInvokeInProgress: false,
             isInvokeDone: false,
-            analysisResult: {analysis_function: {}, result: { body: {}}},
+            analysisResult: {analysis_function: {}, result: { meta: {}}},
             invokedFunctionId: null,
 
             trialInProcess: null,
@@ -604,6 +628,9 @@ export default {
         }),
         sessionUrl() {
             return "https://app.opencap.ai/session/" + this.session.id;
+        },
+        analysisFunctionsWithMenu(){
+            return this.analysisFunctions.map((func) => ({...func, isMenuOpen: false}))
         },
         filteredTrialsWithMenu() {
             return this.filteredTrials.map(trial => ({...trial, isMenuOpen: false}));
@@ -676,7 +703,7 @@ export default {
             }
         },
         showAnalysisDialog(newShowAnalysisDialog, oldShowAnalysisDialog){
-            if(!newShowAnalysisDialog){
+            if(!newShowAnalysisDialog & !this.isInvokeInProgress){
                 this.isInvokeInProgress = false;
                 this.isInvokeDone = false;
                 this.analysisResult = {analysis_function: {}, result: {body: {}}};
@@ -814,6 +841,7 @@ export default {
             this.isInvokeInProgress = true;
             this.isInvokeDone = false;
             this.invokedFunctionId = functionId;
+            this.analysisFunctionsWithMenu.forEach(func => {func.isMenuOpen = false});
             let state = this;
             const invokeAnalysisFunctionUrl = new URL(`/analysis-functions/${functionId}/invoke/`, axios.defaults.baseURL);
             const invokeData = {session_id: this.session.id, specific_trial_names: [trialName]};
