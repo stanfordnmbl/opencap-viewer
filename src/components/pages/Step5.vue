@@ -165,7 +165,7 @@
                                 <v-card-text>
                                     <v-row>
                                         <v-col cols="4">Message</v-col>
-                                        <v-col cols="8">{{ analysisResult.result ? analysisResult.result.meta : analysisResult.response }}</v-col>
+                                        <v-col cols="8">{{ analysisResult.response }}</v-col>
                                     </v-row>
                                     <v-row>
                                         <v-col cols="4">Status</v-col>
