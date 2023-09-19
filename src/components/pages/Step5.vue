@@ -87,12 +87,24 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="800">
                                 <template v-slot:activator="{ on }">
-                                    <v-list-item-title v-on="on">Analysis</v-list-item-title>
+                                    <v-list-item-title v-on="on" @click="shownAnalysisDialogTrialName = t.name">Analysis</v-list-item-title>
                                 </template>
                                 <v-card>
                                     <v-card-title>Advanced Analysis</v-card-title>
                                     <v-card-text v-if="analysisFunctions.length > 0">
-                                        <v-row  v-for="func in analysisFunctionsWithMenu" :key="func.id">
+                                        <v-row v-if="invokedAnalysisFunctionTrialName !== shownAnalysisDialogTrialName & isInvokeInProgress" class="my-1">
+                                            <v-col cols="12">
+                                                <v-alert 
+                                                    dense
+                                                    border="left"
+                                                    type="warning"
+                                                    width="700"
+                                                    >
+                                                    The analysis proccess is running on the <code>{{invokedAnalysisFunctionTrialName}}</code> trial.
+                                                </v-alert>
+                                            </v-col>
+                                        </v-row>
+                                        <v-row v-for="func in analysisFunctionsWithMenu" :key="func.id">
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
@@ -148,7 +160,7 @@
                                   <v-btn
                                     color="red darken-1"
                                     text
-                                    @click="t.isMenuOpen = false; showAnalysisDialog = false"
+                                    @click="t.isMenuOpen = false; showAnalysisDialog = false; shownAnalysisDialogTrialName = null;"
                                   >
                                     Close
                                   </v-btn>
@@ -573,6 +585,8 @@ export default {
             isInvokeDone: false,
             analysisResult: {analysis_function: {}, result: { meta: {}}},
             invokedFunctionId: null,
+            invokedAnalysisFunctionTrialName: null,
+            shownAnalysisDialogTrialName: null,
 
             trialInProcess: null,
             trial: null,
@@ -703,11 +717,14 @@ export default {
             }
         },
         showAnalysisDialog(newShowAnalysisDialog, oldShowAnalysisDialog){
-            if(!newShowAnalysisDialog & !this.isInvokeInProgress){
-                this.isInvokeInProgress = false;
-                this.isInvokeDone = false;
-                this.analysisResult = {analysis_function: {}, result: {body: {}}};
-                this.invokedFunctionId = null;
+            if(!newShowAnalysisDialog){
+                this.shownAnalysisDialogTrialName = null;
+                if(!this.isInvokeInProgress){
+                    this.isInvokeInProgress = false;
+                    this.isInvokeDone = false;
+                    this.analysisResult = {analysis_function: {}, response: {}};
+                    this.invokedFunctionId = null;
+                }
             }
         }
     },
@@ -841,6 +858,7 @@ export default {
             this.isInvokeInProgress = true;
             this.isInvokeDone = false;
             this.invokedFunctionId = functionId;
+            this.invokedAnalysisFunctionTrialName = trialName;
             this.analysisFunctionsWithMenu.forEach(func => {func.isMenuOpen = false});
             let state = this;
             const invokeAnalysisFunctionUrl = new URL(`/analysis-functions/${functionId}/invoke/`, axios.defaults.baseURL);
@@ -859,6 +877,7 @@ export default {
                         state.analysisResult = response.data;
                         state.isInvokeInProgress = false;
                         state.isInvokeDone = true;
+                        state.invokedAnalysisFunctionTrialName = null;
                     }
             });
         },
