@@ -56,9 +56,18 @@ export default {
       "non-binary": "Non-Binary/Non-Conforming",
       "prefer-not-respond": "Prefer not to respond",
     },
-    isSyncDownloadAllowed: JSON.parse(localStorage.getItem("isSyncDownloadAllowed"))
+    isSyncDownloadAllowed: JSON.parse(localStorage.getItem("isSyncDownloadAllowed")),
+    analysis: {}
   },
   mutations: {
+    setAnalysis(state, trial, analysisData){
+      state.analysis[trial.id] = {
+        isInvokeInProgress: analysisData.isInvokeInProgress,
+        isInvokeDone: analysisData.isInvokeDone,
+        functionId: analysisData.functionId,
+        result: analysisData.result
+      }
+    },
     setSession (state, session) {
       session.created_at = formatDate(session.created_at); 
       state.session = session;
@@ -105,7 +114,40 @@ export default {
       console.log(state.subjects)
     },
     setAnalysisFunctions(state, functions){
-      state.analysisFunctions = functions;
+      state.analysisFunctions = functions.map((func) => ({...func, trials: [], results: []}));
+      console.log(state.analysisFunctions)
+    },
+    setAnalysisFunctionTrial(state, functionId, trialId){
+      const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
+      if (index >= 0) {
+        const analysisFunction = state.analysisFunctions[index];
+        analysisFunction.trials.push(trialId);
+        Vue.set(state.analysisFunctions, index, analysisFunction);
+      }
+    },
+    removeAnalysisFunctionTrial(state, functionId, trialId){
+      const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
+      if (index >= 0) {
+        const analysisFunction = state.analysisFunctions[index];
+        analysisFunction.trials = analysisFunction.trials.filter(id => id !== trialId);
+        Vue.set(state.analysisFunctions, index, analysisFunction);
+      }
+    },
+    setAnalysisFunctionResult(state, functionId, result){
+      const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
+      if (index >= 0) {
+        const analysisFunction = state.analysisFunctions[index];
+        analysisFunction.results.push(result);
+        Vue.set(state.analysisFunctions, index, analysisFunction);
+      }
+    },
+    resetAnalysisFunctionResult(state, functionId, trialId){
+      const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
+      if (index >= 0) {
+        const analysisFunction = state.analysisFunctions[index];
+        analysisFunction.resuls = analysisFunction.results.filter(result => result.trial.id !== trialId);
+        Vue.set(state.analysisFunctions, index, analysisFunction);
+      }
     },
     setStep1 (state, { cameras }) {
       state.cameras = cameras

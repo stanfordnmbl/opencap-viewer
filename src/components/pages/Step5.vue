@@ -87,11 +87,12 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="800">
                                 <template v-slot:activator="{ on }">
-                                    <v-list-item-title v-on="on" @click="shownAnalysisDialogTrialName = t.name">Analysis</v-list-item-title>
+                                    <v-list-item-title v-on="on">Analysis</v-list-item-title>
                                 </template>
                                 <v-card>
                                     <v-card-title>Advanced Analysis</v-card-title>
                                     <v-card-text v-if="analysisFunctions.length > 0">
+                                    <!--
                                         <v-row v-if="invokedAnalysisFunctionTrialName !== shownAnalysisDialogTrialName & isInvokeInProgress" class="my-1">
                                             <v-col cols="12">
                                                 <v-alert 
@@ -104,18 +105,19 @@
                                                 </v-alert>
                                             </v-col>
                                         </v-row>
+                                        -->
                                         <v-row v-for="func in analysisFunctionsWithMenu" :key="func.id">
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
-                                                <v-btn small v-if="func.id === invokedFunctionId & isInvokeInProgress" :disabled="isInvokeInProgress">
+                                                <v-btn small v-if="t.id in func.trials" :disabled="t.id in func.trials">
                                                     <span >
                                                         <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
                                                         Calculating...
                                                     </span>
                                                 </v-btn>
-                                                <v-btn small v-if="func.id === invokedFunctionId & isInvokeDone">
-                                                    <span>{{ analysisResult.state }}</span>
+                                                <v-btn small v-if="func.results.length > 0 & func.results.filter(result => result.trial.id === t.id).length > 0">
+                                                    <span>{{ func.results.filter(result => result.trial.id === t.id)[0].state }}</span>
                                                     <v-menu v-model="func.isMenuOpen" offset-y>
                                                         <template v-slot:activator="{ on, attrs }">
                                                         <v-btn icon dark v-bind="attrs" v-on="on">
@@ -124,8 +126,8 @@
                                                         </template>
                                                         <v-list>
                                                             <v-list-item link
-                                                                @click="invokeAnalysisFunction(func.id, t.name)"
-                                                                :disabled="isInvokeInProgress">
+                                                                @click="invokeAnalysisFunction(func.id, t)"
+                                                                :disabled="t.id in func.trials">
                                                                 Re-run
                                                             </v-list-item>
                                                             <v-list-item @click="showAnalysisResultDialog=true">Details</v-list-item>
@@ -134,13 +136,42 @@
                                                 </v-btn>
                                                 <v-btn
                                                     small
-                                                    v-if="!(func.id === invokedFunctionId & (isInvokeInProgress || isInvokeDone))"
-                                                    :disabled="isInvokeInProgress"
-                                                    @click="invokeAnalysisFunction(func.id, t.name)"
+                                                    v-if="!(t.id in func.trials)"
+                                                    @click="invokeAnalysisFunction(func.id, t)"
                                                     >
                                                     Run
                                                 </v-btn>
                                             </v-col>
+                                            <!--
+                                            <v-dialog
+                                                v-model="showAnalysisResultDialog"
+                                                width="auto"
+                                            >
+                                                <v-card>
+                                                <v-card-title>{{ func.results.filter(result => result.trial.id === t.id)[0].analysis_function.title }}</v-card-title>
+                                                <v-card-text>
+                                                    <v-row>
+                                                        <v-col cols="4">Message</v-col>
+                                                        <v-col cols="8">{{ func.results.filter(result => result.trial.id === t.id)[0].response }}</v-col>
+                                                    </v-row>
+                                                    <v-row>
+                                                        <v-col cols="4">Status</v-col>
+                                                        <v-col cols="8">{{ func.results.filter(result => result.trial.id === t.id)[0].state }}</v-col>
+                                                    </v-row>
+                                                </v-card-text>
+                                                <v-card-actions>
+                                                    <v-spacer></v-spacer>
+                                                    <v-btn
+                                                    color="blue darken-1"
+                                                    text
+                                                    @click="showAnalysisResultDialog=false"
+                                                    >
+                                                    Close
+                                                    </v-btn>
+                                                </v-card-actions>
+                                                </v-card>
+                                            </v-dialog>
+                                            -->
                                         </v-row>
                                     </v-card-text>
                                     <v-card-text v-else>
@@ -152,48 +183,17 @@
                                     color="blue darken-1"
                                     text
                                     v-if="analysisFunctions.length > 0"
-                                    :disabled="isInvokeInProgress"
-                                    @click="isInvokeInProgress = false; isInvokeDone = false;"
                                   >
                                     Reset results
                                   </v-btn>
                                   <v-btn
                                     color="red darken-1"
                                     text
-                                    @click="t.isMenuOpen = false; showAnalysisDialog = false; shownAnalysisDialogTrialName = null;"
+                                    @click="t.isMenuOpen = false; showAnalysisDialog = false;"
                                   >
                                     Close
                                   </v-btn>
                                     </v-card-actions>
-                                </v-card>
-                            </v-dialog>
-
-                            <v-dialog
-                                v-model="showAnalysisResultDialog"
-                                width="auto"
-                            >
-                                <v-card>
-                                <v-card-title>{{ analysisResult.analysis_function.title }}</v-card-title>
-                                <v-card-text>
-                                    <v-row>
-                                        <v-col cols="4">Message</v-col>
-                                        <v-col cols="8">{{ analysisResult.response }}</v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="4">Status</v-col>
-                                        <v-col cols="8">{{analysisResult.state}}</v-col>
-                                    </v-row>
-                                </v-card-text>
-                                <v-card-actions>
-                                    <v-spacer></v-spacer>
-                                    <v-btn
-                                    color="blue darken-1"
-                                    text
-                                    @click="showAnalysisResultDialog=false"
-                                    >
-                                    Close
-                                    </v-btn>
-                                </v-card-actions>
                                 </v-card>
                             </v-dialog>
 
@@ -581,12 +581,12 @@ export default {
 
             showAnalysisDialog: false,
             showAnalysisResultDialog: false,
-            isInvokeInProgress: false,
-            isInvokeDone: false,
-            analysisResult: {analysis_function: {}, result: { meta: {}}},
-            invokedFunctionId: null,
-            invokedAnalysisFunctionTrialName: null,
-            shownAnalysisDialogTrialName: null,
+            // isInvokeInProgress: false,
+            // isInvokeDone: false,
+            // analysisResult: {analysis_function: {}, result: { meta: {}}},
+            // invokedFunctionId: null,
+            // invokedAnalysisFunctionTrialName: null,
+            // shownAnalysisDialogTrialName: null,
 
             trialInProcess: null,
             trial: null,
@@ -716,17 +716,17 @@ export default {
                 this.archiveUrl = "#";
             }
         },
-        showAnalysisDialog(newShowAnalysisDialog, oldShowAnalysisDialog){
-            if(!newShowAnalysisDialog){
-                this.shownAnalysisDialogTrialName = null;
-                if(!this.isInvokeInProgress){
-                    this.isInvokeInProgress = false;
-                    this.isInvokeDone = false;
-                    this.analysisResult = {analysis_function: {}, response: {}};
-                    this.invokedFunctionId = null;
-                }
-            }
-        }
+        // showAnalysisDialog(newShowAnalysisDialog, oldShowAnalysisDialog){
+        //     console.log(newShowAnalysisDialog);
+        //     // if(!newShowAnalysisDialog){
+        //     //     this.shownAnalysisDialogTrialName = null;
+        //     //     if(!this.isInvokeInProgress){
+        //     //         this.isInvokeDone = false;
+        //     //         this.analysisResult = {analysis_function: {}, response: {}};
+        //     //         this.invokedFunctionId = null;
+        //     //     }
+        //     // }
+        // }
     },
     methods: {
         ...mapMutations('data', [
@@ -735,6 +735,10 @@ export default {
             'setSessionId',
             'addTrial',
             'updateTrial',
+            'setAnalysisFunctionTrial',
+            'setAnalysisFunctionResult',
+            'removeAnalysisFunctionTrial',
+            'resetAnalysisFunctionResult'
         ]),
         ...mapActions('data', ['loadSession', 'initSessionSameSetup', 'loadAnalysisFunctions']),
         async changeState() {
@@ -854,15 +858,29 @@ export default {
                     }
             });
         },
-        async invokeAnalysisFunction(functionId, trialName){
-            this.isInvokeInProgress = true;
-            this.isInvokeDone = false;
-            this.invokedFunctionId = functionId;
-            this.invokedAnalysisFunctionTrialName = trialName;
+        // setTrialAnalysisState(trial, analysisState){
+        //     let updatedTrial = {...trial};
+        //     updatedTrial.analysis.invokedFunctionID = analysisState.invokedFunctionID;
+        //     updatedTrial.analysis.isInvokeInProgress = analysisState.isInvokeInProgress;
+        //     updatedTrial.analysis.isInvokeDone = analysisState.isInvokeDone;
+        //     if(analysisState.result !== null){
+        //         updatedTrial.analysis.result = analysisState.result;
+        //     }
+        //     console.log("Before:", this.filteredTrialsWithMenu)
+        //     console.log(this.showAnalysisDialog)
+        //     const trialWithMenuIndex = this.filteredTrialsWithMenu.indexOf(trial);
+        //     this.filteredTrialsWithMenu[trialWithMenuIndex] = updatedTrial;
+        //     //this.$set(this.filteredTrialsWithMenu, trialWithMenuIndex, updatedTrial);
+        //     //this.updateTrialWithData(trial, updatedTrial);
+        //     console.log("After:", this.filteredTrialsWithMenu)
+        //     console.log(this.showAnalysisDialog)
+        // },
+        async invokeAnalysisFunction(functionId, trial){
+            this.setAnalysisFunctionTrial(functionId, trial.id);
             this.analysisFunctionsWithMenu.forEach(func => {func.isMenuOpen = false});
-            let state = this;
+            const state = this;
             const invokeAnalysisFunctionUrl = new URL(`/analysis-functions/${functionId}/invoke/`, axios.defaults.baseURL);
-            const invokeData = {session_id: this.session.id, specific_trial_names: [trialName]};
+            const invokeData = {session_id: this.session.id, specific_trial_names: [trial.name]};
             await axios.post(invokeAnalysisFunctionUrl, invokeData).then(
                 async function pollResultOnReady(data){
                     const taskID = data.data.task_id;
@@ -874,10 +892,8 @@ export default {
                     if(response.status === 200){
                         console.log("Analysis result:", response.data)
                         clearTimeout(pollResultOnReady);
-                        state.analysisResult = response.data;
-                        state.isInvokeInProgress = false;
-                        state.isInvokeDone = true;
-                        state.invokedAnalysisFunctionTrialName = null;
+                        state.removeAnalysisFunctionTrial(functionId, trial.id);
+                        state.setAnalysisFunctionResult(functionId, response.data);
                     }
             });
         },
