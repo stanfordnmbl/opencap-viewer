@@ -156,7 +156,7 @@ export default {
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
-        analysisFunction.resuls = analysisFunction.results.filter(result => result.trial.id !== trialId);
+        analysisFunction.results = analysisFunction.results.filter(result => result.trial.id !== trialId);
         Vue.set(state.analysisFunctions, index, analysisFunction);
       }
     },
