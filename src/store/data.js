@@ -114,10 +114,11 @@ export default {
       console.log(state.subjects)
     },
     setAnalysisFunctions(state, functions){
+      console.log(functions)
       state.analysisFunctions = functions.map((func) => ({...func, trials: [], results: []}));
-      console.log(state.analysisFunctions)
     },
-    setAnalysisFunctionTrial(state, functionId, trialId){
+    SET_ANALYSIS_FUNCTION_TRIAL(state, functionId, trialId){
+      console.log('setAnalysisFunctionTrial', state, functionId, trialId)
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
@@ -125,7 +126,7 @@ export default {
         Vue.set(state.analysisFunctions, index, analysisFunction);
       }
     },
-    removeAnalysisFunctionTrial(state, functionId, trialId){
+    REMOVE_ANALYSIS_FUNCTION_TRIAL(state, functionId, trialId){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
@@ -133,11 +134,15 @@ export default {
         Vue.set(state.analysisFunctions, index, analysisFunction);
       }
     },
-    setAnalysisFunctionResult(state, functionId, result){
+    SET_ANALYSIS_FUNCTION_RESULT(state, functionId, result){
+      console.log('setAnalysisFucntionResult')
+      console.log(result)
+      console.log(functionId)
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
         analysisFunction.results.push(result);
+        console.log(analysisFunction)
         Vue.set(state.analysisFunctions, index, analysisFunction);
       }
     },
@@ -145,7 +150,7 @@ export default {
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
-        analysisFunction.resuls = analysisFunction.results.filter(result => result.trial.id !== trialId);
+        analysisFunction.results = analysisFunction.results.filter(result => result.trial.id !== trialId);
         Vue.set(state.analysisFunctions, index, analysisFunction);
       }
     },
@@ -322,7 +327,28 @@ export default {
       res.data.created_at = formatDate(res.data.created_at);
 
       commit('updateSubject', res.data)
+    },
+    setAnalysisFunctionTrial({state, commit}, functionId, trialId){
+      console.log('action', functionId, trialId);
+      commit('SET_ANALYSIS_FUNCTION_TRIAL', functionId, trialId)
+    },
+    setAnalysisFunctionResult({state, commit}, functionId, result){
+      commit('SET_ANALYSIS_FUNCTION_RESULT', functionId, result)
+    },
+    removeAnalysisFunctionTrial({state, commit}, functionId, trialId){
+      commit('REMOVE_ANALYSIS_FUNCTION_TRIAL', functionId, trialId)
     }
 
+  },
+  getters: {
+    getAnalysisFunctionResult: (state) => (functionId, trialId) => {
+      const analysisFunction = state.analysisFunctions.find(func => func.id === functionId);
+      console.log(analysisFunction)
+      const result = analysisFunction.results.filter(result => result.result.trial === trialId);
+      if(result.length > 0){
+          return result[0];
+      }
+      return {analysis_function: {}, result: {}, response: {}};
+    }
   }
 }

@@ -116,8 +116,8 @@
                                                         Calculating...
                                                     </span>
                                                 </v-btn>
-                                                <v-btn small v-if="func.results.length > 0 & func.results.filter(result => result.trial.id === t.id).length > 0">
-                                                    <span>{{ func.results.filter(result => result.trial.id === t.id)[0].state }}</span>
+                                                <v-btn small v-if="func.results.length > 0">
+                                                    <span>{{ getAnalysisFunctionResult(func.id, t.id).state }}</span>
                                                     <v-menu v-model="func.isMenuOpen" offset-y>
                                                         <template v-slot:activator="{ on, attrs }">
                                                         <v-btn icon dark v-bind="attrs" v-on="on">
@@ -508,7 +508,7 @@ import moment from 'moment'
 import Vue from 'vue'
 import momentDurationFormatSetup from 'moment-duration-format'
 import axios from 'axios'
-import { mapState, mapMutations, mapActions } from 'vuex'
+import { mapState, mapMutations, mapActions, mapGetters } from 'vuex'
 import { apiError, apiErrorRes, apiSuccess } from '@/util/ErrorMessage.js'
 import Status from '@/components/ui/Status'
 import * as THREE from 'three'
@@ -640,6 +640,9 @@ export default {
             gender: state => state.data.gender,
             isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
         }),
+        ...mapGetters(
+            'data', ['getAnalysisFunctionResult']
+        ),
         sessionUrl() {
             return "https://app.opencap.ai/session/" + this.session.id;
         },
@@ -735,12 +738,22 @@ export default {
             'setSessionId',
             'addTrial',
             'updateTrial',
-            'setAnalysisFunctionTrial',
-            'setAnalysisFunctionResult',
-            'removeAnalysisFunctionTrial',
-            'resetAnalysisFunctionResult'
+            // 'setAnalysisFunctionTrial',
+            // 'setAnalysisFunctionResult',
+            // 'removeAnalysisFunctionTrial',
+            // 'resetAnalysisFunctionResult'
         ]),
-        ...mapActions('data', ['loadSession', 'initSessionSameSetup', 'loadAnalysisFunctions']),
+        ...mapActions(
+            'data',
+            [
+                'loadSession',
+                'initSessionSameSetup',
+                'loadAnalysisFunctions',
+                'setAnalysisFunctionTrial',
+                'setAnalysisFunctionResult',
+                'removeAnalysisFunctionTrial',
+            ]
+        ),
         async changeState() {
             switch (this.state) {
                 case 'ready': {
@@ -876,9 +889,10 @@ export default {
         //     console.log(this.showAnalysisDialog)
         // },
         async invokeAnalysisFunction(functionId, trial){
+            console.log(trial)
             this.setAnalysisFunctionTrial(functionId, trial.id);
             this.analysisFunctionsWithMenu.forEach(func => {func.isMenuOpen = false});
-            const state = this;
+            const obj = this;
             const invokeAnalysisFunctionUrl = new URL(`/analysis-functions/${functionId}/invoke/`, axios.defaults.baseURL);
             const invokeData = {session_id: this.session.id, specific_trial_names: [trial.name]};
             await axios.post(invokeAnalysisFunctionUrl, invokeData).then(
@@ -892,8 +906,8 @@ export default {
                     if(response.status === 200){
                         console.log("Analysis result:", response.data)
                         clearTimeout(pollResultOnReady);
-                        state.removeAnalysisFunctionTrial(functionId, trial.id);
-                        state.setAnalysisFunctionResult(functionId, response.data);
+                        obj.removeAnalysisFunctionTrial(functionId, trial.id);
+                        obj.setAnalysisFunctionResult(functionId, response.data);
                     }
             });
         },
