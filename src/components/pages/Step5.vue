@@ -205,6 +205,9 @@
                               </v-card>
                             </v-dialog>
                           </v-list-item>
+                          <v-list-item link v-if="!t.trashed">
+                            <v-list-item-title @click="$router.push({ name: 'GaitDashboard', params: { id: session.id, trialID: t.id } })">Visualizer</v-list-item-title>
+                          </v-list-item>
                           <v-list-item link v-else>
                             <v-dialog
                                     v-model="restore_dialog"
@@ -640,6 +643,8 @@ export default {
         const doneTrials = this.filteredTrials.filter(trial => trial.status === 'done')
 
         if (doneTrials.length > 0) {
+            console.log("Done trials:")
+            console.log(doneTrials[0])
             this.loadTrial(doneTrials[0])
         }
     },
@@ -968,6 +973,7 @@ export default {
                     const { data } = await axios.get(`/trials/${trial.id}/`)
 
                     this.trial = data
+                    console.log("Trial:", data)
 
                     // load JSON
                     const json = data.results.filter(element => element.tag == "visualizerTransforms-json")
