@@ -117,6 +117,17 @@ export default {
       state.analysisFunctions = functions.map((func) => ({...func, trials: [], results: []}));
       console.log(state.analysisFunctions)
     },
+    setAnalysisFunctionPending(state, data) {
+      for(let i = 0; i < state.analysisFunctions.length; i++) {
+        let f_id = state.analysisFunctions[i].id.toString();
+        if (f_id in data) {
+          state.analysisFunctions[i].trials = data[f_id];
+        } else {
+          state.analysisFunctions[i].trials = [];
+        }
+
+      }
+    },
     setAnalysisFunctionTrial(state, functionId, trialId){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
@@ -304,6 +315,10 @@ export default {
     async loadAnalysisFunctions({ state, commit }){
       const response = await axios.get('/analysis-functions/');
       commit('setAnalysisFunctions', response.data);
+    },
+    async loadAnalysisFunctionsPending({ state, commit }){
+      const response = await axios.get('/analysis-results/pending/');
+      commit('setAnalysisFunctionPending', response.data);
     },
     async trashExistingSubject ({ state, commit }, id) {
       const subjectId = id

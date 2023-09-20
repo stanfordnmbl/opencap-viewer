@@ -110,7 +110,7 @@
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
-                                                <v-btn small v-if="t.id in func.trials" :disabled="t.id in func.trials">
+                                                <v-btn small v-if="func.trials.includes(t.id)" :disabled="func.trials.includes(t.id)">
                                                     <span >
                                                         <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
                                                         Calculating...
@@ -136,7 +136,7 @@
                                                 </v-btn>
                                                 <v-btn
                                                     small
-                                                    v-if="!(t.id in func.trials)"
+                                                    v-if="!func.trials.includes(t.id)"
                                                     @click="invokeAnalysisFunction(func.id, t)"
                                                     >
                                                     Run
@@ -672,6 +672,8 @@ export default {
     async mounted() {
         await this.loadSession(this.$route.params.id)
         await this.loadAnalysisFunctions()
+        await this.loadAnalysisFunctionsPending()
+        await this.analysisFunctionsPolls()
         console.log(this.user_id)
         console.log(this.session.user)
         this.show_controls = (this.user_id == this.session.user)
@@ -740,7 +742,10 @@ export default {
             'removeAnalysisFunctionTrial',
             'resetAnalysisFunctionResult'
         ]),
-        ...mapActions('data', ['loadSession', 'initSessionSameSetup', 'loadAnalysisFunctions']),
+        ...mapActions('data', [
+            'loadSession',
+            'initSessionSameSetup',
+            'loadAnalysisFunctions', 'loadAnalysisFunctionsPending']),
         async changeState() {
             switch (this.state) {
                 case 'ready': {
@@ -875,7 +880,37 @@ export default {
         //     console.log("After:", this.filteredTrialsWithMenu)
         //     console.log(this.showAnalysisDialog)
         // },
-        async invokeAnalysisFunction(functionId, trial){
+        async analysisFunctionsPolls() {
+            for(let func of this.analysisFunctions) {
+                for(let trial_id of func.trials) {
+                   console.log(func);
+                   console.log(trial_id);
+                    this.checkAnalysisFunction(func.id, trial_id);
+                }
+            }
+        },
+        async checkAnalysisFunction(functionId, trial_id) {
+            const checkAnalysisFunctionUrl =
+                new URL(`/analysis-functions/${functionId}/task-for-trial/${trial_id}/`, axios.defaults.baseURL);
+            const state = this;
+            await axios.get(checkAnalysisFunctionUrl).then(
+                async function pollResultOnReady(data){
+                  const taskID = data.data.task_id;
+                  const getResultOnReadyURL = new URL(`/analysis-result/${taskID}/`, axios.defaults.baseURL);
+                  const response = await axios.get(getResultOnReadyURL);
+                  if(response.status === 202){
+                      setTimeout(function(){pollResultOnReady(data);}, 1000);
+                  }
+                  if(response.status === 200){
+                      console.log("Analysis result:", response.data)
+                      clearTimeout(pollResultOnReady);
+                      state.removeAnalysisFunctionTrial(functionId, trial_id);
+                      state.setAnalysisFunctionResult(functionId, response.data);
+                  }
+               }
+           )
+        },
+        async invokeAnalysisFunction(functionId, trial) {
             this.setAnalysisFunctionTrial(functionId, trial.id);
             this.analysisFunctionsWithMenu.forEach(func => {func.isMenuOpen = false});
             const state = this;
