@@ -92,47 +92,26 @@
                                 <v-card>
                                     <v-card-title>Advanced Analysis</v-card-title>
                                     <v-card-text v-if="analysisFunctions.length > 0">
-                                    <!--
-                                        <v-row v-if="invokedAnalysisFunctionTrialName !== shownAnalysisDialogTrialName & isInvokeInProgress" class="my-1">
-                                            <v-col cols="12">
-                                                <v-alert 
-                                                    dense
-                                                    border="left"
-                                                    type="warning"
-                                                    width="700"
-                                                    >
-                                                    The analysis proccess is running on the <code>{{invokedAnalysisFunctionTrialName}}</code> trial.
-                                                </v-alert>
-                                            </v-col>
-                                        </v-row>
-                                        -->
+
                                         <v-row v-for="func in analysisFunctionsWithMenu" :key="func.id">
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
-                                              <p>{{t.id}}<br>{{func.trials}}</p>
+                                              <v-btn small v-if="func.trials.includes(t.id)" :disabled="t.id in func.trials">
+                                                  <span >
+                                                      <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                                                      Calculating...
+                                                  </span>
+                                              </v-btn>
 
-                                              <div v-for="ft in func.trials" :key="ft">
-                                                <v-btn small v-if="t.id == ft" :disabled="t.id == ft">
-                                                    <span >
-                                                        <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
-                                                        Calculating...
-                                                    </span>
-                                                </v-btn>
-
-                                              </div>
                                               <v-btn
                                                   small
-                                                  v-if="!(t.id in func.trials) && !(t.id in func.states)"
+                                                  v-if="!func.trials.includes(t.id) && !(t.id in func.states)"
                                                   @click="invokeAnalysisFunction(func.id, t.id, t.name)"
                                                   >
                                                   Run
                                               </v-btn>
-
-                                              <div v-for="(fs, ft, fs_idx) in func.states" :key="fs_idx">
-                                                  <p>{{fs}} {{ft}} {{fs_idx}}</p>
-
-                                                <v-btn small v-show="t.id  == ft">
+                                                <v-btn small v-if="(t.id in func.states) && !func.trials.includes(t.id)">
                                                     <span :style="func.states[t.id].state == 'failed'? 'color:red' : 'color:green'">{{ func.states[t.id].state }}</span>
                                                     <v-menu v-model="func.isMenuOpen" offset-y>
                                                         <template v-slot:activator="{ on, attrs }">
@@ -146,15 +125,13 @@
                                                                 :disabled="t.id in func.trials">
                                                                 Re-run
                                                             </v-list-item>
-                                                            <v-list-item v-if="func.states[t.id].state == 'success'">Details</v-list-item>
+                                                            <v-list-item
+                                                                @click="alert('Not implemented yet')"
+                                                                v-if="func.states[t.id].state == 'successfull'"
+                                                                >Details</v-list-item>
                                                         </v-list>
                                                     </v-menu>
                                                 </v-btn>
-
-
-
-                                              </div>
-
 
 
                                             </v-col>
@@ -925,7 +902,7 @@ export default {
                       state.removeAnalysisFunctionTrial({functionId, trialId:trial_id});
                       state.setAnalysisFunctionResult(functionId, response.data);
                       state.setAnalysisFunctionState(
-                          functionId, trial_id, {"state": response.data.state, "task_id": taskID});
+                          {functionId, trialId:trial_id, data:{"state": response.data.state, "task_id": taskID}});
                   }
                }
            )
@@ -951,7 +928,7 @@ export default {
                         state.removeAnalysisFunctionTrial({functionId, trialId:trial_id});
                         state.setAnalysisFunctionResult(functionId, response.data);
                         state.setAnalysisFunctionState(
-                            functionId, trial_id, {"state": response.data.state, "task_id": taskID});
+                            {functionId, trialId:trial_id, data:{"state": response.data.state, "task_id": taskID}});
                     }
             });
         },

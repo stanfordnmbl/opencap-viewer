@@ -114,16 +114,18 @@ export default {
       console.log(state.subjects)
     },
     setAnalysisFunctions(state, functions){
-      state.analysisFunctions = functions.map((func) => ({...func, trials: [], results: [], states: []}));
+      state.analysisFunctions = functions.map((func) => (
+          {...func, trials: [], results: [],
+            states: []}));
       console.log(state.analysisFunctions)
     },
     setAnalysisFunctionPending(state, data) {
       for(let i = 0; i < state.analysisFunctions.length; i++) {
         let f_id = state.analysisFunctions[i].id.toString();
         if (f_id in data) {
-          Vue.set(state.analysisFunctions[i], "states", data[f_id]);
+          Vue.set(state.analysisFunctions[i], "trials", data[f_id]);
         } else {
-          Vue.set(state.analysisFunctions[i], "states", []);
+          Vue.set(state.analysisFunctions[i], "trials", []);
         }
 
       }
@@ -139,10 +141,11 @@ export default {
 
       }
     },
-    setAnalysisFunctionState(state, functionId, trialId, data){
+    setAnalysisFunctionState(state, {functionId, trialId, data}){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
+        console.log(["setAnalysisFunctionState", functionId, trialId, data])
         Vue.set(state.analysisFunctions[index].states, trialId, data);
       }
     },
@@ -161,10 +164,14 @@ export default {
     removeAnalysisFunctionTrial(state, {functionId, trialId}){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
-        const analysisFunction = state.analysisFunctions[index];
-        analysisFunction.trials = analysisFunction.trials.filter(id => id !== trialId);
-        // Vue.set(state.analysisFunctions, index, analysisFunction);
+        Vue.set(state.analysisFunctions[index], "trials", state.analysisFunctions[index].trials.filter(id => id !== trialId));
+        if(trialId in state.analysisFunctions[index].states) {
+          if(state.analysisFunctions[index].states[trialId].status === "pending") {
+            Vue.delete(state.analysisFunctions[index].states, trialId);
+          }
+        }
       }
+      console.log(state.analysisFunctions);
     },
     setAnalysisFunctionResult(state, functionId, result){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
