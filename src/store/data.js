@@ -114,34 +114,56 @@ export default {
       console.log(state.subjects)
     },
     setAnalysisFunctions(state, functions){
-      state.analysisFunctions = functions.map((func) => ({...func, trials: [], results: []}));
+      state.analysisFunctions = functions.map((func) => ({...func, trials: [], results: [], states: []}));
       console.log(state.analysisFunctions)
     },
     setAnalysisFunctionPending(state, data) {
       for(let i = 0; i < state.analysisFunctions.length; i++) {
         let f_id = state.analysisFunctions[i].id.toString();
         if (f_id in data) {
-          state.analysisFunctions[i].trials = data[f_id];
+          Vue.set(state.analysisFunctions[i], "states", data[f_id]);
         } else {
-          state.analysisFunctions[i].trials = [];
+          Vue.set(state.analysisFunctions[i], "states", []);
         }
 
       }
     },
-    setAnalysisFunctionTrial(state, functionId, trialId){
+    setAnalysisFunctionsStates(state, data) {
+      for(let i = 0; i < state.analysisFunctions.length; i++) {
+        let f_id = state.analysisFunctions[i].id.toString();
+        if (f_id in data) {
+          Vue.set(state.analysisFunctions[i], "states", data[f_id]);
+        } else {
+          Vue.set(state.analysisFunctions[i], "states", []);
+        }
+
+      }
+    },
+    setAnalysisFunctionState(state, functionId, trialId, data){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
-        analysisFunction.trials.push(trialId);
-        Vue.set(state.analysisFunctions, index, analysisFunction);
+        Vue.set(state.analysisFunctions[index].states, trialId, data);
       }
     },
-    removeAnalysisFunctionTrial(state, functionId, trialId){
+    setAnalysisFunctionTrial(state, {functionId, trialId}){
+      console.log(["setAnalysisFunctionTrial", functionId, trialId])
+      const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
+      if (index >= 0) {
+        const analysisFunction = state.analysisFunctions[index];
+        if (!analysisFunction.trials.includes(trialId)) {
+          analysisFunction.trials.push(trialId);
+        }
+        // Vue.set(state.analysisFunctions, index, analysisFunction);
+      }
+      console.log(state.analysisFunctions);
+    },
+    removeAnalysisFunctionTrial(state, {functionId, trialId}){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
         analysisFunction.trials = analysisFunction.trials.filter(id => id !== trialId);
-        Vue.set(state.analysisFunctions, index, analysisFunction);
+        // Vue.set(state.analysisFunctions, index, analysisFunction);
       }
     },
     setAnalysisFunctionResult(state, functionId, result){
@@ -149,7 +171,7 @@ export default {
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
         analysisFunction.results.push(result);
-        Vue.set(state.analysisFunctions, index, analysisFunction);
+        // Vue.set(state.analysisFunctions, index, analysisFunction);
       }
     },
     resetAnalysisFunctionResult(state, functionId, trialId){
@@ -157,7 +179,7 @@ export default {
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
         analysisFunction.results = analysisFunction.results.filter(result => result.trial.id !== trialId);
-        Vue.set(state.analysisFunctions, index, analysisFunction);
+        // Vue.set(state.analysisFunctions, index, analysisFunction);
       }
     },
     setStep1 (state, { cameras }) {
@@ -315,6 +337,10 @@ export default {
     async loadAnalysisFunctions({ state, commit }){
       const response = await axios.get('/analysis-functions/');
       commit('setAnalysisFunctions', response.data);
+    },
+    async loadAnalysisFunctionsStates({ state, commit }){
+      const response = await axios.get('/analysis-results/states/');
+      commit('setAnalysisFunctionsStates', response.data);
     },
     async loadAnalysisFunctionsPending({ state, commit }){
       const response = await axios.get('/analysis-results/pending/');

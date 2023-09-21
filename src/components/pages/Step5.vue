@@ -110,37 +110,53 @@
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
-                                                <v-btn small v-if="func.trials.includes(t.id)" :disabled="func.trials.includes(t.id)">
+                                              <p>{{t.id}}<br>{{func.trials}}</p>
+
+                                              <div v-for="ft in func.trials" :key="ft">
+                                                <v-btn small v-if="t.id == ft" :disabled="t.id == ft">
                                                     <span >
                                                         <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
                                                         Calculating...
                                                     </span>
                                                 </v-btn>
-                                                <v-btn small v-if="func.results.length > 0 & func.results.filter(result => result.trial.id === t.id).length > 0">
-                                                    <span>{{ func.results.filter(result => result.trial.id === t.id)[0].state }}</span>
+
+                                              </div>
+                                              <v-btn
+                                                  small
+                                                  v-if="!(t.id in func.trials) && !(t.id in func.states)"
+                                                  @click="invokeAnalysisFunction(func.id, t.id, t.name)"
+                                                  >
+                                                  Run
+                                              </v-btn>
+
+                                              <div v-for="(fs, ft, fs_idx) in func.states" :key="fs_idx">
+                                                  <p>{{fs}} {{ft}} {{fs_idx}}</p>
+
+                                                <v-btn small v-show="t.id  == ft">
+                                                    <span :style="func.states[t.id].state == 'failed'? 'color:red' : 'color:green'">{{ func.states[t.id].state }}</span>
                                                     <v-menu v-model="func.isMenuOpen" offset-y>
                                                         <template v-slot:activator="{ on, attrs }">
-                                                        <v-btn icon dark v-bind="attrs" v-on="on">
+                                                        <v-btn icon dark v-bind="attrs" v-on="on" >
                                                             <v-icon>mdi-menu</v-icon>
                                                         </v-btn>
                                                         </template>
                                                         <v-list>
                                                             <v-list-item link
-                                                                @click="invokeAnalysisFunction(func.id, t)"
+                                                                @click="invokeAnalysisFunction(func.id, t.id, t.name)"
                                                                 :disabled="t.id in func.trials">
                                                                 Re-run
                                                             </v-list-item>
-                                                            <v-list-item @click="showAnalysisResultDialog=true">Details</v-list-item>
+                                                            <v-list-item v-if="func.states[t.id].state == 'success'">Details</v-list-item>
                                                         </v-list>
                                                     </v-menu>
                                                 </v-btn>
-                                                <v-btn
-                                                    small
-                                                    v-if="!func.trials.includes(t.id)"
-                                                    @click="invokeAnalysisFunction(func.id, t)"
-                                                    >
-                                                    Run
-                                                </v-btn>
+
+
+
+                                              </div>
+
+
+
                                             </v-col>
                                             <!--
                                             <v-dialog
@@ -673,6 +689,8 @@ export default {
         await this.loadSession(this.$route.params.id)
         await this.loadAnalysisFunctions()
         await this.loadAnalysisFunctionsPending()
+        await this.loadAnalysisFunctionsStates()
+
         await this.analysisFunctionsPolls()
         console.log(this.user_id)
         console.log(this.session.user)
@@ -739,13 +757,14 @@ export default {
             'updateTrial',
             'setAnalysisFunctionTrial',
             'setAnalysisFunctionResult',
+            'setAnalysisFunctionState',
             'removeAnalysisFunctionTrial',
             'resetAnalysisFunctionResult'
         ]),
         ...mapActions('data', [
             'loadSession',
             'initSessionSameSetup',
-            'loadAnalysisFunctions', 'loadAnalysisFunctionsPending']),
+            'loadAnalysisFunctions', 'loadAnalysisFunctionsPending', 'loadAnalysisFunctionsStates']),
         async changeState() {
             switch (this.state) {
                 case 'ready': {
@@ -881,11 +900,10 @@ export default {
         //     console.log(this.showAnalysisDialog)
         // },
         async analysisFunctionsPolls() {
+            console.log(this.analysisFunctions);
             for(let func of this.analysisFunctions) {
                 for(let trial_id of func.trials) {
-                   console.log(func);
-                   console.log(trial_id);
-                    this.checkAnalysisFunction(func.id, trial_id);
+                   this.checkAnalysisFunction(func.id, trial_id);
                 }
             }
         },
@@ -904,18 +922,21 @@ export default {
                   if(response.status === 200){
                       console.log("Analysis result:", response.data)
                       clearTimeout(pollResultOnReady);
-                      state.removeAnalysisFunctionTrial(functionId, trial_id);
+                      state.removeAnalysisFunctionTrial({functionId, trialId:trial_id});
                       state.setAnalysisFunctionResult(functionId, response.data);
+                      state.setAnalysisFunctionState(
+                          functionId, trial_id, {"state": response.data.state, "task_id": taskID});
                   }
                }
            )
         },
-        async invokeAnalysisFunction(functionId, trial) {
-            this.setAnalysisFunctionTrial(functionId, trial.id);
+        async invokeAnalysisFunction(functionId, trial_id, trial_name) {
+            console.log(['invokeAnalysisFunction', functionId, trial_id, trial_name])
+            this.setAnalysisFunctionTrial({functionId, trialId:trial_id});
             this.analysisFunctionsWithMenu.forEach(func => {func.isMenuOpen = false});
             const state = this;
             const invokeAnalysisFunctionUrl = new URL(`/analysis-functions/${functionId}/invoke/`, axios.defaults.baseURL);
-            const invokeData = {session_id: this.session.id, specific_trial_names: [trial.name]};
+            const invokeData = {session_id: this.session.id, specific_trial_names: [trial_name]};
             await axios.post(invokeAnalysisFunctionUrl, invokeData).then(
                 async function pollResultOnReady(data){
                     const taskID = data.data.task_id;
@@ -927,8 +948,10 @@ export default {
                     if(response.status === 200){
                         console.log("Analysis result:", response.data)
                         clearTimeout(pollResultOnReady);
-                        state.removeAnalysisFunctionTrial(functionId, trial.id);
+                        state.removeAnalysisFunctionTrial({functionId, trialId:trial_id});
                         state.setAnalysisFunctionResult(functionId, response.data);
+                        state.setAnalysisFunctionState(
+                            functionId, trial_id, {"state": response.data.state, "task_id": taskID});
                     }
             });
         },
