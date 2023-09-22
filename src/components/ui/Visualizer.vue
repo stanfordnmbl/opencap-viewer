@@ -1,34 +1,34 @@
 <template>
-        <div class="step-5 d-flex">
-            <div class="viewer flex-grow-1">
-                <div v-if="trial" class="d-flex flex-column h-100">
-                    <div id="mocap" ref="mocap" class="flex-grow-1" />
-                    <div v-if="!videoControlsDisabled" style="display: flex; flex-wrap: wrap; align-items: center;">
-                        <v-text-field label="Time (s)" type="number" :step="0.01" :value="time"
-                            dark style="flex: 0.1; margin-right: 5px;" @input="onChangeTime"/>
-                        <v-slider :value="frame" :min="0" :max="frames.length - 1" @input="onNavigate" hide-details
-                            class="mb-2" style="flex: 1;" />
-                    </div>
-                </div>
-
-                <div v-else-if="trialLoading" class="flex-grow-1 d-flex align-center justify-center">
-                    <v-progress-circular indeterminate color="grey" size="30" width="4" />
+    <div class="video-player d-flex">
+        <div class="viewer flex-grow-1">
+            <div v-if="trial" class="d-flex flex-column h-100">
+                <div id="mocap" ref="mocap" class="flex-grow-1" />
+                <div v-if="!videoControlsDisabled" style="display: flex; flex-wrap: wrap; align-items: center;">
+                    <v-text-field label="Time (s)" type="number" :step="0.01" :value="time"
+                        dark style="flex: 0.1; margin-right: 5px;" @input="onChangeTime"/>
+                    <v-slider :value="frame" :min="0" :max="frames.length - 1" @input="onNavigate" hide-details
+                        class="mb-2" style="flex: 1;" />
                 </div>
             </div>
 
-            <div class="right d-flex flex-column">
-                <div class="videos flex-grow-1 d-flex flex-column">
-                    <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
-                    playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
-                </div>
-
-                <SpeedControl v-model="playSpeed" />
-
-                <VideoNavigation :playing="playing" :value="frame" :maxFrame="frames.length - 1"
-                    :disabled="videoControlsDisabled" @play="togglePlay(true)" @pause="togglePlay(false)"
-                    @input="onNavigate" class="mb-2" />
+            <div v-else-if="trialLoading" class="flex-grow-1 d-flex align-center justify-center">
+                <v-progress-circular indeterminate color="grey" size="30" width="4" />
             </div>
         </div>
+
+        <div class="right d-flex flex-column">
+            <div class="videos flex-grow-1 d-flex flex-column">
+                <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
+                playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
+            </div>
+
+            <SpeedControl v-model="playSpeed" />
+
+            <VideoNavigation :playing="playing" :value="frame" :maxFrame="frames.length - 1"
+                :disabled="videoControlsDisabled" @play="togglePlay(true)" @pause="togglePlay(false)"
+                @input="onNavigate" class="mb-2" />
+        </div>
+    </div>
 </template>
 <script>
 import axios from 'axios'
@@ -417,8 +417,8 @@ export default {
 
 <style lang="scss">
 
-.step-5 {
-    height: calc(100vh - 64px);
+.video-player {
+    height: calc(100% - 64px);
 
     .left {
         width: 250px;

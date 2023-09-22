@@ -126,9 +126,9 @@
                                                                 Re-run
                                                             </v-list-item>
                                                             <v-list-item
-                                                                @click="goToAnalysisDashboard()"
+                                                                @click="goToAnalysisDashboard(func.id, t.id)"
                                                                 v-if="func.states[t.id].state == 'successfull'"
-                                                                >Details</v-list-item>
+                                                                >Gait Dashboard</v-list-item>
                                                         </v-list>
                                                     </v-menu>
                                                 </v-btn>
@@ -233,9 +233,6 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link v-if="!t.trashed">
-                            <v-list-item-title @click="$router.push({ name: 'GaitDashboard', params: { id: session.id, trialID: t.id } })">Visualizer</v-list-item-title>
                           </v-list-item>
                           <v-list-item link v-else>
                             <v-dialog
@@ -1384,8 +1381,10 @@ export default {
         toggleSessionMenuButtons(){
             this.showSessionMenuButtons = !this.showSessionMenuButtons;
         },
-        goToAnalysisDashboard() {
-          alert("Not implemented yet");
+        goToAnalysisDashboard(functionId, trialId){
+            this.$router.push({
+              name: 'GaitDashboard',
+              params: { id: this.session.id, trialID: trialId, funcID: functionId } })
         }
     }
 }
