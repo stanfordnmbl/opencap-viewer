@@ -126,7 +126,7 @@
                                                                 Re-run
                                                             </v-list-item>
                                                             <v-list-item
-                                                                @click="alert('Not implemented yet')"
+                                                                @click="goToAnalysisDashboard()"
                                                                 v-if="func.states[t.id].state == 'successfull'"
                                                                 >Details</v-list-item>
                                                         </v-list>
@@ -859,23 +859,6 @@ export default {
                     }
             });
         },
-        // setTrialAnalysisState(trial, analysisState){
-        //     let updatedTrial = {...trial};
-        //     updatedTrial.analysis.invokedFunctionID = analysisState.invokedFunctionID;
-        //     updatedTrial.analysis.isInvokeInProgress = analysisState.isInvokeInProgress;
-        //     updatedTrial.analysis.isInvokeDone = analysisState.isInvokeDone;
-        //     if(analysisState.result !== null){
-        //         updatedTrial.analysis.result = analysisState.result;
-        //     }
-        //     console.log("Before:", this.filteredTrialsWithMenu)
-        //     console.log(this.showAnalysisDialog)
-        //     const trialWithMenuIndex = this.filteredTrialsWithMenu.indexOf(trial);
-        //     this.filteredTrialsWithMenu[trialWithMenuIndex] = updatedTrial;
-        //     //this.$set(this.filteredTrialsWithMenu, trialWithMenuIndex, updatedTrial);
-        //     //this.updateTrialWithData(trial, updatedTrial);
-        //     console.log("After:", this.filteredTrialsWithMenu)
-        //     console.log(this.showAnalysisDialog)
-        // },
         async analysisFunctionsPolls() {
             console.log(this.analysisFunctions);
             for(let func of this.analysisFunctions) {
@@ -1394,6 +1377,9 @@ export default {
         },
         toggleSessionMenuButtons(){
             this.showSessionMenuButtons = !this.showSessionMenuButtons;
+        },
+        goToAnalysisDashboard() {
+          alert("Not implemented yet");
         }
     }
 }
