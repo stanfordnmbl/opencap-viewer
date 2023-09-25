@@ -36,9 +36,14 @@
         </div>
       </div>
       <div class="scalar-plot">
-        <div>
-          <p>Scalar plot</p>
+<!--        <div>-->
+<!--          <p>Scalar plot</p>-->
+<!--        </div>-->
+        <div v-for="block in layout.column_1.widgets" :key="block._id">
+          <component :is="block.component" :block="block" :values="result[block.trial_id].scalar_values"></component>
         </div>
+
+
       </div>
     </div>
 
@@ -96,6 +101,8 @@ import {apiWarning} from "@/util/ErrorMessage";
 import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
 import zoomPlugin from 'chartjs-plugin-zoom';
 
+import ScalarPlot from '@/components/ui/ScalarPlot.vue'
+
 import {
   Chart as ChartJS,
   Title,
@@ -121,7 +128,8 @@ ChartJS.register(
 export default {
     name: 'GaitDashboard',
     components: {
-        Visualizer
+        Visualizer,
+        ScalarPlot
     },
     data() {
       return {
@@ -130,6 +138,43 @@ export default {
         trial_names: [],
         y_values: [],
         selected_y_values: [],
+        layout: {
+          column_1: {
+            classes: "scalar-plot",
+            widgets: [
+              {
+                _id: "scalar-plot-1",
+                component: "ScalarPlot",
+                headline: "Scalar Plot 1",
+                trial_id: "trial_1",
+              },
+              {
+                _id: "scalar-plot-2",
+                component: "ScalarPlot",
+                headline: "Scalar Plot 2",
+                trial_id: "trial_2",
+              },
+              // {
+              //   _id: "video-1",
+              //   component: "Vizualizer",
+              // }
+            ]
+          }
+        },
+        result: {
+          "trial_1": {
+            "scalar_values": {
+              "a": 1,
+              "b": 2,
+            },
+          },
+          "trial_2": {
+            "scalar_values": {
+              "a": 1,
+              "b": 2,
+            },
+          },
+        },
       }
     },
     computed: {
