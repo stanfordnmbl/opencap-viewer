@@ -66,12 +66,14 @@
         <div class="left d-flex flex-column pa-2">
           <v-card>
             <v-card-text>
-              <v-select v-model="session_selected" v-bind:items="sessionsIds"
-                        label="Select session" outlined dense return-object
-                v-on:change="onSessionSelected"></v-select>
-              <v-select v-model="trial_selected" v-bind:items="trial_names"
-                        label="Select trial" outlined dense
-                v-on:change="onTrialSelected"></v-select>
+              {{ dashboard }}
+
+<!--              <v-select v-model="session_selected" v-bind:items="sessionsIds"-->
+<!--                        label="Select session" outlined dense return-object-->
+<!--                v-on:change="onSessionSelected"></v-select>-->
+<!--              <v-select v-model="trial_selected" v-bind:items="trial_names"-->
+<!--                        label="Select trial" outlined dense-->
+<!--                v-on:change="onTrialSelected"></v-select>-->
             </v-card-text>
           </v-card>
         </div>
@@ -80,18 +82,6 @@
 
   </div>
 
-
-<!--  <div class="step-5 d-flex">-->
-<!--    <div class="left d-flex flex-column pa-2">-->
-
-<!--    </div>-->
-<!--    <div class="viewer flex-grow-1">-->
-<!--      <div>The video will be here</div>-->
-<!--      <Visualizer :trialID="$route.params.trialID" :session="{session}"></Visualizer>-->
-<!--      <div>The chart will be here</div>-->
-<!--      <div>Scalar plot</div>-->
-<!--    </div>-->
-<!--  </div>-->
 </template>
 
 <script>
@@ -179,6 +169,7 @@ export default {
     },
     computed: {
       ...mapState({
+        dashboard: state => state.data.analysis_dashboard,
         sessions: state => state.data.sessions,
         session: state => state.data.session,
         subjects: state => state.data.subjects,
@@ -227,7 +218,8 @@ export default {
       }
     },
     async mounted() {
-        await this.loadSession(this.$route.params.id)
+        // await this.loadSession(this.$route.params.id)
+        await this.loadAnalysisDashboard(this.$route.params.id)
     },
     created: function () {
       // Indicates if the current logged in user owns the session.
@@ -236,17 +228,17 @@ export default {
       // If the user is logged in, select session from list of sessions.
       if(this.loggedIn) {
         // If a session id has been passed as a parameter, set it as the default session.
-        this.sessionsIds.forEach(sessionId => {
-          if (sessionId.includes(this.$route.params.id)) {
-            this.session_selected = sessionId;
-            this.onSessionSelected(this.session_selected);
-            this.session_owned = true
-          }
-        });
+        // this.sessionsIds.forEach(sessionId => {
+        //   if (sessionId.includes(this.$route.params.id)) {
+        //     this.session_selected = sessionId;
+        //     this.onSessionSelected(this.session_selected);
+        //     this.session_owned = true
+        //   }
+        // });
       }
     },
     methods: {
-        ...mapActions('data', ['loadSession']),
+        ...mapActions('data', ['loadSession', 'loadAnalysisDashboard']),
         leftMenu() {
           if (document.getElementById("body").classList.contains("left-menu-closed")) {
             document.getElementById("body").classList.remove("left-menu-closed");

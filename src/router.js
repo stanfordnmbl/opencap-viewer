@@ -82,7 +82,7 @@ var router = new Router({
       component: Dashboard
     },
     {
-      path: '/gait-dashboard/:id/trial/:trialID/:funcID/',
+      path: '/gait-dashboard/:id/',
       name: 'GaitDashboard',
       component: GaitDashboard
     },
