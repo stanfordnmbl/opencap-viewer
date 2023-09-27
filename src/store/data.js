@@ -17,7 +17,12 @@ export default {
     // Analysis dashboards
     analysis_dashboards: [],
     analysis_dashboard: {
-      data: {}
+      data: {
+        sessions: [],
+        subjects: [],
+        trials: [],
+        results: [],
+      }
     },
 
     // step 1

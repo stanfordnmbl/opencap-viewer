@@ -1,21 +1,15 @@
 <template>
   <div class="scalar-plot">
-    <h2 class="h5 plot-caption">{{block.headline}}</h2>
+    <h2 class="h5 plot-caption">Scalar plot</h2>
 
-    <ul>
-      <li v-for="(value, key) in values" :key="key">
-        {{key}}: {{value}}
-      </li>
-    </ul>
+    <p>trialID: {{trialID}}</p>
+    <p>Lorem ipsum dolor sit amet...</p>
   </div>
 </template>
 
 <script>
 export default {
-  props: {
-    block: Object,
-    values: Object
-  },
+  props: ["trialID"],
   name: "scalar-plot"
 };
 </script>

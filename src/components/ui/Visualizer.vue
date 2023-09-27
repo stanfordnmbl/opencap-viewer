@@ -50,7 +50,7 @@ export default {
         VideoNavigation,
         SpeedControl
     },
-    props: ['trialID', 'session'],
+    props: ['trialID'],
     data(){
         return {
             videos: [],

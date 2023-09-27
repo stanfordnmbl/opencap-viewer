@@ -1,50 +1,55 @@
 <template>
   <div id="body" class="chart-page d-flex flex-column">
-    <div class="d-flex">
-      <div class="flex-grow-1" style="padding-left:300px;">
-        <div style="height: 50vh;">
-          <Visualizer :trialID="$route.params.trialID" :session="{session}"></Visualizer>
-        </div>
-        <div style="height: 50vh;">
-          <div style="width: 300px;">
-            <v-select
-              v-model="selected_y_values"
-              :items="y_values"
-              label="Y Quantities"
-              multiple outlined dense
-            ></v-select>
+    <div class="d-flex" v-if="trial_selected">
+        <div v-for="(column, column_name, column_idx) in dashboard.layout" :key="column_idx" :class="column.classes">
+          <div v-for="block in column.widgets" :key="block._id" :class="block.classes">
+            <component :is="block.component" :trialID="trial_selected.id"></component>
           </div>
-
-            <div class="content-chart">
-              <div id="spinner-layer" style="position: relative; width: 100%; height: 100%; display:none;">
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
-                  <div class="spinner"></div>
-                </div>
-                <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; color:black">
-                  <h3>Loading Chart</h3>
-                </div>
-              </div>
-
-              <LineChartGenerator
-                id="chart"
-                :chart-options="chartOptions"
-                :chart-data="chartData"
-                style="position: relative; width: 100%; height: 100%;"
-                ref="chartRef"
-              />
-            </div>
         </div>
-      </div>
-      <div class="scalar-plot">
+
+
+
+<!--      <div class="flex-grow-1" style="padding-left:300px;">-->
+<!--        <div style="height: 50vh;">-->
+<!--          <Visualizer :trialID="trial_selected.id"></Visualizer>-->
+<!--        </div>-->
+<!--        <div style="height: 50vh;">-->
+<!--          <div style="width: 300px;">-->
+<!--            <v-select-->
+<!--              v-model="selected_y_values"-->
+<!--              :items="y_values"-->
+<!--              label="Y Quantities"-->
+<!--              multiple outlined dense-->
+<!--            ></v-select>-->
+<!--          </div>-->
+
+<!--            <div class="content-chart">-->
+<!--              <div id="spinner-layer" style="position: relative; width: 100%; height: 100%; display:none;">-->
+<!--                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">-->
+<!--                  <div class="spinner"></div>-->
+<!--                </div>-->
+<!--                <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; color:black">-->
+<!--                  <h3>Loading Chart</h3>-->
+<!--                </div>-->
+<!--              </div>-->
+
+<!--              <LineChartGenerator-->
+<!--                id="chart"-->
+<!--                :chart-options="chartOptions"-->
+<!--                :chart-data="chartData"-->
+<!--                style="position: relative; width: 100%; height: 100%;"-->
+<!--                ref="chartRef"-->
+<!--              />-->
+<!--            </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="scalar-plot">-->
 <!--        <div>-->
 <!--          <p>Scalar plot</p>-->
 <!--        </div>-->
-        <div v-for="block in layout.column_1.widgets" :key="block._id">
-          <component :is="block.component" :block="block" :values="result[block.trial_id].scalar_values"></component>
-        </div>
 
 
-      </div>
+<!--      </div>-->
     </div>
 
     <div id="button-left" class="pa-2 fixed-button fixed-button-to-left">
@@ -53,20 +58,39 @@
       </v-btn>
     </div>
 
-
     <v-card class="sidebar left-sidebar">
       <div class="pa-4 left-menu-close-button">
         <v-btn width="64px" @click="leftMenu">
           ✖
         </v-btn>
       </div>
-      <v-card-text height="100%">
+      <v-card-text height="100%" v-if="dashboard.data">
         <v-toolbar-title class="text-center">Data Menu</v-toolbar-title>
         <v-subheader class="subheader-bold"></v-subheader>
         <div class="left d-flex flex-column pa-2">
           <v-card>
             <v-card-text>
-              {{ dashboard }}
+              <v-select v-model="subject_selected"
+                        item-value="id"
+                        item-text="name"
+                        :items="dashboard.data.subjects"
+                        label="Select subject" outlined dense return-object></v-select>
+              <v-select v-model="session_selected"
+                        item-value="id"
+                        item-text="id"
+                        :items="filteredSessions"
+                        :disabled="!subject_selected"
+                        label="Select session" outlined dense return-object></v-select>
+              <v-select v-model="trial_selected"
+                        item-value="id"
+                        item-text="name"
+                        :items="filteredTrials"
+                        :disabled="!session_selected"
+                        label="Select trial" outlined dense return-object></v-select>
+
+<!--              <hr>-->
+
+<!--              {{ dashboard }}-->
 
 <!--              <v-select v-model="session_selected" v-bind:items="sessionsIds"-->
 <!--                        label="Select session" outlined dense return-object-->
@@ -92,6 +116,7 @@ import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
 import zoomPlugin from 'chartjs-plugin-zoom';
 
 import ScalarPlot from '@/components/ui/ScalarPlot.vue'
+import LinearChart from '@/components/ui/LinearChart.vue'
 
 import {
   Chart as ChartJS,
@@ -119,52 +144,16 @@ export default {
     name: 'GaitDashboard',
     components: {
         Visualizer,
-        ScalarPlot
+        ScalarPlot,
+        LinearChart,
     },
     data() {
       return {
+        subject_selected: null,
         session_selected: null,
         trial_selected: null,
-        trial_names: [],
         y_values: [],
         selected_y_values: [],
-        layout: {
-          column_1: {
-            classes: "scalar-plot",
-            widgets: [
-              {
-                _id: "scalar-plot-1",
-                component: "ScalarPlot",
-                headline: "Scalar Plot 1",
-                trial_id: "trial_1",
-              },
-              {
-                _id: "scalar-plot-2",
-                component: "ScalarPlot",
-                headline: "Scalar Plot 2",
-                trial_id: "trial_2",
-              },
-              // {
-              //   _id: "video-1",
-              //   component: "Vizualizer",
-              // }
-            ]
-          }
-        },
-        result: {
-          "trial_1": {
-            "scalar_values": {
-              "a": 1,
-              "b": 2,
-            },
-          },
-          "trial_2": {
-            "scalar_values": {
-              "a": 1,
-              "b": 2,
-            },
-          },
-        },
       }
     },
     computed: {
@@ -175,47 +164,55 @@ export default {
         subjects: state => state.data.subjects,
         loggedIn: state => state.auth.verified
       }),
-      sessionsNames() {
-        var result_sessions = this.sessions.map(function (obj) {
-          // Check that there are valid trials
-          var trials = obj['trials'];
-          // Filter trials by name and status.
-          trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
-
-          if (trials.length > 0) {
-            return  obj.name + " (" + obj.id + ")";
-          } else {
-            return "";
-          }
-        })
-        var filtered_sessions = result_sessions.filter(function (value, index, arr) {
-          return value !== "";
-        });
-        return filtered_sessions;
-
+      filteredSessions() {
+        return this.dashboard.data.sessions.filter(session => this.subject_selected && session.subject_id === this.subject_selected.id )
       },
-      sessionsIds() {
-          var result_sessions = this.sessions.map(function (obj) {
-            // Check that there are valid trials
-            var trials = obj['trials'];
-            // Filter trials by name and status.
-            trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
+      filteredTrials() {
+        return this.dashboard.data.trials.filter(trial => this.session_selected && trial.session_id === this.session_selected.id)
+      },
 
-            if (trials.length > 0) {
-              if (obj.name)
-                return  obj.name + " (" + obj.id + ")";
-              else
-                if (obj.meta && obj.meta.subject && obj.meta.subject.id)
-                    return obj.meta.subject.id + " (" + obj.id + ")";
-            } else {
-              return "";
-            }
-          })
-          var filtered_sessions = result_sessions.filter(function (value, index, arr) {
-            return value !== "";
-          });
-          return filtered_sessions;
-      }
+
+      // sessionsNames() {
+      //   var result_sessions = this.sessions.map(function (obj) {
+      //     // Check that there are valid trials
+      //     var trials = obj['trials'];
+      //     // Filter trials by name and status.
+      //     trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
+      //
+      //     if (trials.length > 0) {
+      //       return  obj.name + " (" + obj.id + ")";
+      //     } else {
+      //       return "";
+      //     }
+      //   })
+      //   var filtered_sessions = result_sessions.filter(function (value, index, arr) {
+      //     return value !== "";
+      //   });
+      //   return filtered_sessions;
+      //
+      // },
+      // sessionsIds() {
+      //     var result_sessions = this.sessions.map(function (obj) {
+      //       // Check that there are valid trials
+      //       var trials = obj['trials'];
+      //       // Filter trials by name and status.
+      //       trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
+      //
+      //       if (trials.length > 0) {
+      //         if (obj.name)
+      //           return  obj.name + " (" + obj.id + ")";
+      //         else
+      //           if (obj.meta && obj.meta.subject && obj.meta.subject.id)
+      //               return obj.meta.subject.id + " (" + obj.id + ")";
+      //       } else {
+      //         return "";
+      //       }
+      //     })
+      //     var filtered_sessions = result_sessions.filter(function (value, index, arr) {
+      //       return value !== "";
+      //     });
+      //     return filtered_sessions;
+      // }
     },
     async mounted() {
         // await this.loadSession(this.$route.params.id)
@@ -378,5 +375,9 @@ export default {
 
 .scalar-plot {
   width: 300px;
+}
+
+.height-50vh {
+  height: 50vh;
 }
 </style>
