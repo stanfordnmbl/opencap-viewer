@@ -307,6 +307,7 @@ export default {
                         this.time = this.vid0().duration
                     }
                 }
+                this.$emit('changeTimePosition', this.time)
 
                 if (cframe < this.frames.length) {
                     // display the frame

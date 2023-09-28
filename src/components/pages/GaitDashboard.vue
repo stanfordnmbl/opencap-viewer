@@ -1,9 +1,14 @@
 <template>
   <div id="body" class="chart-page d-flex flex-column">
-    <div class="d-flex" v-if="trial_selected">
+    <div class="d-flex" v-if="show_dashboard">
         <div v-for="(column, column_name, column_idx) in dashboard.layout" :key="column_idx" :class="column.classes">
           <div v-for="block in column.widgets" :key="block._id" :class="block.classes">
-            <component :is="block.component" :trialID="trial_selected.id"></component>
+            <component :is="block.component"
+                       @changeTimePosition="captureTimePosition"
+                       :block="block"
+                       :result="result"
+                       :trialID="trial_selected.id"
+                       :timePosition="time_position"></component>
           </div>
         </div>
 
@@ -88,16 +93,12 @@
                         :disabled="!session_selected"
                         label="Select trial" outlined dense return-object></v-select>
 
-<!--              <hr>-->
+              <hr>
 
-<!--              {{ dashboard }}-->
+<!--              {{trial_selected}}-->
+<!--              {{ result }}-->
 
-<!--              <v-select v-model="session_selected" v-bind:items="sessionsIds"-->
-<!--                        label="Select session" outlined dense return-object-->
-<!--                v-on:change="onSessionSelected"></v-select>-->
-<!--              <v-select v-model="trial_selected" v-bind:items="trial_names"-->
-<!--                        label="Select trial" outlined dense-->
-<!--                v-on:change="onTrialSelected"></v-select>-->
+
             </v-card-text>
           </v-card>
         </div>
@@ -111,6 +112,7 @@
 <script>
 import Visualizer from '@/components/ui/Visualizer';
 import { mapState, mapActions } from 'vuex'
+import axios from 'axios'
 import {apiWarning} from "@/util/ErrorMessage";
 import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
 import zoomPlugin from 'chartjs-plugin-zoom';
@@ -154,6 +156,9 @@ export default {
         trial_selected: null,
         y_values: [],
         selected_y_values: [],
+        time_position: 0,
+        result: {},
+        show_dashboard: false,
       }
     },
     computed: {
@@ -214,6 +219,11 @@ export default {
       //     return filtered_sessions;
       // }
     },
+    watch: {
+      trial_selected: function (val) {
+        this.loadResult()
+      },
+    },
     async mounted() {
         // await this.loadSession(this.$route.params.id)
         await this.loadAnalysisDashboard(this.$route.params.id)
@@ -245,43 +255,69 @@ export default {
             document.getElementById("button-left").style.display = "inline-block";
           }
         },
-        onSessionSelected(sessionName) {
-          console.log(sessionName)
-          var sessionIdSelected = sessionName.match(/\((.*)\)/);
-          if (sessionIdSelected !== null) {
-            sessionIdSelected = sessionIdSelected.pop();
-
-            this.current_session_id = sessionIdSelected;
-            var session = this.sessions.filter(function (obj) {
-              if (obj.id === sessionIdSelected) {
-                return obj.name;
-              }
-            });
-
-            var trials = session[0]['trials'];
-            // Filter trials by name.
-            trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
-
-            if (trials.length > 0) {
-              this.trial_ids = []
-              this.trial_names = [];
-              trials.forEach(element => {
-                this.trial_names.push(element.name);
-                this.trial_ids.push(element.id)
-              });
-              this.trial_selected = this.trial_names[0];
-
-              // Load data from this trial.
-              this.onTrialSelected(this.trial_selected);
-            } else {
-              this.trial_names = []
-              apiWarning("There are no dynamic trials associated with this session, thereby nothing to plot.")
+        captureTimePosition(time) {
+          this.time_position = time;
+        },
+        getResultUrl(trial_id) {
+          for(let i=0; i<this.dashboard.data.results.length; i++) {
+            if (this.dashboard.data.results[i].trial_id === trial_id) {
+              return this.dashboard.data.results[i].media
             }
           }
         },
-        onTrialSelected(trialName) {
-          this.trial_selected = trialName;
-        }
+        loadResult() {
+          console.log("loadResult")
+          console.log(this.trial_selected)
+          this.result = {}
+          if (this.trial_selected) {
+            let url = this.getResultUrl(this.trial_selected.id)
+            console.log(url)
+            if (url) {
+              axios.get(url).then(response => {
+                this.result = response.data
+                this.show_dashboard = true
+              })
+            }
+          }
+        },
+
+        // onSessionSelected(sessionName) {
+        //   console.log(sessionName)
+        //   var sessionIdSelected = sessionName.match(/\((.*)\)/);
+        //   if (sessionIdSelected !== null) {
+        //     sessionIdSelected = sessionIdSelected.pop();
+        //
+        //     this.current_session_id = sessionIdSelected;
+        //     var session = this.sessions.filter(function (obj) {
+        //       if (obj.id === sessionIdSelected) {
+        //         return obj.name;
+        //       }
+        //     });
+        //
+        //     var trials = session[0]['trials'];
+        //     // Filter trials by name.
+        //     trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'neutral' && trial.name !== 'calibration')
+        //
+        //     if (trials.length > 0) {
+        //       this.trial_ids = []
+        //       this.trial_names = [];
+        //       trials.forEach(element => {
+        //         this.trial_names.push(element.name);
+        //         this.trial_ids.push(element.id)
+        //       });
+        //       this.trial_selected = this.trial_names[0];
+        //
+        //       // Load data from this trial.
+        //       this.onTrialSelected(this.trial_selected);
+        //     } else {
+        //       this.trial_names = []
+        //       apiWarning("There are no dynamic trials associated with this session, thereby nothing to plot.")
+        //     }
+        //   }
+        // },
+        // onTrialSelected(trialName) {
+        //   this.trial_selected = trialName;
+        // }
 
     },
 }
