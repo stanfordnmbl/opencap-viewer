@@ -6,7 +6,10 @@
                 <div v-if="!videoControlsDisabled" style="display: flex; flex-wrap: wrap; align-items: center;">
                     <v-text-field label="Time (s)" type="number" :step="0.01" :value="time"
                         dark style="flex: 0.1; margin-right: 5px;" @input="onChangeTime"/>
-                    <v-slider :value="frame" :min="0" :max="frames.length - 1" @input="onNavigate" hide-details
+                    <v-slider :value="frame"
+                              :min="timeToFrame(timeStart)"
+                              :max="timeToFrame(timeEnd)"
+                              @input="onNavigate" hide-details
                         class="mb-2" style="flex: 1;" />
                 </div>
             </div>
@@ -18,8 +21,12 @@
 
         <div class="right d-flex flex-column">
             <div class="videos flex-grow-1 d-flex flex-column">
-                <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
-                playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
+                <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`"
+                       muted
+                       playsinline :src="video.media" crossorigin="anonymous"
+                       @loadedmetadata="onVideoLoadMetadata(index)"
+                       @timeupdate="onVideoTimeUpdate(index)"
+                       @ended="onVideoEnded(index)" />
             </div>
 
             <SpeedControl v-model="playSpeed" />
@@ -50,7 +57,7 @@ export default {
         VideoNavigation,
         SpeedControl
     },
-    props: ['trialID'],
+    props: ['trialID', 'timeStart', 'timeEnd'],
     data(){
         return {
             videos: [],
@@ -89,7 +96,7 @@ export default {
     methods: {
         async loadTrial(trialID) {
             console.log('loadTrial')
-            this.time = 0
+            this.time = this.timeStart ? parseFloat(this.timeStart) : 0
 
             if (!this.trialLoading) {
                 this.frame = 0
@@ -137,7 +144,7 @@ export default {
 
                     if (this.videos.length === 0) {
                         this.frame = 0
-                        this.time = 0
+                        this.time = this.timeStart ? parseFloat(this.timeStart) : 0
                     }
 
                     if (this.frames.length > 0) {
@@ -284,6 +291,17 @@ export default {
                 this.animateOneFrame()
             }
         },
+        timeToFrame(time) {
+            let duration = 0
+            if (this.vid0()) duration = this.vid0().duration
+            if (this.vid0() && !isNaN(this.vid0().duration)) {
+              let framerate = this.frames.length / duration
+              let t = parseFloat(time)
+              return (Math.round(t * framerate)) > this.frames.length ? this.frames.length - 1 : (Math.round(t * framerate))
+            } else {
+              return 0
+            }
+        },
         animateOneFrame() {
             let cframe
 
@@ -349,11 +367,29 @@ export default {
 
             this.synced = true
         },
+        onVideoLoadMetadata(index) {
+            if (index === 0) {
+                this.videos.forEach((video, index) => {
+                      const vid_element = this.videoElement(index)
+                      vid_element.currentTime = this.timeStart ? parseFloat(this.timeStart) : 0
+                })
+            }
+        },
+        onVideoTimeUpdate(index) {
+            if (index === 0) {
+                this.videos.forEach((video, index) => {
+                      const vid_element = this.videoElement(index)
+                      if(vid_element.currentTime >= parseFloat(this.timeEnd)) {
+                          vid_element.currentTime = this.timeStart ? parseFloat(this.timeStart) : 0
+                      }
+                })
+            }
+        },
         onVideoEnded(index) {
             if (index === 0) {
                 this.videos.forEach((video, index) => {
                     const vid_element = this.videoElement(index)
-                    vid_element.currentTime = 0
+                    vid_element.currentTime = this.time = this.timeStart ? parseFloat(this.timeStart) : 0
                     vid_element.play()
                 })
             }

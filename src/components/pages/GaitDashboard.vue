@@ -8,7 +8,10 @@
                        :block="block"
                        :result="result"
                        :trialID="trial_selected.id"
-                       :timePosition="time_position"></component>
+                       :timePosition="time_position"
+                       timeStart="1"
+                       timeEnd="1.5"
+            ></component>
           </div>
         </div>
 

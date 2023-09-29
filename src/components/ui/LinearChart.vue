@@ -88,7 +88,7 @@ ChartJS.register(
 )
 
 export default {
-  props: ["trialID", 'timePosition', 'result', 'block'],
+  props: ["trialID", 'timePosition', 'result', 'block', 'timeStart', 'timeEnd'],
   name: "linear-chart",
   components: {
     LineChartGenerator,
@@ -119,7 +119,7 @@ export default {
           x: {
             title: {
               display: true,
-              text: 'X axis title',
+              text: 'Time (s)',
               font: {
                 size: 20
               },
@@ -129,7 +129,7 @@ export default {
           y: {
             title: {
               display: true,
-              text: 'Y axis title',
+              text: 'Values',
               font: {
                 size: 20
               },
@@ -167,6 +167,9 @@ export default {
       this.chartData.labels = []
       this.chartData.datasets = []
 
+      let timeStart = parseFloat(this.timeStart);
+      let timeEnd = parseFloat(this.timeEnd);
+
       // Add y quantities.
       console.log(this.y_selected)
       var dataset = {};
@@ -180,14 +183,11 @@ export default {
 
       var labels = [];
       for(let j=0; j < this.result.datasets.length; j++) {
-        labels.push(this.result.datasets[j][this.result.x_axis]);
-        for(let i=0; i < this.y_selected.length; i++) {
-          // this.chartData.datasets[i].data.push(
-          //     {
-          //       x: this.result.datasets[j][this.result.x_axis],
-          //       y: this.result.datasets[j][this.y_selected[i]]
-          //     });
-          this.chartData.datasets[i].data.push(this.result.datasets[j][this.y_selected[i]]);
+        if(this.result.datasets[j][this.result.x_axis] >= timeStart && this.result.datasets[j][this.result.x_axis] <= timeEnd) {
+          labels.push(this.result.datasets[j][this.result.x_axis]);
+          for(let i=0; i < this.y_selected.length; i++) {
+            this.chartData.datasets[i].data.push(this.result.datasets[j][this.y_selected[i]]);
+          }
         }
       }
       this.chartData["labels"] = labels;
