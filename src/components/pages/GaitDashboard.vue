@@ -9,55 +9,9 @@
                        :result="result"
                        :trialID="trial_selected.id"
                        :timePosition="time_position"
-                       timeStart="1"
-                       timeEnd="1.5"
             ></component>
           </div>
         </div>
-
-
-
-<!--      <div class="flex-grow-1" style="padding-left:300px;">-->
-<!--        <div style="height: 50vh;">-->
-<!--          <Visualizer :trialID="trial_selected.id"></Visualizer>-->
-<!--        </div>-->
-<!--        <div style="height: 50vh;">-->
-<!--          <div style="width: 300px;">-->
-<!--            <v-select-->
-<!--              v-model="selected_y_values"-->
-<!--              :items="y_values"-->
-<!--              label="Y Quantities"-->
-<!--              multiple outlined dense-->
-<!--            ></v-select>-->
-<!--          </div>-->
-
-<!--            <div class="content-chart">-->
-<!--              <div id="spinner-layer" style="position: relative; width: 100%; height: 100%; display:none;">-->
-<!--                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">-->
-<!--                  <div class="spinner"></div>-->
-<!--                </div>-->
-<!--                <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; color:black">-->
-<!--                  <h3>Loading Chart</h3>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <LineChartGenerator-->
-<!--                id="chart"-->
-<!--                :chart-options="chartOptions"-->
-<!--                :chart-data="chartData"-->
-<!--                style="position: relative; width: 100%; height: 100%;"-->
-<!--                ref="chartRef"-->
-<!--              />-->
-<!--            </div>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--      <div class="scalar-plot">-->
-<!--        <div>-->
-<!--          <p>Scalar plot</p>-->
-<!--        </div>-->
-
-
-<!--      </div>-->
     </div>
 
     <div id="button-left" class="pa-2 fixed-button fixed-button-to-left">
@@ -96,7 +50,7 @@
                         :disabled="!session_selected"
                         label="Select trial" outlined dense return-object></v-select>
 
-              <hr>
+<!--              <hr>-->
 
 <!--              {{trial_selected}}-->
 <!--              {{ result }}-->

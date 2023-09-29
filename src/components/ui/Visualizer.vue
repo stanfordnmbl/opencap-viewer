@@ -57,7 +57,7 @@ export default {
         VideoNavigation,
         SpeedControl
     },
-    props: ['trialID', 'timeStart', 'timeEnd'],
+    props: ['trialID', 'result'],
     data(){
         return {
             videos: [],
@@ -76,6 +76,8 @@ export default {
             playSpeed: 1,
             trial: null,
             trialLoading: false,
+            timeStart: 0,
+            timeEnd: 0,
         }
     },
     computed: {
@@ -91,12 +93,14 @@ export default {
         },
     },
     async mounted(){
+        this.timeStart = this.result.indices.start
+        this.timeEnd = this.result.indices.end
         await this.loadTrial(this.trialID);
     },
     methods: {
         async loadTrial(trialID) {
             console.log('loadTrial')
-            this.time = this.timeStart ? parseFloat(this.timeStart) : 0
+            this.time = this.timeStart
 
             if (!this.trialLoading) {
                 this.frame = 0
@@ -144,7 +148,7 @@ export default {
 
                     if (this.videos.length === 0) {
                         this.frame = 0
-                        this.time = this.timeStart ? parseFloat(this.timeStart) : 0
+                        this.time = this.timeStart
                     }
 
                     if (this.frames.length > 0) {
@@ -371,7 +375,7 @@ export default {
             if (index === 0) {
                 this.videos.forEach((video, index) => {
                       const vid_element = this.videoElement(index)
-                      vid_element.currentTime = this.timeStart ? parseFloat(this.timeStart) : 0
+                      vid_element.currentTime = this.timeStart
                 })
             }
         },
@@ -379,8 +383,8 @@ export default {
             if (index === 0) {
                 this.videos.forEach((video, index) => {
                       const vid_element = this.videoElement(index)
-                      if(vid_element.currentTime >= parseFloat(this.timeEnd)) {
-                          vid_element.currentTime = this.timeStart ? parseFloat(this.timeStart) : 0
+                      if(vid_element.currentTime >= this.timeEnd) {
+                          vid_element.currentTime = this.timeStart
                       }
                 })
             }
@@ -389,7 +393,7 @@ export default {
             if (index === 0) {
                 this.videos.forEach((video, index) => {
                     const vid_element = this.videoElement(index)
-                    vid_element.currentTime = this.time = this.timeStart ? parseFloat(this.timeStart) : 0
+                    vid_element.currentTime = this.time = this.timeStart
                     vid_element.play()
                 })
             }

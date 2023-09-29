@@ -1,6 +1,6 @@
 <template>
-  <div class="linear-chart">
-      <div style="width: 300px;">
+  <div class="linear-chart d-flex">
+      <div class="pr-2" style="width: 300px;">
         <v-select
           v-model="y_selected"
           @change="drawChart"
@@ -8,10 +8,11 @@
           label="Y Quantities"
           multiple outlined dense
         ></v-select>
+        <div>{{timePosition}}</div>
       </div>
-    <div>{{timePosition}}</div>
 
-    <div class="content-chart">
+
+    <div class="content-chart flex-grow-1">
 <!--      <div id="spinner-layer" style="position: relative; width: 100%; height: 100%; display:none;">-->
 <!--        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">-->
 <!--          <div class="spinner"></div>-->
@@ -34,10 +35,14 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-
+import axios from 'axios'
+import { apiError, apiInfo, apiWarning, clearToastMessages } from '@/util/ErrorMessage.js'
+import Vue from 'vue'
+import store from '@/store/store.js'
 import chroma from 'chroma-js';
 import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
 import zoomPlugin from 'chartjs-plugin-zoom';
+import annotationPlugin from 'chartjs-plugin-annotation';
 import {
   Chart as ChartJS,
   Title,
@@ -50,29 +55,6 @@ import {
   PointElement} from 'chart.js'
 import IconTooltip from "@/components/ui/IconTooltip.vue";
 
-// const VerticalLinePlugin = {
-//      id: 'verticalLinePlugin',
-//      afterDraw (chart, args, options) {
-//           const ctx = chart.ctx
-//           ctx.save()
-//
-//           const yAxis = chart.scales['y-axis-0']
-//           const xAxis = chart.scales['x-axis-0']
-//        console.log(chart.scales)
-//           const x = xAxis.getPixelForValue(2)
-//
-//        console.log(x)
-//
-//
-//           ctx.beginPath()
-//           ctx.moveTo(yAxis.top, x)
-//           ctx.lineTo(yAxis.bottom, x)
-//           ctx.lineWidth = 2
-//           ctx.strokeStyle = "green"
-//           ctx.stroke()
-//           ctx.restore()
-//      }
-// }
 
 ChartJS.register(
   Title,
@@ -84,35 +66,70 @@ ChartJS.register(
   CategoryScale,
   PointElement,
   zoomPlugin,
-    // VerticalLinePlugin
+  annotationPlugin,
 )
 
 export default {
-  props: ["trialID", 'timePosition', 'result', 'block', 'timeStart', 'timeEnd'],
+  props: ["trialID", 'timePosition', 'result', 'block'],
   name: "linear-chart",
   components: {
     LineChartGenerator,
   },
   data() {
     return {
+      timeStart: 0,
+      timeEnd: 0,
       y_selected: null,
       chartOptions: {
-        annotation: {
-        annotations: [
-          {
-            type: "line",
-            mode: "vertical",
-            scaleID: "x-axis-0",
-            value: 2,
-            borderColor: "red",
-            label: {
-              content: "TIME",
+        plugins: {
+          legend: {
+            position: 'right',
+            align: 'center',
+            labels: {
+              font: {
+                size: 15
+              },
+            }
+          },
+          zoom: {
+            pan: {
               enabled: true,
-              position: "top"
+              mode: 'xy',
+              modifierKey: 'ctrl',
+            },
+            zoom: {
+              mode: 'xy',
+              overScaleMode: 'xy',
+              drag: {
+                enabled: true,
+              },
+              wheel: {
+                enabled: true,
+              }
+            }
+          },
+          annotation: {
+            annotations: {
+              // line1: {
+              //   type: 'line',
+              //   xMin: 1.2,
+              //   xMax: 1.2,
+              //   borderColor: 'red',
+              //   borderWidth: 2,
+              //   borderDash: [10, 10],
+              //   label: {
+              //     backgroundColor: 'red',
+              //     content: 'Time',
+              //     enabled: true,
+              //     position: 'top',
+              //     font: {
+              //       size: 20,
+              //     },
+              //   },
+              // },
             }
           }
-        ]
-      },
+        },
         responsive: true,
         maintainAspectRatio: false,
         scales: {
@@ -155,7 +172,10 @@ export default {
       ],
       chart_legend_position: ["top", "right", "bottom", "left", "chartArea"],
       chart_legend_alignment: ["start", "center", "end"],
-
+      chart_line_width: 5,
+      chart_point_style_options: ["none", "circle", "cross", "crossRot", "dash", "line", "rect", "rectRounded", "rectRot", "star", "triangle"],
+      chart_point_style: 'none',
+      chart_point_radius: 12,
     }
   },
   methods: {
@@ -167,17 +187,48 @@ export default {
       this.chartData.labels = []
       this.chartData.datasets = []
 
-      let timeStart = parseFloat(this.timeStart);
-      let timeEnd = parseFloat(this.timeEnd);
+      this.timeStart = this.result.indices.start;
+      this.timeEnd = this.result.indices.end;
+
+      let timeStart = this.timeStart;
+      let timeEnd = this.timeEnd;
 
       // Add y quantities.
-      console.log(this.y_selected)
+      // console.log(this.y_selected)
       var dataset = {};
+
+      // const selectedOption = this.chart_color_scales_options.find(option => {
+      //   return option.value === this.chart_color_scales_selected;
+      // });
+      // const selectedText = selectedOption ? selectedOption.text : "";
+      console.log(chroma)
+      var colors = chroma.scale("Viridis").correctLightness().gamma(2).cache(false).colors(this.y_selected.length);
+      console.log(colors)
+      // if (selectedText == "Spectral" || selectedText == "Rainbow" || selectedText == "Red-Yellow-Blue" || selectedText == "Yellow-Green-Blue")
+      //     colors = chroma.scale(this.chart_color_scales_selected).colors(this.y_quantities_selected.length);
+      // else if (selectedText == "Yellow-Green")
+      //     colors = chroma.scale(this.chart_color_scales_selected).correctLightness().colors(this.y_quantities_selected.length);
+      // else if (selectedText == "Red-Green" || selectedText == "Red-Blue" || selectedText == "Green-Blue")
+      //     colors = chroma.scale(this.chart_color_scales_selected).gamma(0.75).cache(false).colors(this.y_quantities_selected.length);
+      // else
+      //     colors = chroma.scale(this.chart_color_scales_selected).correctLightness().gamma(2).cache(false).colors(this.y_quantities_selected.length);
+
       for(let i=0; i < this.y_selected.length; i++) {
-        console.log(this.y_selected[i])
+        // console.log(this.y_selected[i])
         dataset = {};
         dataset["label"] = this.y_selected[i];
         dataset["data"] = [];
+        dataset["backgroundColor"] = colors[i];
+        dataset["borderColor"] = colors[i];
+        dataset["borderWidth"] = this.chart_line_width;
+        // Handle "none" option to remove points
+        dataset["pointStyle"] = this.chart_point_style;
+        if (this.chart_point_style === "none") {
+          dataset["pointRadius"] = 0;
+        } else {
+          dataset["pointRadius"] = this.chart_point_radius;
+        }
+
         this.chartData.datasets.push(dataset);
       }
 
@@ -191,8 +242,21 @@ export default {
         }
       }
       this.chartData["labels"] = labels;
+      this.chartOptions['plugins']['annotation']['annotations']['v_time'] = {
+        drawTime: 'afterDraw',
+        type: 'line',
+        value: this.timePosition,
+        mode: 'vertical',
+        // xMax: this.timePosition,
+        borderColor: 'rgb(255, 99, 132)',
+        borderWidth: 2,
+        label: {
+          borderWidth: 2,
+          borderCapStyle: 'butt',
+        }
+      }
 
-      console.log(this.chartData)
+      // console.log(this.chartData)
       // Show spinner and hide chart until finished.
       // document.getElementById("spinner-layer").style.display = "None";
       // document.getElementById("chart").style.display = "block";
