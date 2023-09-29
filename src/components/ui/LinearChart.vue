@@ -81,6 +81,9 @@ export default {
       timeEnd: 0,
       y_selected: null,
       chartOptions: {
+        animation: {
+            duration: 0
+        },
         plugins: {
           legend: {
             position: 'right',
@@ -178,6 +181,11 @@ export default {
       chart_point_radius: 12,
     }
   },
+  // watch: {
+  //   timePosition: function () {
+  //     this.drawChart();
+  //   }
+  // },
   methods: {
     drawChart() {
       // Show spinner and hide chart until finished.
@@ -201,9 +209,9 @@ export default {
       //   return option.value === this.chart_color_scales_selected;
       // });
       // const selectedText = selectedOption ? selectedOption.text : "";
-      console.log(chroma)
+      // console.log(chroma)
       var colors = chroma.scale("Viridis").correctLightness().gamma(2).cache(false).colors(this.y_selected.length);
-      console.log(colors)
+      // console.log(colors)
       // if (selectedText == "Spectral" || selectedText == "Rainbow" || selectedText == "Red-Yellow-Blue" || selectedText == "Yellow-Green-Blue")
       //     colors = chroma.scale(this.chart_color_scales_selected).colors(this.y_quantities_selected.length);
       // else if (selectedText == "Yellow-Green")
@@ -237,24 +245,24 @@ export default {
         if(this.result.datasets[j][this.result.x_axis] >= timeStart && this.result.datasets[j][this.result.x_axis] <= timeEnd) {
           labels.push(this.result.datasets[j][this.result.x_axis]);
           for(let i=0; i < this.y_selected.length; i++) {
-            this.chartData.datasets[i].data.push(this.result.datasets[j][this.y_selected[i]]);
+              this.chartData.datasets[i].data.push(this.result.datasets[j][this.y_selected[i]]);
           }
         }
       }
       this.chartData["labels"] = labels;
-      this.chartOptions['plugins']['annotation']['annotations']['v_time'] = {
-        drawTime: 'afterDraw',
-        type: 'line',
-        value: this.timePosition,
-        mode: 'vertical',
-        // xMax: this.timePosition,
-        borderColor: 'rgb(255, 99, 132)',
-        borderWidth: 2,
-        label: {
-          borderWidth: 2,
-          borderCapStyle: 'butt',
-        }
-      }
+      // this.chartOptions['plugins']['annotation']['annotations']['v_time'] = {
+      //   // drawTime: 'afterDraw',
+      //   type: 'line',
+      //   value: this.timePosition,
+      //   mode: 'vertical',
+      //   // xMax: this.timePosition,
+      //   // borderColor: 'rgb(255, 99, 132)',
+      //   // borderWidth: 2,
+      //   // label: {
+      //   //   borderWidth: 2,
+      //   //   borderCapStyle: 'butt',
+      //   // }
+      // }
 
       // console.log(this.chartData)
       // Show spinner and hide chart until finished.
