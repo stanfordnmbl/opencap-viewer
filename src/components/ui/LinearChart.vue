@@ -113,6 +113,7 @@ export default {
           },
           annotation: {
             annotations: {
+
               // line1: {
               //   type: 'line',
               //   xMin: 1.2,
@@ -145,6 +146,8 @@ export default {
               },
             },
             type: 'linear',
+            min: this.result.indices.start,
+            max: this.result.indices.end,
           },
           y: {
             title: {
@@ -181,11 +184,14 @@ export default {
       chart_point_radius: 12,
     }
   },
-  // watch: {
-  //   timePosition: function () {
-  //     this.drawChart();
-  //   }
-  // },
+  watch: {
+    timePosition: function () {
+      this.drawChart();
+    }
+  },
+  mounted() {
+    this.drawChart();
+  },
   methods: {
     drawChart() {
       // Show spinner and hide chart until finished.
@@ -221,6 +227,7 @@ export default {
       // else
       //     colors = chroma.scale(this.chart_color_scales_selected).correctLightness().gamma(2).cache(false).colors(this.y_quantities_selected.length);
 
+      var $this = this;
       for(let i=0; i < this.y_selected.length; i++) {
         // console.log(this.y_selected[i])
         dataset = {};
@@ -235,6 +242,11 @@ export default {
           dataset["pointRadius"] = 0;
         } else {
           dataset["pointRadius"] = this.chart_point_radius;
+        }
+        dataset['segment'] = {
+          borderColor: function(ctx) {
+            return ctx.p0.parsed.x < $this.timePosition ? colors[i] : '#e4e4e4';
+          }
         }
 
         this.chartData.datasets.push(dataset);

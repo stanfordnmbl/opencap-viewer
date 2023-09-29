@@ -1383,8 +1383,8 @@ export default {
         },
         goToAnalysisDashboard(functionId, trialId){
             this.$router.push({
-              name: 'GaitDashboard',
-              params: { id: this.session.id, trialID: trialId, funcID: functionId } })
+              name: 'AnalysisDashboard',
+              params: { id: 1 } })
         }
     }
 }

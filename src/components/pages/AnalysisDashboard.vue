@@ -100,7 +100,7 @@ ChartJS.register(
   zoomPlugin)
 
 export default {
-    name: 'GaitDashboard',
+    name: 'AnalysisDashboard',
     components: {
         Visualizer,
         ScalarPlot,
@@ -132,49 +132,6 @@ export default {
       filteredTrials() {
         return this.dashboard.data.trials.filter(trial => this.session_selected && trial.session_id === this.session_selected.id)
       },
-
-
-      // sessionsNames() {
-      //   var result_sessions = this.sessions.map(function (obj) {
-      //     // Check that there are valid trials
-      //     var trials = obj['trials'];
-      //     // Filter trials by name and status.
-      //     trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
-      //
-      //     if (trials.length > 0) {
-      //       return  obj.name + " (" + obj.id + ")";
-      //     } else {
-      //       return "";
-      //     }
-      //   })
-      //   var filtered_sessions = result_sessions.filter(function (value, index, arr) {
-      //     return value !== "";
-      //   });
-      //   return filtered_sessions;
-      //
-      // },
-      // sessionsIds() {
-      //     var result_sessions = this.sessions.map(function (obj) {
-      //       // Check that there are valid trials
-      //       var trials = obj['trials'];
-      //       // Filter trials by name and status.
-      //       trials = trials.filter(trial => trial.status === 'done' && trial.name !== 'calibration')
-      //
-      //       if (trials.length > 0) {
-      //         if (obj.name)
-      //           return  obj.name + " (" + obj.id + ")";
-      //         else
-      //           if (obj.meta && obj.meta.subject && obj.meta.subject.id)
-      //               return obj.meta.subject.id + " (" + obj.id + ")";
-      //       } else {
-      //         return "";
-      //       }
-      //     })
-      //     var filtered_sessions = result_sessions.filter(function (value, index, arr) {
-      //       return value !== "";
-      //     });
-      //     return filtered_sessions;
-      // }
     },
     watch: {
       trial_selected: function (val) {
@@ -364,10 +321,6 @@ export default {
 
 @keyframes spinner {
   to {transform: rotate(360deg);}
-}
-
-.scalar-plot {
-  width: 300px;
 }
 
 .height-50vh {
