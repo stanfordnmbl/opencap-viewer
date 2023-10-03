@@ -8,7 +8,6 @@
           label="Y Quantities"
           multiple outlined dense
         ></v-select>
-        <div>{{timePosition}}</div>
       </div>
 
 
