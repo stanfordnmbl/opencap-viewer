@@ -126,9 +126,9 @@
                                                                 Re-run
                                                             </v-list-item>
                                                             <v-list-item
-                                                                @click="goToAnalysisDashboard(func.id, t.id)"
-                                                                v-if="func.states[t.id].state == 'successfull'"
-                                                                >Gait Dashboard</v-list-item>
+                                                                @click="goToAnalysisDashboard(func.states[t.id].dashboard_id)"
+                                                                v-if="func.states[t.id].state == 'successfull' && func.states[t.id].dashboard_id"
+                                                                >Analysis Dashboard</v-list-item>
                                                         </v-list>
                                                     </v-menu>
                                                 </v-btn>
@@ -1381,10 +1381,10 @@ export default {
         toggleSessionMenuButtons(){
             this.showSessionMenuButtons = !this.showSessionMenuButtons;
         },
-        goToAnalysisDashboard(functionId, trialId){
+        goToAnalysisDashboard(dashboardId){
             this.$router.push({
               name: 'AnalysisDashboard',
-              params: { id: 1 } })
+              params: { id: dashboardId } })
         }
     }
 }
