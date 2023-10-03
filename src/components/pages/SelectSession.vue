@@ -24,6 +24,14 @@
         Recycle Bin
       </v-btn>
 
+      <v-btn
+        v-for="dashboard in analysis_dashboards"
+        :key="dashboard.id"
+        class="ml-2"
+        @click="$router.push({ name: 'AnalysisDashboard', params: { id: dashboard.id } })">
+        {{ dashboard.title }}
+      </v-btn>
+
       <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed sessions"></v-checkbox>
     </div>
 
@@ -222,6 +230,7 @@ export default {
   created: function () {
       this.loadSubjects()
       this.loadExistingSessions({reroute: false, quantity: -1})
+      this.loadAnalysisDashboardList()
   },
   data () {
     return {
@@ -251,7 +260,8 @@ export default {
   },
   computed: {
     ...mapState({
-      sessions: state => state.data.sessions
+      sessions: state => state.data.sessions,
+      analysis_dashboards: state => state.data.analysis_dashboards
     }),
     sessionsMapped () {
       return this.sessions.map(s => ({
@@ -271,7 +281,9 @@ export default {
   methods: {
     ...mapActions('data', [
         'loadExistingSessions', 'trashExistingSession',
-        'restoreTrashedSession', 'loadSubjects']),
+        'restoreTrashedSession', 'loadSubjects',
+        'loadAnalysisDashboardList',
+    ]),
     onSelect ({ item, value }) {
       this.selected = value ? item : null
     },

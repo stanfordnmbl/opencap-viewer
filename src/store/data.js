@@ -79,6 +79,9 @@ export default {
         result: analysisData.result
       }
     },
+    setAnalysisDahboardList (state, analysis_dashboards) {
+      state.analysis_dashboards = analysis_dashboards;
+    },
     setAnalysisDahboard (state, analysis_dashboard) {
       state.analysis_dashboard = analysis_dashboard;
     },
@@ -277,6 +280,11 @@ export default {
     }
   },
   actions: {
+    async loadAnalysisDashboardList({ state, commit }) {
+      let res = await axios.get(`/analysis-dashboards/`)
+      let result = res.data.map((dashboard) => ({id: dashboard.id, title: dashboard.title}))
+      commit('setAnalysisDahboardList', result)
+    },
     async loadAnalysisDashboard({ state, commit }, id) {
       const dashboardId = id || state.session.id
 

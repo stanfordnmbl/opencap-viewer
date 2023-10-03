@@ -127,44 +127,13 @@
                                                             </v-list-item>
                                                             <v-list-item
                                                                 @click="goToAnalysisDashboard(func.states[t.id].dashboard_id)"
-                                                                v-if="func.states[t.id].state == 'successfull' && func.states[t.id].dashboard_id"
+                                                                v-if="func.states[t.id].dashboard_id != null && func.states[t.id].state == 'successfull'"
                                                                 >Analysis Dashboard</v-list-item>
                                                         </v-list>
                                                     </v-menu>
                                                 </v-btn>
 
-
                                             </v-col>
-                                            <!--
-                                            <v-dialog
-                                                v-model="showAnalysisResultDialog"
-                                                width="auto"
-                                            >
-                                                <v-card>
-                                                <v-card-title>{{ func.results.filter(result => result.trial.id === t.id)[0].analysis_function.title }}</v-card-title>
-                                                <v-card-text>
-                                                    <v-row>
-                                                        <v-col cols="4">Message</v-col>
-                                                        <v-col cols="8">{{ func.results.filter(result => result.trial.id === t.id)[0].response }}</v-col>
-                                                    </v-row>
-                                                    <v-row>
-                                                        <v-col cols="4">Status</v-col>
-                                                        <v-col cols="8">{{ func.results.filter(result => result.trial.id === t.id)[0].state }}</v-col>
-                                                    </v-row>
-                                                </v-card-text>
-                                                <v-card-actions>
-                                                    <v-spacer></v-spacer>
-                                                    <v-btn
-                                                    color="blue darken-1"
-                                                    text
-                                                    @click="showAnalysisResultDialog=false"
-                                                    >
-                                                    Close
-                                                    </v-btn>
-                                                </v-card-actions>
-                                                </v-card>
-                                            </v-dialog>
-                                            -->
                                         </v-row>
                                     </v-card-text>
                                     <v-card-text v-else>
@@ -913,7 +882,7 @@ export default {
                         state.removeAnalysisFunctionTrial({functionId, trialId:trial_id});
                         state.setAnalysisFunctionResult(functionId, response.data);
                         state.setAnalysisFunctionState(
-                            {functionId, trialId:trial_id, data:{"state": response.data.state, "task_id": taskID}});
+                            {functionId, trialId:trial_id, data:{"state": response.data.state, "task_id": taskID, "dashboard_id": response.data.dashboard_id}});
                     }
             });
         },
