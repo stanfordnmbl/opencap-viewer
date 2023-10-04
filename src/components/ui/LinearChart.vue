@@ -41,7 +41,6 @@ import store from '@/store/store.js'
 import chroma from 'chroma-js';
 import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
 import zoomPlugin from 'chartjs-plugin-zoom';
-import annotationPlugin from 'chartjs-plugin-annotation';
 import {
   Chart as ChartJS,
   Title,
@@ -64,8 +63,7 @@ ChartJS.register(
   LinearScale,
   CategoryScale,
   PointElement,
-  zoomPlugin,
-  annotationPlugin,
+  zoomPlugin
 )
 
 export default {
