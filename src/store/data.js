@@ -14,6 +14,17 @@ export default {
       trials: []
     },
 
+    // Analysis dashboards
+    analysis_dashboards: [],
+    analysis_dashboard: {
+      data: {
+        sessions: [],
+        subjects: [],
+        trials: [],
+        results: [],
+      }
+    },
+
     // step 1
     cameras: 2,
     // step 2
@@ -67,6 +78,12 @@ export default {
         functionId: analysisData.functionId,
         result: analysisData.result
       }
+    },
+    setAnalysisDahboardList (state, analysis_dashboards) {
+      state.analysis_dashboards = analysis_dashboards;
+    },
+    setAnalysisDahboard (state, analysis_dashboard) {
+      state.analysis_dashboard = analysis_dashboard;
     },
     setSession (state, session) {
       session.created_at = formatDate(session.created_at); 
@@ -263,6 +280,22 @@ export default {
     }
   },
   actions: {
+    async loadAnalysisDashboardList({ state, commit }) {
+      let res = await axios.get(`/analysis-dashboards/`)
+      let result = res.data.map((dashboard) => ({id: dashboard.id, title: dashboard.title}))
+      commit('setAnalysisDahboardList', result)
+    },
+    async loadAnalysisDashboard({ state, commit }, id) {
+      const dashboardId = id || state.session.id
+
+      let res = await axios.get(`/analysis-dashboards/${dashboardId}/`)
+      let result = res.data
+      res = await axios.get(`/analysis-dashboards/${dashboardId}/data/`)
+      result['data'] = res.data
+
+      commit('setAnalysisDahboard', result)
+
+    },
     async initSession ({ state, commit }) {
       const res = await axios.get('/sessions/new/')
       commit('setSession', res.data[0])

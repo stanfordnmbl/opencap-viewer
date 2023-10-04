@@ -1,0 +1,291 @@
+<template>
+  <div class="linear-chart d-flex">
+      <div class="pr-2" style="width: 300px;">
+        <v-select
+          v-model="y_selected"
+          @change="drawChart"
+          :items="result.y_axis"
+          label="Y Quantities"
+          multiple outlined dense
+        ></v-select>
+      </div>
+
+
+    <div class="content-chart flex-grow-1">
+<!--      <div id="spinner-layer" style="position: relative; width: 100%; height: 100%; display:none;">-->
+<!--        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">-->
+<!--          <div class="spinner"></div>-->
+<!--        </div>-->
+<!--        <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; color:black">-->
+<!--          <h3>Loading Chart</h3>-->
+<!--        </div>-->
+<!--      </div>-->
+
+      <LineChartGenerator
+        id="chart"
+        :chart-options="chartOptions"
+        :chart-data="chartData"
+        style="position: relative; width: 100%; height: 100%;"
+        ref="chartRef"
+      />
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapState, mapActions } from 'vuex'
+import axios from 'axios'
+import { apiError, apiInfo, apiWarning, clearToastMessages } from '@/util/ErrorMessage.js'
+import Vue from 'vue'
+import store from '@/store/store.js'
+import chroma from 'chroma-js';
+import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
+import zoomPlugin from 'chartjs-plugin-zoom';
+import annotationPlugin from 'chartjs-plugin-annotation';
+import {
+  Chart as ChartJS,
+  Title,
+  SubTitle,
+  Tooltip,
+  Legend,
+  LineElement,
+  LinearScale,
+  CategoryScale,
+  PointElement} from 'chart.js'
+import IconTooltip from "@/components/ui/IconTooltip.vue";
+
+
+ChartJS.register(
+  Title,
+  SubTitle,
+  Tooltip,
+  Legend,
+  LineElement,
+  LinearScale,
+  CategoryScale,
+  PointElement,
+  zoomPlugin,
+  annotationPlugin,
+)
+
+export default {
+  props: ["trialID", 'timePosition', 'result', 'block'],
+  name: "linear-chart",
+  components: {
+    LineChartGenerator,
+  },
+  data() {
+    return {
+      timeStart: 0,
+      timeEnd: 0,
+      y_selected: null,
+      chartOptions: {
+        animation: {
+            duration: 0
+        },
+        plugins: {
+          legend: {
+            position: 'right',
+            align: 'center',
+            labels: {
+              font: {
+                size: 15
+              },
+            }
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'xy',
+              modifierKey: 'ctrl',
+            },
+            zoom: {
+              mode: 'xy',
+              overScaleMode: 'xy',
+              drag: {
+                enabled: true,
+              },
+              wheel: {
+                enabled: true,
+              }
+            }
+          },
+          annotation: {
+            annotations: {
+
+              // line1: {
+              //   type: 'line',
+              //   xMin: 1.2,
+              //   xMax: 1.2,
+              //   borderColor: 'red',
+              //   borderWidth: 2,
+              //   borderDash: [10, 10],
+              //   label: {
+              //     backgroundColor: 'red',
+              //     content: 'Time',
+              //     enabled: true,
+              //     position: 'top',
+              //     font: {
+              //       size: 20,
+              //     },
+              //   },
+              // },
+            }
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Time (s)',
+              font: {
+                size: 20
+              },
+            },
+            type: 'linear',
+            min: this.result.indices.start,
+            max: this.result.indices.end,
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Values',
+              font: {
+                size: 20
+              },
+            },
+            type: 'linear',
+          },
+        },
+      },
+      chartData: {
+        datasets: [{
+          label: 'Empty',
+          data: [],
+        }]
+      },
+      chart_color_scales_selected: "Viridis",
+      chart_color_scales_options: [
+        { text: 'Viridis (recommended)', value: 'Viridis' },
+        { text: 'Hot', value: ['black', 'red', 'yellow'] },
+        { text: 'Yellow-Blue', value: ['yellow', 'blue'] },
+        { text: 'Yellow-Green', value: ['yellow', 'green'] },
+        { text: 'Grays', value: ['lightgrey', 'black'] },
+        { text: 'Blues', value: ['#add8e6', '#191970'] },
+      ],
+      chart_legend_position: ["top", "right", "bottom", "left", "chartArea"],
+      chart_legend_alignment: ["start", "center", "end"],
+      chart_line_width: 5,
+      chart_point_style_options: ["none", "circle", "cross", "crossRot", "dash", "line", "rect", "rectRounded", "rectRot", "star", "triangle"],
+      chart_point_style: 'none',
+      chart_point_radius: 12,
+    }
+  },
+  watch: {
+    timePosition: function () {
+      this.drawChart();
+    }
+  },
+  mounted() {
+    this.drawChart();
+  },
+  methods: {
+    drawChart() {
+      // Show spinner and hide chart until finished.
+      // document.getElementById("spinner-layer").style.display = "block";
+      // document.getElementById("chart").style.display = "None";
+
+      this.chartData.labels = []
+      this.chartData.datasets = []
+
+      this.timeStart = this.result.indices.start;
+      this.timeEnd = this.result.indices.end;
+
+      let timeStart = this.timeStart;
+      let timeEnd = this.timeEnd;
+
+      // Add y quantities.
+      // console.log(this.y_selected)
+      var dataset = {};
+
+      // const selectedOption = this.chart_color_scales_options.find(option => {
+      //   return option.value === this.chart_color_scales_selected;
+      // });
+      // const selectedText = selectedOption ? selectedOption.text : "";
+      // console.log(chroma)
+      var colors = chroma.scale("Viridis").correctLightness().gamma(2).cache(false).colors(this.y_selected.length);
+      // console.log(colors)
+      // if (selectedText == "Spectral" || selectedText == "Rainbow" || selectedText == "Red-Yellow-Blue" || selectedText == "Yellow-Green-Blue")
+      //     colors = chroma.scale(this.chart_color_scales_selected).colors(this.y_quantities_selected.length);
+      // else if (selectedText == "Yellow-Green")
+      //     colors = chroma.scale(this.chart_color_scales_selected).correctLightness().colors(this.y_quantities_selected.length);
+      // else if (selectedText == "Red-Green" || selectedText == "Red-Blue" || selectedText == "Green-Blue")
+      //     colors = chroma.scale(this.chart_color_scales_selected).gamma(0.75).cache(false).colors(this.y_quantities_selected.length);
+      // else
+      //     colors = chroma.scale(this.chart_color_scales_selected).correctLightness().gamma(2).cache(false).colors(this.y_quantities_selected.length);
+
+      var $this = this;
+      for(let i=0; i < this.y_selected.length; i++) {
+        // console.log(this.y_selected[i])
+        dataset = {};
+        dataset["label"] = this.y_selected[i];
+        dataset["data"] = [];
+        dataset["backgroundColor"] = colors[i];
+        dataset["borderColor"] = colors[i];
+        dataset["borderWidth"] = this.chart_line_width;
+        // Handle "none" option to remove points
+        dataset["pointStyle"] = this.chart_point_style;
+        if (this.chart_point_style === "none") {
+          dataset["pointRadius"] = 0;
+        } else {
+          dataset["pointRadius"] = this.chart_point_radius;
+        }
+        dataset['segment'] = {
+          borderColor: function(ctx) {
+            return ctx.p0.parsed.x < $this.timePosition ? colors[i] : '#e4e4e4';
+          }
+        }
+
+        this.chartData.datasets.push(dataset);
+      }
+
+      var labels = [];
+      for(let j=0; j < this.result.datasets.length; j++) {
+        if(this.result.datasets[j][this.result.x_axis] >= timeStart && this.result.datasets[j][this.result.x_axis] <= timeEnd) {
+          labels.push(this.result.datasets[j][this.result.x_axis]);
+          for(let i=0; i < this.y_selected.length; i++) {
+              this.chartData.datasets[i].data.push(this.result.datasets[j][this.y_selected[i]]);
+          }
+        }
+      }
+      this.chartData["labels"] = labels;
+      // this.chartOptions['plugins']['annotation']['annotations']['v_time'] = {
+      //   // drawTime: 'afterDraw',
+      //   type: 'line',
+      //   value: this.timePosition,
+      //   mode: 'vertical',
+      //   // xMax: this.timePosition,
+      //   // borderColor: 'rgb(255, 99, 132)',
+      //   // borderWidth: 2,
+      //   // label: {
+      //   //   borderWidth: 2,
+      //   //   borderCapStyle: 'butt',
+      //   // }
+      // }
+
+      // console.log(this.chartData)
+      // Show spinner and hide chart until finished.
+      // document.getElementById("spinner-layer").style.display = "None";
+      // document.getElementById("chart").style.display = "block";
+
+
+    }
+  }
+};
+</script>
+
+<style>
+
+</style>

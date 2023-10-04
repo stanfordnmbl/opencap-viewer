@@ -13,6 +13,7 @@ import Step5 from '@/components/pages/Step5'
 import SelectSession from '@/components/pages/SelectSession'
 import HelloWorld from '@/components/HelloWorld'
 import Dashboard from '@/components/pages/Dashboard'
+import AnalysisDashboard from '@/components/pages/AnalysisDashboard'
 import ResetPassword from '@/components/pages/ResetPassword'
 import NewPassword from '@/components/pages/NewPassword'
 import RecycleBin from "@/components/pages/RecycleBin.vue";
@@ -81,6 +82,11 @@ var router = new Router({
       component: Dashboard
     },
     {
+      path: '/analysis-dashboard/:id/',
+      name: 'AnalysisDashboard',
+      component: AnalysisDashboard
+    },
+    {
       path: '/reset-password',
       name: 'ResetPassword',
       component: ResetPassword
@@ -110,6 +116,7 @@ const routesWithOutAuth = [
   'ResetPassword',
   'NewPassword',
   'Dashboard',
+  'AnalysisDashboard'
   // 'Step4'
   
 ]
@@ -133,6 +140,7 @@ const acceptedRoutes = [
   'Step4',
   'Session',
   'Dashboard',
+  'AnalysisDashboard',
   'ResetPassword',
   'NewPassword',
   'RecycleBin',
