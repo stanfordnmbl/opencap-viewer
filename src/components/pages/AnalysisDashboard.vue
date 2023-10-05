@@ -187,7 +187,7 @@ export default {
             let url = this.getResultUrl(this.trial_selected.id)
             console.log(url)
             if (url) {
-              axios.get(url).then(response => {
+              axios.get(url, {headers: {}}).then(response => {
                 console.log(response)
                 this.result = response.data
                 this.show_dashboard = true
