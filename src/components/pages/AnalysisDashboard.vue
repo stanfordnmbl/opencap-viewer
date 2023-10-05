@@ -195,6 +195,7 @@ export default {
                   // Handle the response here
                   console.log(response.data);
                   this.result = response.data
+                  console.log(this.result);
                   this.show_dashboard = true
                 })
                 .catch(error => {
