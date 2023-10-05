@@ -189,6 +189,7 @@ export default {
             if (url) {
               // Create a new instance of Axios without the token
               const axiosWithoutToken = axios.create();
+              axiosWithoutToken.defaults.headers.common['Authorization'] = ''; // Clear the Authorization header
               // Make a request without the token
               axiosWithoutToken.get(url)
                 .then(response => {
