@@ -6,11 +6,31 @@
         New session
       </v-btn>
 
-      <v-btn
-        class="ml-2"
-        @click="$router.push({ name: 'Dashboard', params: { id: '' } })">
-        Analysis Dashboard
-      </v-btn>
+      <v-menu offset-y>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn dark v-bind="attrs" v-on="on" class="ml-2">
+            <span class="mr-2">Dashboards</span>
+            <v-icon>mdi-menu</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+            <v-list-item link
+                @click="$router.push({ name: 'Dashboard', params: { id: '' } })">
+                Kinematics
+            </v-list-item>
+            <v-list-item
+                v-for="dashboard in analysis_dashboards"
+                :key="dashboard.id"
+                @click="$router.push({ name: 'AnalysisDashboard', params: { id: dashboard.id } })">
+              {{ dashboard.title }}</v-list-item>
+        </v-list>
+      </v-menu>
+
+<!--      <v-btn-->
+<!--        class="ml-2"-->
+<!--        @click="$router.push({ name: 'Dashboard', params: { id: '' } })">-->
+<!--        Analysis Dashboard-->
+<!--      </v-btn>-->
 
       <v-btn
         class="ml-2"
@@ -24,13 +44,13 @@
         Recycle Bin
       </v-btn>
 
-      <v-btn
-        v-for="dashboard in analysis_dashboards"
-        :key="dashboard.id"
-        class="ml-2"
-        @click="$router.push({ name: 'AnalysisDashboard', params: { id: dashboard.id } })">
-        {{ dashboard.title }}
-      </v-btn>
+<!--      <v-btn-->
+<!--        v-for="dashboard in analysis_dashboards"-->
+<!--        :key="dashboard.id"-->
+<!--        class="ml-2"-->
+<!--        @click="$router.push({ name: 'AnalysisDashboard', params: { id: dashboard.id } })">-->
+<!--        {{ dashboard.title }}-->
+<!--      </v-btn>-->
 
       <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed sessions"></v-checkbox>
     </div>
