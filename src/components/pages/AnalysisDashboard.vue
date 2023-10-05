@@ -188,6 +188,7 @@ export default {
             console.log(url)
             if (url) {
               axios.get(url).then(response => {
+                console.log(response)
                 this.result = response.data
                 this.show_dashboard = true
               })
