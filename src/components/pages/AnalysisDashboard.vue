@@ -187,11 +187,20 @@ export default {
             let url = this.getResultUrl(this.trial_selected.id)
             console.log(url)
             if (url) {
-              axios.get(url, {headers: {}}).then(response => {
-                console.log(response)
-                this.result = response.data
-                this.show_dashboard = true
-              })
+              // Create a new instance of Axios without the token
+              const axiosWithoutToken = axios.create();
+              // Make a request without the token
+              axiosWithoutToken.get(url)
+                .then(response => {
+                  // Handle the response here
+                  console.log(response.data);
+                  this.result = response.data
+                  this.show_dashboard = true
+                })
+                .catch(error => {
+                  // Handle any errors here
+                  console.error(error);
+                });
             }
           }
         },
