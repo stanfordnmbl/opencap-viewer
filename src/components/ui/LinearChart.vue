@@ -25,7 +25,7 @@
         id="chart"
         :chart-options="chartOptions"
         :chart-data="chartData"
-        style="position: relative; width: 100%; height: 100%;"
+        style="position: relative; width: 100%; height: 100%; background-color: black;"
         ref="chartRef"
       />
     </div>
@@ -86,6 +86,7 @@ export default {
             position: 'right',
             align: 'center',
             labels: {
+              color: 'white',
               font: {
                 size: 15
               },
@@ -139,8 +140,11 @@ export default {
               display: true,
               text: 'Time (s)',
               font: {
-                size: 20
+                size: 20,
+                color: 'white',
               },
+            },ticks: {
+              color: 'white',
             },
             type: 'linear',
             min: this.result.indices.start,
@@ -151,8 +155,12 @@ export default {
               display: true,
               text: 'Values',
               font: {
-                size: 20
+                size: 20,
+                color: 'white',
               },
+            },
+            ticks: {
+              color: 'white',
             },
             type: 'linear',
           },
