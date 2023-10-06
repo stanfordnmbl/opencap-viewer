@@ -1,6 +1,6 @@
 <template>
   <div id="body" class="chart-page d-flex flex-column">
-    <div class="d-flex" v-if="show_dashboard">
+    <div class="dashboard-body d-flex" v-if="show_dashboard">
         <div v-for="(column, column_name, column_idx) in dashboard.layout" :key="column_idx" :class="column.classes">
           <div v-for="block in column.widgets" :key="block._id" :class="block.classes">
             <component :is="block.component"
@@ -53,8 +53,6 @@
 <!--              <hr>-->
 
 <!--              {{trial_selected}}-->
-<!--              {{ result }}-->
-
 
             </v-card-text>
 
@@ -143,28 +141,26 @@ export default {
     },
     watch: {
       trial_selected: function (val) {
+        this.show_dashboard = false
+        this.y_values = []
+        this.selected_y_values = []
+        this.time_position = 0
+        this.result = {}
+
         this.loadResult()
       },
     },
     async mounted() {
-        // await this.loadSession(this.$route.params.id)
         await this.loadAnalysisDashboard(this.$route.params.id)
-    },
-    created: function () {
-      // Indicates if the current logged in user owns the session.
-      this.session_owned = false
-
-      // If the user is logged in, select session from list of sessions.
-      if(this.loggedIn) {
-        // If a session id has been passed as a parameter, set it as the default session.
-        // this.sessionsIds.forEach(sessionId => {
-        //   if (sessionId.includes(this.$route.params.id)) {
-        //     this.session_selected = sessionId;
-        //     this.onSessionSelected(this.session_selected);
-        //     this.session_owned = true
-        //   }
-        // });
-      }
+        let given_trial_id = this.$route.query.trialId
+        if (given_trial_id) {
+          let trial_selected = this.dashboard.data.trials.filter(trial => trial.id === given_trial_id)[0]
+          let session_selected = this.dashboard.data.sessions.filter(session => session.id === trial_selected.session_id)[0]
+          let subject_selected = this.dashboard.data.subjects.filter(subject => subject.id === session_selected.subject_id)[0]
+          this.subject_selected = subject_selected
+          this.session_selected = session_selected
+          this.trial_selected = trial_selected
+        }
     },
     methods: {
         ...mapActions('data', ['loadSession', 'loadAnalysisDashboard']),
@@ -321,7 +317,6 @@ export default {
   margin: auto;
   width: 60%;
   height: 80%;
-  background-color: white;
 }
 
 .spinner {
@@ -339,5 +334,9 @@ export default {
 
 .height-50vh {
   height: 50vh;
+}
+
+.dashboard-body {
+  margin-left: 300px;
 }
 </style>
