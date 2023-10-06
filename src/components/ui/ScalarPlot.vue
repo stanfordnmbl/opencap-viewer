@@ -43,6 +43,10 @@ export default {
 </script>
 
 <style>
+.plot-caption {
+  font-size: 16px;
+}
+
 .scalar-plot {
   width: 300px;
   height: 100vh;
