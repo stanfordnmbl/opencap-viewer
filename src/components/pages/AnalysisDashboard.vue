@@ -57,6 +57,14 @@
 
 
             </v-card-text>
+
+            <div class="left d-flex flex-column pa-2">
+              <div v-if="loggedIn" class="left d-flex flex-column">
+                <v-btn class="w-100 mt-4" :to="{ name: 'SelectSession' }">Back to session list
+                </v-btn>
+              </div>
+            </div>
+
           </v-card>
         </div>
       </v-card-text>
