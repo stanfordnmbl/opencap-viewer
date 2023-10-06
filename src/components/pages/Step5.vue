@@ -126,7 +126,7 @@
                                                                 Re-run
                                                             </v-list-item>
                                                             <v-list-item
-                                                                @click="goToAnalysisDashboard(func.states[t.id].dashboard_id)"
+                                                                @click="goToAnalysisDashboard(func.states[t.id].dashboard_id, t.id)"
                                                                 v-if="func.states[t.id].dashboard_id != null && func.states[t.id].state == 'successfull'"
                                                                 >Analysis Dashboard</v-list-item>
                                                         </v-list>
@@ -1350,10 +1350,17 @@ export default {
         toggleSessionMenuButtons(){
             this.showSessionMenuButtons = !this.showSessionMenuButtons;
         },
-        goToAnalysisDashboard(dashboardId){
+        goToAnalysisDashboard(dashboardId, trialId){
+          if (trialId) {
+            this.$router.push({
+              name: 'AnalysisDashboard',
+              params: { id: dashboardId },
+              query: { trialId: trialId }})
+          } else {
             this.$router.push({
               name: 'AnalysisDashboard',
               params: { id: dashboardId } })
+          }
         }
     }
 }

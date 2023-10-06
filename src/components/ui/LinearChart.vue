@@ -1,6 +1,6 @@
 <template>
-  <div class="linear-chart d-flex">
-      <div class="pr-2" style="width: 300px;">
+  <div class="linear-chart">
+      <div class="linear-chart-toolbar">
         <v-select
           v-model="y_selected"
           @change="drawChart"
@@ -10,17 +10,7 @@
         ></v-select>
       </div>
 
-
-    <div class="content-chart flex-grow-1">
-<!--      <div id="spinner-layer" style="position: relative; width: 100%; height: 100%; display:none;">-->
-<!--        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">-->
-<!--          <div class="spinner"></div>-->
-<!--        </div>-->
-<!--        <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); text-align: center; color:black">-->
-<!--          <h3>Loading Chart</h3>-->
-<!--        </div>-->
-<!--      </div>-->
-
+    <div class="content-chart" style="width: 100%;background-color: black;position: relative;top: -67px;">
       <LineChartGenerator
         id="chart"
         :chart-options="chartOptions"
@@ -76,7 +66,7 @@ export default {
     return {
       timeStart: 0,
       timeEnd: 0,
-      y_selected: null,
+      y_selected: [],
       chartOptions: {
         animation: {
             duration: 0
@@ -108,28 +98,6 @@ export default {
                 enabled: true,
               }
             }
-          },
-          annotation: {
-            annotations: {
-
-              // line1: {
-              //   type: 'line',
-              //   xMin: 1.2,
-              //   xMax: 1.2,
-              //   borderColor: 'red',
-              //   borderWidth: 2,
-              //   borderDash: [10, 10],
-              //   label: {
-              //     backgroundColor: 'red',
-              //     content: 'Time',
-              //     enabled: true,
-              //     position: 'top',
-              //     font: {
-              //       size: 20,
-              //     },
-              //   },
-              // },
-            }
           }
         },
         responsive: true,
@@ -143,8 +111,13 @@ export default {
                 size: 20,
                 color: 'white',
               },
-            },ticks: {
+            },
+            ticks: {
               color: 'white',
+            },
+            color: 'white',
+            grid: {
+              color: 'grey',
             },
             type: 'linear',
             min: this.result.indices.start,
@@ -161,6 +134,10 @@ export default {
             },
             ticks: {
               color: 'white',
+            },
+            color: 'white',
+            grid: {
+              color: 'grey',
             },
             type: 'linear',
           },
@@ -293,5 +270,16 @@ export default {
 </script>
 
 <style>
+.linear-chart {
+  height: 100%;
+}
 
+.linear-chart-toolbar {
+  width: 300px;
+  position: relative;
+  left: 100%;
+  margin-left: -320px;
+  z-index: 1;
+  background: black;
+}
 </style>
