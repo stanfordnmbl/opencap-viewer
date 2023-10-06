@@ -421,7 +421,7 @@
                 </v-btn>
 
                 <v-btn small class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
-                    Analysis Dashboard
+                    Dashboard kinematics
                 </v-btn>
 
                 <v-btn small class="mt-4 w-100" v-show="show_controls" @click="$router.push({ name: 'SelectSession'})"
