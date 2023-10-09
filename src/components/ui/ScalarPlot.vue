@@ -47,6 +47,7 @@ export default {
   padding-left: 2rem;
   padding-right: 2rem;
   padding-top: 4rem;
+  padding-bottom: 4rem;
 }
 
 .scalar-plot {
@@ -55,6 +56,7 @@ export default {
   background: black;
   color: white;
   margin-bottom: 1rem;
+  overflow-y: auto;
 }
 
 .plot-caption {
