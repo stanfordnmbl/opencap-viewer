@@ -337,6 +337,7 @@ export default {
 }
 
 .dashboard-body {
-  margin-left: 300px;
+  margin-left: 320px;
+  margin-right: 10px;
 }
 </style>

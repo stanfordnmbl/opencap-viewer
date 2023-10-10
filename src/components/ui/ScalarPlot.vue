@@ -33,7 +33,13 @@ export default {
     buildValueStyles(value, min, max) {
       let percent = (value - min) / (max - min) * 100;
       return `position: relative;margin-top: -33px;margin-left:${percent}%;`
-    }
+    },
+    calculatedMinLimit(minLimit, value) {
+      return Math.min(minLimit, 0.95 * value);
+    },
+    calculatedMaxLimit(maxLimit, value) {
+      return Math.max(maxLimit, 1.05 * value);
+    },
   }
 };
 </script>

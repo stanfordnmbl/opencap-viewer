@@ -10,7 +10,7 @@
         ></v-select>
       </div>
 
-    <div class="content-chart" style="width: 100%;background-color: black;position: relative;top: -67px;">
+    <div class="content-chart" style="width: 100%;background-color: black;position: relative;top: 0px;">
       <LineChartGenerator
         id="chart"
         :chart-options="chartOptions"
@@ -276,8 +276,10 @@ export default {
 
 .linear-chart-toolbar {
   width: 300px;
+  height: 10px;
   position: relative;
   left: 100%;
+  top: -30px;
   margin-left: -320px;
   z-index: 1;
   background: black;
