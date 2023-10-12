@@ -236,11 +236,6 @@
                 </div>
               </div>
 
-              {{ invalid }}
-              <div>
-                terms: {{ terms }}, privacy: {{ privacy }}, nonprofit: {{ nonprofit }}
-              </div>
-
               <div class="row">
                 <div class="col-12">
                   <v-checkbox
@@ -254,9 +249,18 @@
                                 :error="errors.length > 0"
                                 :error-messages="errors[0]">
                       <template v-slot:label>
-                        <div>I confirm that I have read and agree to the Terms and Conditions of OpenCap.
-                        <a href="https://www.opencap.ai/terms-conditions"
-                           target="_blank">https://www.opencap.ai/terms-conditions</a>.</div>
+                        <div>I confirm that I have read and agree to the
+                          <v-tooltip location="bottom">
+                            <template v-slot:activator="{ props }">
+                              <a href="https://www.opencap.ai/terms-conditions"
+                                 target="_blank"
+                                 v-bind="props"
+                                 @click.stop>Terms and Conditions</a>
+                            </template>
+                            Opens in new window
+                          </v-tooltip>
+                          of OpenCap.
+                        </div>
                       </template>
                     </v-checkbox>
                   </ValidationProvider>
@@ -267,9 +271,18 @@
                                 :error="errors.length > 0"
                                 :error-messages="errors[0]">
                       <template v-slot:label>
-                        <div>I confirm that I have read and agree to the the Privacy Policy of OpenCap.
-                        <a href="https://docs.google.com/document/d/1DBw9LVAuUwgz713037VQjsaD8sj2-AN_hzga_7kXtXI"
-                           target="_blank">https://docs.google.com/document/d/1DBw9LVAuUwgz713037VQjsaD8sj2-AN_hzga_7kXtXI</a>.</div>
+                        <div>I confirm that I have read and agree to the the
+                          <v-tooltip location="bottom">
+                            <template v-slot:activator="{ props }">
+                              <a href="https://docs.google.com/document/d/1DBw9LVAuUwgz713037VQjsaD8sj2-AN_hzga_7kXtXI"
+                                 target="_blank"
+                                 v-bind="props"
+                                 @click.stop>Privacy Policy</a>
+                            </template>
+                            Opens in new window
+                          </v-tooltip>
+                          of OpenCap.
+                        </div>
                       </template>
                     </v-checkbox>
                   </ValidationProvider>
