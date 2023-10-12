@@ -243,6 +243,61 @@
                     label="Sign up to receive our newsletter"
                   ></v-checkbox>
                 </div>
+                <div class="col-12 pb-0">
+                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="Terms and Conditions agreement selection">
+                    <v-checkbox v-model="terms" class="mt-0 mb-0"
+                                :error="errors.length > 0"
+                                :error-messages="errors[0]">
+                      <template v-slot:label>
+                        <div>I confirm that I have read and agree to the
+                          <v-tooltip location="bottom">
+                            <template v-slot:activator="{ props }">
+                              <a href="https://www.opencap.ai/terms-conditions"
+                                 target="_blank"
+                                 v-bind="props"
+                                 @click.stop>Terms and Conditions</a>
+                            </template>
+                            Opens in new window
+                          </v-tooltip>
+                          of OpenCap.
+                        </div>
+                      </template>
+                    </v-checkbox>
+                  </ValidationProvider>
+                </div>
+                <div class="col-12 pt-0 pb-0">
+                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="Privacy Policy agreement selection">
+                    <v-checkbox v-model="privacy" class="mt-0 mb-0"
+                                :error="errors.length > 0"
+                                :error-messages="errors[0]">
+                      <template v-slot:label>
+                        <div>I confirm that I have read and agree to the the
+                          <v-tooltip location="bottom">
+                            <template v-slot:activator="{ props }">
+                              <a href="https://docs.google.com/document/d/1DBw9LVAuUwgz713037VQjsaD8sj2-AN_hzga_7kXtXI"
+                                 target="_blank"
+                                 v-bind="props"
+                                 @click.stop>Privacy Policy</a>
+                            </template>
+                            Opens in new window
+                          </v-tooltip>
+                          of OpenCap.
+                        </div>
+                      </template>
+                    </v-checkbox>
+                  </ValidationProvider>
+                </div>
+                <div class="col-12 pt-0">
+                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="Non-profit use agreement selection">
+                    <v-checkbox v-model="nonprofit" class="mt-0 mb-0"
+                                :error="errors.length > 0"
+                                :error-messages="errors[0]">
+                      <template v-slot:label>
+                        <div>I confirm that I am using OpenCap for academic or non-profit organization non-commercial research or educational use only and that my use of OpenCap is in compliance with the relevant privacy, security, and human subjects research regulations in my location.</div>
+                      </template>
+                    </v-checkbox>
+                  </ValidationProvider>
+                </div>
               </div>
 
               <div class="pt-2">
@@ -290,6 +345,9 @@ export default {
       password: "",
       confirmPassword: "",
       newsletter: true,
+      terms: false,
+      privacy: false,
+      nonprofit: false,
       show_password: false,
       show_confirm_password: false,
     };
