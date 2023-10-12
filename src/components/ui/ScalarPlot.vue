@@ -5,10 +5,6 @@
       <h2 class="h5 plot-caption">{{ row.label }}</h2>
 
       <div class="scalar-plot-container d-flex" style="margin-top: 45px;margin-bottom: 55px;">
-<!--        <div class="scalar-plot-bar scalar-plot-bar-left" :style="buildBarStyles(row.colors[0])"></div>-->
-<!--        <div class="scalar-plot-bar scalar-plot-bar-middle" :style="buildBarStyles(row.colors[1])"></div>-->
-<!--        <div class="scalar-plot-bar scalar-plot-bar-right" :style="buildBarStyles(row.colors[2])"></div>-->
-
         <div class="scalar-plot-bar scalar-plot-bar-left text-right" :style="buildBarStyles(row, 'left')">
           <div style="position: relative;margin-top: 20px;">{{row.min_limit}}</div>
         </div>
