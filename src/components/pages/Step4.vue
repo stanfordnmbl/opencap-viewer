@@ -380,8 +380,8 @@
             rows=3
           ></v-textarea>
 
-          <div class="pt-0" v-if="subjects.length === 0">
-            <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="The value">
+          <div class="pt-0">
+            <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="Informed consent selection">
               <v-checkbox v-model="edited_subject.terms" class="mt-0 mb-0"
                           :error="errors.length > 0"
                           :error-messages="errors[0]">
