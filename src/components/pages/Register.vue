@@ -244,7 +244,7 @@
                   ></v-checkbox>
                 </div>
                 <div class="col-12 pb-0">
-                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="The value">
+                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="terms">
                     <v-checkbox v-model="terms" class="mt-0 mb-0"
                                 :error="errors.length > 0"
                                 :error-messages="errors[0]">
@@ -266,7 +266,7 @@
                   </ValidationProvider>
                 </div>
                 <div class="col-12 pt-0 pb-0">
-                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="The value">
+                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="privacy">
                     <v-checkbox v-model="privacy" class="mt-0 mb-0"
                                 :error="errors.length > 0"
                                 :error-messages="errors[0]">
@@ -288,7 +288,7 @@
                   </ValidationProvider>
                 </div>
                 <div class="col-12 pt-0">
-                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="The value">
+                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="nonprofit">
                     <v-checkbox v-model="nonprofit" class="mt-0 mb-0"
                                 :error="errors.length > 0"
                                 :error-messages="errors[0]">
