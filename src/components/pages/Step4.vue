@@ -309,6 +309,11 @@
     </v-card>
   
     <v-dialog v-model="new_subject_dialog" width="500">
+      <ValidationObserver
+        tag="form"
+        class="d-flex flex-column"
+        ref="observer"
+        v-slot="{ invalid }">
       <v-form>
       <v-card>
         <v-card-title class="headline" v-if="edited_subject.id">Edit subject "{{ edited_subject.name }}"</v-card-title>
@@ -375,6 +380,40 @@
             rows=3
           ></v-textarea>
 
+          <div class="pt-0" v-if="subjects.length === 0">
+            <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="The value">
+              <v-checkbox v-model="edited_subject.terms" class="mt-0 mb-0"
+                          :error="errors.length > 0"
+                          :error-messages="errors[0]">
+                <template v-slot:label>
+                  <div>I, the research Participant, have provided informed consent to the research Investigator conducting this study.
+                    I have read and I agree to the
+                    <v-tooltip location="bottom">
+                      <template v-slot:activator="{ props }">
+                        <a href="https://www.opencap.ai/terms-conditions"
+                           target="_blank"
+                           v-bind="props"
+                           @click.stop>Terms and Conditions</a>
+                      </template>
+                      Opens in new window
+                    </v-tooltip>
+                    and
+                    <v-tooltip location="bottom">
+                      <template v-slot:activator="{ props }">
+                        <a href="https://docs.google.com/document/d/1DBw9LVAuUwgz713037VQjsaD8sj2-AN_hzga_7kXtXI"
+                           target="_blank"
+                           v-bind="props"
+                           @click.stop>Privacy Policy</a>
+                      </template>
+                    </v-tooltip>
+                    of the OpenCap tool.
+                  </div>
+                </template>
+                Opens in new window
+              </v-checkbox>
+            </ValidationProvider>
+          </div>
+
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -388,6 +427,7 @@
           <v-btn
             color="green darken-1"
             text
+            :disabled="invalid"
             @click="submitSubjectForm()"
           >
             Save
@@ -395,6 +435,7 @@
         </v-card-actions>
       </v-card>
       </v-form>
+      </ValidationObserver>
     </v-dialog>
     
   </MainLayout>
