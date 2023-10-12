@@ -236,12 +236,54 @@
                 </div>
               </div>
 
+              {{ invalid }}
+              <div>
+                terms: {{ terms }}, privacy: {{ privacy }}, nonprofit: {{ nonprofit }}
+              </div>
+
               <div class="row">
                 <div class="col-12">
                   <v-checkbox
                     v-model="newsletter"
                     label="Sign up to receive our newsletter"
                   ></v-checkbox>
+                </div>
+                <div class="col-12 pb-0">
+                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="The value">
+                    <v-checkbox v-model="terms" class="mt-0 mb-0"
+                                :error="errors.length > 0"
+                                :error-messages="errors[0]">
+                      <template v-slot:label>
+                        <div>I confirm that I have read and agree to the Terms and Conditions of OpenCap.
+                        <a href="https://www.opencap.ai/terms-conditions"
+                           target="_blank">https://www.opencap.ai/terms-conditions</a>.</div>
+                      </template>
+                    </v-checkbox>
+                  </ValidationProvider>
+                </div>
+                <div class="col-12 pt-0 pb-0">
+                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="The value">
+                    <v-checkbox v-model="privacy" class="mt-0 mb-0"
+                                :error="errors.length > 0"
+                                :error-messages="errors[0]">
+                      <template v-slot:label>
+                        <div>I confirm that I have read and agree to the the Privacy Policy of OpenCap.
+                        <a href="https://docs.google.com/document/d/1DBw9LVAuUwgz713037VQjsaD8sj2-AN_hzga_7kXtXI"
+                           target="_blank">https://docs.google.com/document/d/1DBw9LVAuUwgz713037VQjsaD8sj2-AN_hzga_7kXtXI</a>.</div>
+                      </template>
+                    </v-checkbox>
+                  </ValidationProvider>
+                </div>
+                <div class="col-12 pt-0">
+                  <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="The value">
+                    <v-checkbox v-model="nonprofit" class="mt-0 mb-0"
+                                :error="errors.length > 0"
+                                :error-messages="errors[0]">
+                      <template v-slot:label>
+                        <div>I confirm that I am using OpenCap for academic or non-profit organization non-commercial research or educational use only and that my use of OpenCap is in compliance with the relevant privacy, security, and human subjects research regulations in my location.</div>
+                      </template>
+                    </v-checkbox>
+                  </ValidationProvider>
                 </div>
               </div>
 
@@ -290,6 +332,9 @@ export default {
       password: "",
       confirmPassword: "",
       newsletter: true,
+      terms: false,
+      privacy: false,
+      nonprofit: false,
       show_password: false,
       show_confirm_password: false,
     };
