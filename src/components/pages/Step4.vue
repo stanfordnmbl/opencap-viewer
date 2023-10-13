@@ -31,14 +31,6 @@
     <div v-else class="step-4-1 d-flex flex-column">
 
       <v-card class="mb-4">
-        <v-card-text>
-        <p>Expected cameras: {{ n_calibrated_cameras }}</p>
-        <p>Videos uploaded: {{ n_videos_uploaded }} / {{ n_calibrated_cameras }}</p>
-
-        </v-card-text>
-      </v-card>
-
-      <v-card class="mb-4">
         <v-card-title class="justify-center subject-title">
           Session Info
         </v-card-title>
@@ -542,11 +534,7 @@ export default {
         if(!isNaN(parseFloat(v)) && v > currentYear) return `The subject's birth year cannot be set in the future. Please ensure that you are using the correct units. The birth year should be earlier than the current year ${currentYear} and specified in years (yyyy) format.`;
         if(!isNaN(parseFloat(v)) && v < 1900) return "It seems unlikely that the subject's birth year predates 1900. Please ensure that you are using the correct units. The birth year should be specified in years (yyyy) format.";
       },
-      checkboxRule: (v) => !!v || 'The subject must agree to continue!',
-
-      n_calibrated_cameras: 0,
-      n_cameras_connected: 0,
-      n_videos_uploaded: 0
+      checkboxRule: (v) => !!v || 'The subject must agree to continue!'
     };
   },
   computed: {
@@ -621,17 +609,13 @@ export default {
       return this.errors;
     },
   },
-  async mounted() {
+  mounted() {
     apiInfo("The default marker augmenter model was upgraded (from v0.2 to v0.3). The new model (v0.3) should be more accurate and more robust to different activities. If you would like to use the model that was default prior to 07-30-2023, select v0.2 under 'Marker augmenter model' under 'Advanced Settings'.", 30000);
     this.loadSession(this.$route.params.id)
     this.loadSubjects()
     if (this.$route.query.autoRecord) {
       this.onNext();
     }
-
-    const res = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
-
-    this.n_calibrated_cameras = res.data.data
   },
   methods: {
     ...mapMutations("data", ["setStep4", "setStep3"]),
@@ -804,16 +788,6 @@ export default {
             }
             this.lastPolledStatus = res.data.status;
             window.setTimeout(this.pollStatus, 1000);
-
-
-            const res = await axios.get(`/sessions/${this.$route.params.id}/status/`, {})
-
-            this.n_cameras_connected = res.data.n_cameras_connected
-            this.n_videos_uploaded = res.data.n_videos_uploaded
-
-            if (this.n_cameras_connected !== this.n_calibrated_cameras)
-              apiError(this.n_calibrated_cameras = " cameras calibrated and " + this.n_cameras_connected + "are connected. Please reconnect the " + this.n_calibrated_cameras + " calibrated cameras to the session using the QR code at the top of the screen.");
-
             break;
           }
         }

@@ -4,8 +4,6 @@
 
             <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
 
-                <p>Expected cameras: {{ n_calibrated_cameras }}</p>
-
                 <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
 
                     <v-text-field v-show="show_controls" v-model="trialName" label="Trial name" class="flex-grow-0"
@@ -15,8 +13,8 @@
                 <v-btn class="mb-4 w-100" v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
                 </v-btn>
-                <p v-if="state === 'recording'">{{ n_cameras_connected }} cameras are recording, do not refresh</p>
-                <p v-if="state === 'processing'">{{ n_videos_uploaded  }}/{{ n_cameras_connected }} videos uploaded, do not refresh.</p>
+                <p v-if="state === 'recording'">Videos are recording, do not refresh</p>
+                <p v-if="state === 'processing'">Videos are uploading, do not refresh</p>
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
@@ -581,11 +579,7 @@ export default {
             recordingTimer: null,
 
             trialsPoll: null,
-            showSessionMenuButtons: true,
-
-            n_calibrated_cameras: 0,
-            n_cameras_connected: 0,
-            n_videos_uploaded: 0
+            showSessionMenuButtons: true
         }
     },
     computed: {
@@ -644,7 +638,6 @@ export default {
         await this.loadAnalysisFunctionsStates()
 
         await this.analysisFunctionsPolls()
-        
         console.log(this.user_id)
         console.log(this.session.user)
         this.show_controls = (this.user_id == this.session.user)
@@ -658,13 +651,6 @@ export default {
             console.log(doneTrials[0])
             this.loadTrial(doneTrials[0])
         }
-
-        // Get number of expected cameras.
-
-        const res = await axios.get(`/sessions/${this.session.id}/get_n_calibrated_cameras/`, {})
-
-        this.n_calibrated_cameras = res.data.data
-
     },
     beforeDestroy() {
         this.cancelPoll()
@@ -749,15 +735,6 @@ export default {
                             // add to the list
                             this.trialInProcess = res.data
                             this.addTrial(this.trialInProcess)
-
-                            // Get n_cameras_connected.
-                            const res_status = await axios.get(`/sessions/${this.session.id}/status/`, {})
-
-                            this.n_cameras_connected = res_status.data.n_cameras_connected
-                            if (this.n_cameras_connected === null) {
-                                this.n_cameras_connected = 0
-                                apiError("ERROR")
-                            }
 
                             this.recordingStarted = moment()
                             this.recordingTimePassed = 0
@@ -933,11 +910,6 @@ export default {
 
                     this.state = 'ready'
                 } else {
-                    this.n_cameras_connected = res.data.n_cameras_connected
-                    this.n_videos_uploaded = res.data.n_videos_uploaded
-                    if (this.n_cameras_connected !== this.n_calibrated_cameras) {
-                        apiErrorRes(res.data, this.n_calibrated_cameras + ' cameras calibrated and ' + this.n_cameras_connected +  ' are connected. Please reconnect the ' + this.n_calibrated_cameras + ' calibrated cameras to the session using the QR code at the top of the screen')
-                    }
                     this.startPoll()
                 }
             }, 2000)
