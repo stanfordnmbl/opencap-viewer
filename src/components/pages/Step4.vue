@@ -768,7 +768,9 @@ export default {
     },
     async pollStatus() {
       try {
+        console.log("STEP4: Enter Poll Status")
         //const res = await axios.get(`/sessions/1966df9a-0a60-4365-9404-43e53750b784/neutral_img/`)
+        console.log("STEP4: Get Neutral Image")
         const res = await axios.get(
           `/sessions/${this.session.id}/neutral_img/`
         );
@@ -784,6 +786,7 @@ export default {
         ]
         this.busy = false
         */
+        console.log("STEP4: Switch status")
         switch (res.data.status) {
           case "done": {
             this.$toasted.clear()
@@ -805,6 +808,7 @@ export default {
             break;
           }
           default: {
+          console.log("STEP4: Default case")
             if (
               res.data.status === "processing" &&
               res.data.status !== this.lastPolledStatus
@@ -823,10 +827,12 @@ export default {
             if (this.n_cameras_connected !== this.n_calibrated_cameras)
               apiError(this.n_calibrated_cameras = " cameras calibrated and " + this.n_cameras_connected + "are connected. Please reconnect the " + this.n_calibrated_cameras + " calibrated cameras to the session using the QR code at the top of the screen.");
 
+            console.log("STEP4: End default case")
             break;
           }
         }
       } catch (error) {
+        console.log("STEP4: Enter catch")
         apiError(error);
       }
     },
