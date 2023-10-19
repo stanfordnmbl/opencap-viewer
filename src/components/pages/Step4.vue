@@ -679,6 +679,7 @@ export default {
         console.log(this.disabledNextButton)
     },
     async onNext() {
+      console.log("STEP4: onNext")
       if (this.imgs) {
         // Confirm
         this.$router.push({
@@ -688,6 +689,7 @@ export default {
           },
         });
       } else {
+        console.log("STEP4: Validate")
         if (await this.$refs.observer.validate()) {
           this.lastPolledStatus = "";
           // Record press
@@ -706,6 +708,7 @@ export default {
             augmenter_model: this.augmenter_model,
           });
           try {
+            console.log("STEP4: Set Metadata")
             const resUpdate = await axios.get(
               `/sessions/${this.session.id}/set_metadata/`,
               {
@@ -725,6 +728,7 @@ export default {
               }
             );
 
+            console.log("STEP4: Set Subject")
             const resSubject = await axios.get(
                 `/sessions/${this.session.id}/set_subject/`,
                 {
@@ -733,7 +737,7 @@ export default {
                     }
                 }
             )
-
+            console.log("STEP4: Record")
             const res = await axios.get(
               `/sessions/${this.session.id}/record/`,
               {
@@ -749,6 +753,7 @@ export default {
                 },
               }
             );
+            console.log("STEP4: Set Step 4")
             this.setStep3(res.data.id); // sets trialID
             this.pollStatus();
           } catch (error) {
