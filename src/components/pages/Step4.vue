@@ -809,6 +809,9 @@ export default {
           }
           default: {
             console.log("STEP4: Default case")
+            console.log("STEP4: res.data: " + res.data)
+            console.log("STEP4: res.data.satus: " + res.data.status)
+            console.log("STEP4: this.lastPolledStatus: " + this.lastPolledStatus)
             if (
               res.data.status === "processing" &&
               res.data.status !== this.lastPolledStatus
@@ -820,13 +823,18 @@ export default {
 
 
             const res = await axios.get(`/sessions/${this.$route.params.id}/status/`, {})
+            console.log("STEP4: status: " + res.data)
 
             this.n_cameras_connected = res.data.n_cameras_connected
             this.n_videos_uploaded = res.data.n_videos_uploaded
 
+            console.log("STEP4:  Retrieved n_cameras and n_videos.")
+
             const resCalibratedCameras = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
 
             this.n_calibrated_cameras = resCalibratedCameras.data.data
+
+            console.log("STEP4:  Retrieved n_calibrated.")
 
             if (this.n_cameras_connected !== this.n_calibrated_cameras)
               apiError(this.n_calibrated_cameras = " cameras calibrated and " + this.n_cameras_connected + "are connected. Please reconnect the " + this.n_calibrated_cameras + " calibrated cameras to the session using the QR code at the top of the screen.");
