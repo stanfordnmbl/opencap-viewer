@@ -6,11 +6,25 @@
         New session
       </v-btn>
 
-      <v-btn
-        class="ml-2"
-        @click="$router.push({ name: 'Dashboard', params: { id: '' } })">
-        Analysis Dashboard
-      </v-btn>
+      <v-menu offset-y>
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn dark v-bind="attrs" v-on="on" class="ml-2">
+            <span class="mr-2">Dashboards</span>
+            <v-icon>mdi-menu</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+            <v-list-item link
+                @click="$router.push({ name: 'Dashboard', params: { id: '' } })">
+                Kinematics
+            </v-list-item>
+            <v-list-item
+                v-for="dashboard in analysis_dashboards"
+                :key="dashboard.id"
+                @click="$router.push({ name: 'AnalysisDashboard', params: { id: dashboard.id } })">
+              {{ dashboard.title }}</v-list-item>
+        </v-list>
+      </v-menu>
 
       <v-btn
         class="ml-2"
@@ -62,7 +76,7 @@
               <v-list-item link>
                 <v-list-item-title
                   @click="$router.push({ name: 'Dashboard', params: { id: item.id } })"
-                  >Dashboard</v-list-item-title>
+                  >Dashboard kinematics</v-list-item-title>
               </v-list-item>
 
               <v-list-item link>
@@ -222,6 +236,7 @@ export default {
   created: function () {
       this.loadSubjects()
       this.loadExistingSessions({reroute: false, quantity: -1})
+      this.loadAnalysisDashboardList()
   },
   data () {
     return {
@@ -251,7 +266,8 @@ export default {
   },
   computed: {
     ...mapState({
-      sessions: state => state.data.sessions
+      sessions: state => state.data.sessions,
+      analysis_dashboards: state => state.data.analysis_dashboards
     }),
     sessionsMapped () {
       return this.sessions.map(s => ({
@@ -271,7 +287,9 @@ export default {
   methods: {
     ...mapActions('data', [
         'loadExistingSessions', 'trashExistingSession',
-        'restoreTrashedSession', 'loadSubjects']),
+        'restoreTrashedSession', 'loadSubjects',
+        'loadAnalysisDashboardList',
+    ]),
     onSelect ({ item, value }) {
       this.selected = value ? item : null
     },

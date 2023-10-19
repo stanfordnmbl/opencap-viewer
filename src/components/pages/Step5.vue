@@ -83,7 +83,7 @@
                             </v-dialog>
 
                           </v-list-item>
-                          <!-- <v-list-item link v-if="!t.trashed && t.name !== 'neutral'">
+                          <v-list-item link v-if="!t.trashed && t.name !== 'neutral'">
                             <v-dialog
                                     v-model="showAnalysisDialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
@@ -94,18 +94,47 @@
                                 <v-card>
                                     <v-card-title>Advanced Analysis</v-card-title>
                                     <v-card-text v-if="analysisFunctions.length > 0">
-                                        <v-row  v-for="func in analysisFunctions" :key="func.id">
+
+                                        <v-row v-for="func in analysisFunctionsWithMenu" :key="func.id">
                                             <v-col cols="3">{{ func.title }}</v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
-                                                <v-btn v-if="!isInvokeDone" small @click="invokeAnalysisFunction(func.id, t.name)" :disabled="isInvokeInProgress">
-                                                    <span v-if="func.id === invokedFunctionId & isInvokeInProgress & !isInvokeDone">
-                                                        <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
-                                                        Calculating...
-                                                    </span>
-                                                    <span v-if="func.id !== invokedFunctionId || !invokedFunctionId || !(isInvokeInProgress || isInvokeDone)">Start</span>
+                                              <v-btn small v-if="func.trials.includes(t.id)" :disabled="t.id in func.trials">
+                                                  <span >
+                                                      <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                                                      Calculating...
+                                                  </span>
+                                              </v-btn>
+
+                                              <v-btn
+                                                  small
+                                                  v-if="!func.trials.includes(t.id) && !(t.id in func.states)"
+                                                  @click="invokeAnalysisFunction(func.id, t.id, t.name)"
+                                                  >
+                                                  Run
+                                              </v-btn>
+                                                <v-btn small v-if="(t.id in func.states) && !func.trials.includes(t.id)">
+                                                    <span :style="func.states[t.id].state == 'failed'? 'color:red' : 'color:green'">{{ func.states[t.id].state }}</span>
+                                                    <v-menu v-model="func.isMenuOpen" offset-y>
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                        <v-btn icon dark v-bind="attrs" v-on="on" >
+                                                            <v-icon>mdi-menu</v-icon>
+                                                        </v-btn>
+                                                        </template>
+                                                        <v-list>
+                                                            <v-list-item link
+                                                                @click="invokeAnalysisFunction(func.id, t.id, t.name)"
+                                                                :disabled="t.id in func.trials">
+                                                                Re-run
+                                                            </v-list-item>
+                                                            <v-list-item
+                                                                @click="goToAnalysisDashboard(func.states[t.id].dashboard_id, t.id)"
+                                                                v-if="func.states[t.id].dashboard_id != null && func.states[t.id].state == 'successfull'"
+                                                                >Analysis Dashboard</v-list-item>
+                                                        </v-list>
+                                                    </v-menu>
                                                 </v-btn>
-                                                <v-btn small v-if="func.id === invokedFunctionId & isInvokeDone" @click="showAnalysisResultDialog=true">Open details</v-btn>
+
                                             </v-col>
                                         </v-row>
                                     </v-card-text>
@@ -118,15 +147,13 @@
                                     color="blue darken-1"
                                     text
                                     v-if="analysisFunctions.length > 0"
-                                    :disabled="isInvokeInProgress"
-                                    @click="isInvokeInProgress = false; isInvokeDone = false;"
                                   >
                                     Reset results
                                   </v-btn>
                                   <v-btn
                                     color="red darken-1"
                                     text
-                                    @click="t.isMenuOpen = false; showAnalysisDialog = false"
+                                    @click="t.isMenuOpen = false; showAnalysisDialog = false;"
                                   >
                                     Close
                                   </v-btn>
@@ -134,36 +161,7 @@
                                 </v-card>
                             </v-dialog>
 
-                            <v-dialog
-                                v-model="showAnalysisResultDialog"
-                                width="auto"
-                            >
-                                <v-card>
-                                <v-card-title>{{ analysisResult.analysis_function.title }}</v-card-title>
-                                <v-card-text>
-                                    <v-row>
-                                        <v-col cols="4">Message</v-col>
-                                        <v-col cols="8">{{ analysisResult.result.body ? analysisResult.result.body.message || analysisResult.result.body.error : analysisResult.result.message ? analysisResult.result.message : analysisResult.result.error }}</v-col>
-                                    </v-row>
-                                    <v-row>
-                                        <v-col cols="4">Status</v-col>
-                                        <v-col cols="8">{{analysisResult.state}}</v-col>
-                                    </v-row>
-                                </v-card-text>
-                                <v-card-actions>
-                                    <v-spacer></v-spacer>
-                                    <v-btn
-                                    color="blue darken-1"
-                                    text
-                                    @click="showAnalysisResultDialog=false"
-                                    >
-                                    Close
-                                    </v-btn>
-                                </v-card-actions>
-                                </v-card>
-                            </v-dialog>
-
-                          </v-list-item> -->
+                          </v-list-item>
                           <v-list-item link v-if="!t.trashed">
                             <v-dialog
                                     v-model="remove_dialog"
@@ -425,7 +423,7 @@
                 </v-btn>
 
                 <v-btn small class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
-                    Analysis Dashboard
+                    Dashboard kinematics
                 </v-btn>
 
                 <v-btn small class="mt-4 w-100" v-show="show_controls" @click="$router.push({ name: 'SelectSession'})"
@@ -547,10 +545,12 @@ export default {
 
             showAnalysisDialog: false,
             showAnalysisResultDialog: false,
-            isInvokeInProgress: false,
-            isInvokeDone: false,
-            analysisResult: {analysis_function: {}, result: { body: {}}},
-            invokedFunctionId: null,
+            // isInvokeInProgress: false,
+            // isInvokeDone: false,
+            // analysisResult: {analysis_function: {}, result: { meta: {}}},
+            // invokedFunctionId: null,
+            // invokedAnalysisFunctionTrialName: null,
+            // shownAnalysisDialogTrialName: null,
 
             trialInProcess: null,
             trial: null,
@@ -611,6 +611,9 @@ export default {
         sessionUrl() {
             return "https://app.opencap.ai/session/" + this.session.id;
         },
+        analysisFunctionsWithMenu(){
+            return this.analysisFunctions.map((func) => ({...func, isMenuOpen: false}))
+        },
         filteredTrialsWithMenu() {
             return this.filteredTrials.map(trial => ({...trial, isMenuOpen: false}));
         },
@@ -636,7 +639,12 @@ export default {
     },
     async mounted() {
         await this.loadSession(this.$route.params.id)
-        //await this.loadAnalysisFunctions()
+        await this.loadAnalysisFunctions()
+        await this.loadAnalysisFunctionsPending()
+        await this.loadAnalysisFunctionsStates()
+
+        await this.analysisFunctionsPolls()
+        
         console.log(this.user_id)
         console.log(this.session.user)
         this.show_controls = (this.user_id == this.session.user)
@@ -646,6 +654,8 @@ export default {
         const doneTrials = this.filteredTrials.filter(trial => trial.status === 'done')
 
         if (doneTrials.length > 0) {
+            console.log("Done trials:")
+            console.log(doneTrials[0])
             this.loadTrial(doneTrials[0])
         }
 
@@ -688,14 +698,17 @@ export default {
                 this.archiveUrl = "#";
             }
         },
-        showAnalysisDialog(newShowAnalysisDialog, oldShowAnalysisDialog){
-            if(!newShowAnalysisDialog){
-                this.isInvokeInProgress = false;
-                this.isInvokeDone = false;
-                this.analysisResult = {analysis_function: {}, result: {body: {}}};
-                this.invokedFunctionId = null;
-            }
-        }
+        // showAnalysisDialog(newShowAnalysisDialog, oldShowAnalysisDialog){
+        //     console.log(newShowAnalysisDialog);
+        //     // if(!newShowAnalysisDialog){
+        //     //     this.shownAnalysisDialogTrialName = null;
+        //     //     if(!this.isInvokeInProgress){
+        //     //         this.isInvokeDone = false;
+        //     //         this.analysisResult = {analysis_function: {}, response: {}};
+        //     //         this.invokedFunctionId = null;
+        //     //     }
+        //     // }
+        // }
     },
     methods: {
         ...mapMutations('data', [
@@ -704,8 +717,16 @@ export default {
             'setSessionId',
             'addTrial',
             'updateTrial',
+            'setAnalysisFunctionTrial',
+            'setAnalysisFunctionResult',
+            'setAnalysisFunctionState',
+            'removeAnalysisFunctionTrial',
+            'resetAnalysisFunctionResult'
         ]),
-        ...mapActions('data', ['loadSession', 'initSessionSameSetup', 'loadAnalysisFunctions']),
+        ...mapActions('data', [
+            'loadSession',
+            'initSessionSameSetup',
+            'loadAnalysisFunctions', 'loadAnalysisFunctionsPending', 'loadAnalysisFunctionsStates']),
         async changeState() {
             switch (this.state) {
                 case 'ready': {
@@ -832,13 +853,44 @@ export default {
                     }
             });
         },
-        async invokeAnalysisFunction(functionId, trialName){
-            this.isInvokeInProgress = true;
-            this.isInvokeDone = false;
-            this.invokedFunctionId = functionId;
-            let state = this;
+        async analysisFunctionsPolls() {
+            console.log(this.analysisFunctions);
+            for(let func of this.analysisFunctions) {
+                for(let trial_id of func.trials) {
+                   this.checkAnalysisFunction(func.id, trial_id);
+                }
+            }
+        },
+        async checkAnalysisFunction(functionId, trial_id) {
+            const checkAnalysisFunctionUrl =
+                new URL(`/analysis-functions/${functionId}/task-for-trial/${trial_id}/`, axios.defaults.baseURL);
+            const state = this;
+            await axios.get(checkAnalysisFunctionUrl).then(
+                async function pollResultOnReady(data){
+                  const taskID = data.data.task_id;
+                  const getResultOnReadyURL = new URL(`/analysis-result/${taskID}/`, axios.defaults.baseURL);
+                  const response = await axios.get(getResultOnReadyURL);
+                  if(response.status === 202){
+                      setTimeout(function(){pollResultOnReady(data);}, 1000);
+                  }
+                  if(response.status === 200){
+                      console.log("Analysis result:", response.data)
+                      clearTimeout(pollResultOnReady);
+                      state.removeAnalysisFunctionTrial({functionId, trialId:trial_id});
+                      state.setAnalysisFunctionResult(functionId, response.data);
+                      state.setAnalysisFunctionState(
+                          {functionId, trialId:trial_id, data:{"state": response.data.state, "task_id": taskID}});
+                  }
+               }
+           )
+        },
+        async invokeAnalysisFunction(functionId, trial_id, trial_name) {
+            console.log(['invokeAnalysisFunction', functionId, trial_id, trial_name])
+            this.setAnalysisFunctionTrial({functionId, trialId:trial_id});
+            this.analysisFunctionsWithMenu.forEach(func => {func.isMenuOpen = false});
+            const state = this;
             const invokeAnalysisFunctionUrl = new URL(`/analysis-functions/${functionId}/invoke/`, axios.defaults.baseURL);
-            const invokeData = {session_id: this.session.id, specific_trial_names: [trialName]};
+            const invokeData = {session_id: this.session.id, specific_trial_names: [trial_name]};
             await axios.post(invokeAnalysisFunctionUrl, invokeData).then(
                 async function pollResultOnReady(data){
                     const taskID = data.data.task_id;
@@ -850,9 +902,10 @@ export default {
                     if(response.status === 200){
                         console.log("Analysis result:", response.data)
                         clearTimeout(pollResultOnReady);
-                        state.analysisResult = response.data;
-                        state.isInvokeInProgress = false;
-                        state.isInvokeDone = true;
+                        state.removeAnalysisFunctionTrial({functionId, trialId:trial_id});
+                        state.setAnalysisFunctionResult(functionId, response.data);
+                        state.setAnalysisFunctionState(
+                            {functionId, trialId:trial_id, data:{"state": response.data.state, "task_id": taskID, "dashboard_id": response.data.dashboard_id}});
                     }
             });
         },
@@ -995,6 +1048,7 @@ export default {
                     const { data } = await axios.get(`/trials/${trial.id}/`)
 
                     this.trial = data
+                    console.log("Trial:", data)
 
                     // load JSON
                     const json = data.results.filter(element => element.tag == "visualizerTransforms-json")
@@ -1323,6 +1377,18 @@ export default {
         },
         toggleSessionMenuButtons(){
             this.showSessionMenuButtons = !this.showSessionMenuButtons;
+        },
+        goToAnalysisDashboard(dashboardId, trialId){
+          if (trialId) {
+            this.$router.push({
+              name: 'AnalysisDashboard',
+              params: { id: dashboardId },
+              query: { trialId: trialId }})
+          } else {
+            this.$router.push({
+              name: 'AnalysisDashboard',
+              params: { id: dashboardId } })
+          }
         }
     }
 }

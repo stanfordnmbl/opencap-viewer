@@ -14,6 +14,17 @@ export default {
       trials: []
     },
 
+    // Analysis dashboards
+    analysis_dashboards: [],
+    analysis_dashboard: {
+      data: {
+        sessions: [],
+        subjects: [],
+        trials: [],
+        results: [],
+      }
+    },
+
     // step 1
     cameras: 2,
     // step 2
@@ -56,9 +67,24 @@ export default {
       "non-binary": "Non-Binary/Non-Conforming",
       "prefer-not-respond": "Prefer not to respond",
     },
-    isSyncDownloadAllowed: JSON.parse(localStorage.getItem("isSyncDownloadAllowed"))
+    isSyncDownloadAllowed: JSON.parse(localStorage.getItem("isSyncDownloadAllowed")),
+    analysis: {}
   },
   mutations: {
+    setAnalysis(state, trial, analysisData){
+      state.analysis[trial.id] = {
+        isInvokeInProgress: analysisData.isInvokeInProgress,
+        isInvokeDone: analysisData.isInvokeDone,
+        functionId: analysisData.functionId,
+        result: analysisData.result
+      }
+    },
+    setAnalysisDahboardList (state, analysis_dashboards) {
+      state.analysis_dashboards = analysis_dashboards;
+    },
+    setAnalysisDahboard (state, analysis_dashboard) {
+      state.analysis_dashboard = analysis_dashboard;
+    },
     setSession (state, session) {
       session.created_at = formatDate(session.created_at); 
       state.session = session;
@@ -105,7 +131,80 @@ export default {
       console.log(state.subjects)
     },
     setAnalysisFunctions(state, functions){
-      state.analysisFunctions = functions;
+      state.analysisFunctions = functions.map((func) => (
+          {...func, trials: [], results: [],
+            states: []}));
+      console.log(state.analysisFunctions)
+    },
+    setAnalysisFunctionPending(state, data) {
+      for(let i = 0; i < state.analysisFunctions.length; i++) {
+        let f_id = state.analysisFunctions[i].id.toString();
+        if (f_id in data) {
+          Vue.set(state.analysisFunctions[i], "trials", data[f_id]);
+        } else {
+          Vue.set(state.analysisFunctions[i], "trials", []);
+        }
+
+      }
+    },
+    setAnalysisFunctionsStates(state, data) {
+      for(let i = 0; i < state.analysisFunctions.length; i++) {
+        let f_id = state.analysisFunctions[i].id.toString();
+        if (f_id in data) {
+          Vue.set(state.analysisFunctions[i], "states", data[f_id]);
+        } else {
+          Vue.set(state.analysisFunctions[i], "states", []);
+        }
+
+      }
+    },
+    setAnalysisFunctionState(state, {functionId, trialId, data}){
+      const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
+      if (index >= 0) {
+        const analysisFunction = state.analysisFunctions[index];
+        console.log(["setAnalysisFunctionState", functionId, trialId, data])
+        Vue.set(state.analysisFunctions[index].states, trialId, data);
+      }
+    },
+    setAnalysisFunctionTrial(state, {functionId, trialId}){
+      console.log(["setAnalysisFunctionTrial", functionId, trialId])
+      const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
+      if (index >= 0) {
+        const analysisFunction = state.analysisFunctions[index];
+        if (!analysisFunction.trials.includes(trialId)) {
+          analysisFunction.trials.push(trialId);
+        }
+        // Vue.set(state.analysisFunctions, index, analysisFunction);
+      }
+      console.log(state.analysisFunctions);
+    },
+    removeAnalysisFunctionTrial(state, {functionId, trialId}){
+      const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
+      if (index >= 0) {
+        Vue.set(state.analysisFunctions[index], "trials", state.analysisFunctions[index].trials.filter(id => id !== trialId));
+        if(trialId in state.analysisFunctions[index].states) {
+          if(state.analysisFunctions[index].states[trialId].status === "pending") {
+            Vue.delete(state.analysisFunctions[index].states, trialId);
+          }
+        }
+      }
+      console.log(state.analysisFunctions);
+    },
+    setAnalysisFunctionResult(state, functionId, result){
+      const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
+      if (index >= 0) {
+        const analysisFunction = state.analysisFunctions[index];
+        analysisFunction.results.push(result);
+        // Vue.set(state.analysisFunctions, index, analysisFunction);
+      }
+    },
+    resetAnalysisFunctionResult(state, functionId, trialId){
+      const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
+      if (index >= 0) {
+        const analysisFunction = state.analysisFunctions[index];
+        analysisFunction.results = analysisFunction.results.filter(result => result.trial.id !== trialId);
+        // Vue.set(state.analysisFunctions, index, analysisFunction);
+      }
     },
     setStep1 (state, { cameras }) {
       state.cameras = cameras
@@ -181,6 +280,22 @@ export default {
     }
   },
   actions: {
+    async loadAnalysisDashboardList({ state, commit }) {
+      let res = await axios.get(`/analysis-dashboards/`)
+      let result = res.data.map((dashboard) => ({id: dashboard.id, title: dashboard.title}))
+      commit('setAnalysisDahboardList', result)
+    },
+    async loadAnalysisDashboard({ state, commit }, id) {
+      const dashboardId = id || state.session.id
+
+      let res = await axios.get(`/analysis-dashboards/${dashboardId}/`)
+      let result = res.data
+      res = await axios.get(`/analysis-dashboards/${dashboardId}/data/`)
+      result['data'] = res.data
+
+      commit('setAnalysisDahboard', result)
+
+    },
     async initSession ({ state, commit }) {
       const res = await axios.get('/sessions/new/')
       commit('setSession', res.data[0])
@@ -262,6 +377,14 @@ export default {
     async loadAnalysisFunctions({ state, commit }){
       const response = await axios.get('/analysis-functions/');
       commit('setAnalysisFunctions', response.data);
+    },
+    async loadAnalysisFunctionsStates({ state, commit }){
+      const response = await axios.get('/analysis-results/states/');
+      commit('setAnalysisFunctionsStates', response.data);
+    },
+    async loadAnalysisFunctionsPending({ state, commit }){
+      const response = await axios.get('/analysis-results/pending/');
+      commit('setAnalysisFunctionPending', response.data);
     },
     async trashExistingSubject ({ state, commit }, id) {
       const subjectId = id
