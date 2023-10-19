@@ -753,11 +753,15 @@ export default {
                 },
               }
             );
-            console.log("STEP4: Set Step 4")
+            console.log("STEP4: Set Step 3")
             this.setStep3(res.data.id); // sets trialID
+            console.log("STEP4: Poll Status")
             this.pollStatus();
+            console.log("STEP4: End")
           } catch (error) {
+            console.log("STEP4: Exception Start")
             apiError(error);
+            console.log("STEP4: Exception End")
           }
         }
       }
