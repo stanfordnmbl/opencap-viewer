@@ -689,7 +689,6 @@ export default {
           },
         });
       } else {
-        console.log("STEP4: Validate")
         if (await this.$refs.observer.validate()) {
           this.lastPolledStatus = "";
           // Record press
@@ -708,7 +707,6 @@ export default {
             augmenter_model: this.augmenter_model,
           });
           try {
-            console.log("STEP4: Set Metadata")
             const resUpdate = await axios.get(
               `/sessions/${this.session.id}/set_metadata/`,
               {
@@ -728,7 +726,6 @@ export default {
               }
             );
 
-            console.log("STEP4: Set Subject")
             const resSubject = await axios.get(
                 `/sessions/${this.session.id}/set_subject/`,
                 {
@@ -737,7 +734,6 @@ export default {
                     }
                 }
             )
-            console.log("STEP4: Record")
             const res = await axios.get(
               `/sessions/${this.session.id}/record/`,
               {
@@ -753,24 +749,17 @@ export default {
                 },
               }
             );
-            console.log("STEP4: Set Step 3")
             this.setStep3(res.data.id); // sets trialID
-            console.log("STEP4: Poll Status")
             this.pollStatus();
-            console.log("STEP4: End")
           } catch (error) {
-            console.log("STEP4: Exception Start")
             apiError(error);
-            console.log("STEP4: Exception End")
           }
         }
       }
     },
     async pollStatus() {
       try {
-        console.log("STEP4: Enter Poll Status")
         //const res = await axios.get(`/sessions/1966df9a-0a60-4365-9404-43e53750b784/neutral_img/`)
-        console.log("STEP4: Get Neutral Image")
         const res = await axios.get(
           `/sessions/${this.session.id}/neutral_img/`
         );
@@ -786,7 +775,6 @@ export default {
         ]
         this.busy = false
         */
-        console.log("STEP4: Switch status")
         switch (res.data.status) {
           case "done": {
             this.$toasted.clear()
@@ -805,13 +793,24 @@ export default {
             this.$toasted.clear();
             apiErrorRes(resTrial, "Error in processing neutral pose");
             this.busy = false;
+
+            const resStatus = await axios.get(`/sessions/${this.$route.params.id}/status/`, {})
+
+            this.n_cameras_connected = resStatus.data.n_cameras_connected
+            this.n_videos_uploaded = resStatus.data.n_videos_uploaded
+
+            const resCalibratedCameras = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
+
+            this.n_calibrated_cameras = resCalibratedCameras.data.data
+
+            if (this.n_videos_uploaded !== this.n_calibrated_cameras) {
+              const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
+              apiError(this.n_calibrated_cameras + " cameras expected and " + this.n_videos_uploaded + " were uploaded. Please reconnect the missing " + num_missing_cameras + " cameras to the session using the QR code at the top of the screen.");
+            }
+
             break;
           }
           default: {
-            console.log("STEP4: Default case")
-            console.log("STEP4: res.data: " + res.data)
-            console.log("STEP4: res.data.satus: " + res.data.status)
-            console.log("STEP4: this.lastPolledStatus: " + this.lastPolledStatus)
             if (
               res.data.status === "processing" &&
               res.data.status !== this.lastPolledStatus
@@ -820,31 +819,10 @@ export default {
             }
             this.lastPolledStatus = res.data.status;
             window.setTimeout(this.pollStatus, 1000);
-
-
-            const res = await axios.get(`/sessions/${this.$route.params.id}/status/`, {})
-            console.log("STEP4: status: " + res.data)
-
-            this.n_cameras_connected = res.data.n_cameras_connected
-            this.n_videos_uploaded = res.data.n_videos_uploaded
-
-            console.log("STEP4:  Retrieved n_cameras and n_videos.")
-
-            const resCalibratedCameras = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
-
-            this.n_calibrated_cameras = resCalibratedCameras.data.data
-
-            console.log("STEP4:  Retrieved n_calibrated.")
-
-            if (this.n_cameras_connected !== this.n_calibrated_cameras)
-              apiError(this.n_calibrated_cameras = " cameras calibrated and " + this.n_cameras_connected + "are connected. Please reconnect the " + this.n_calibrated_cameras + " calibrated cameras to the session using the QR code at the top of the screen.");
-
-            console.log("STEP4: End default case")
             break;
           }
         }
       } catch (error) {
-        console.log("STEP4: Enter catch")
         apiError(error);
       }
     },

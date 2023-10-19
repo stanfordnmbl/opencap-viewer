@@ -639,6 +639,11 @@ export default {
     },
     async mounted() {
         await this.loadSession(this.$route.params.id)
+
+        // Get number of expected cameras.
+        const res = await axios.get(`/sessions/${this.session.id}/get_n_calibrated_cameras/`, {})
+        this.n_calibrated_cameras = res.data.data
+
         await this.loadAnalysisFunctions()
         await this.loadAnalysisFunctionsPending()
         await this.loadAnalysisFunctionsStates()
@@ -659,11 +664,6 @@ export default {
             this.loadTrial(doneTrials[0])
         }
 
-        // Get number of expected cameras.
-
-        const res = await axios.get(`/sessions/${this.session.id}/get_n_calibrated_cameras/`, {})
-
-        this.n_calibrated_cameras = res.data.data
 
     },
     beforeDestroy() {
