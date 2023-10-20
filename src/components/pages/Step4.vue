@@ -312,7 +312,7 @@
       <ValidationObserver
         tag="form"
         class="d-flex flex-column"
-        ref="observer"
+        ref="subject_observer"
         v-slot="{ invalid }">
       <v-form>
       <v-card>
