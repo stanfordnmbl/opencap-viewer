@@ -930,15 +930,16 @@ export default {
                     if (res.data.status === 'error') {
                         apiErrorRes(res.data, 'Finished with error')
                     }
-
+                    if (res.data.status === 'processing') {
+                      this.n_cameras_connected = res.data.n_cameras_connected
+                      this.n_videos_uploaded = res.data.n_videos_uploaded
+                      if (this.n_cameras_connected !== this.n_calibrated_cameras) {
+                          const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
+                          apiErrorRes(res.data, this.n_calibrated_cameras + " cameras expected and " + this.n_videos_uploaded + " were uploaded. Please reconnect the missing " + num_missing_cameras + " cameras to the session using the QR code at the top of the screen.");
+                      }
+                    }
                     this.state = 'ready'
                 } else {
-                    this.n_cameras_connected = res.data.n_cameras_connected
-                    this.n_videos_uploaded = res.data.n_videos_uploaded
-                    if (this.n_cameras_connected !== this.n_calibrated_cameras) {
-                        const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
-                        apiErrorRes(res.data, this.n_calibrated_cameras + " cameras expected and " + this.n_videos_uploaded + " were uploaded. Please reconnect the missing " + num_missing_cameras + " cameras to the session using the QR code at the top of the screen.");
-                    }
                     this.startPoll()
                 }
             }, 2000)
