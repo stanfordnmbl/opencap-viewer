@@ -32,7 +32,6 @@
 
       <v-card class="mb-4">
         <v-card-text>
-        <p>Expected cameras: {{ n_calibrated_cameras }}</p>
         <p>Videos uploaded: {{ n_videos_uploaded }} / {{ n_calibrated_cameras }}</p>
 
         </v-card-text>
@@ -622,7 +621,7 @@ export default {
     },
   },
   async mounted() {
-    apiInfo("The default marker augmenter model was upgraded (from v0.2 to v0.3). The new model (v0.3) should be more accurate and more robust to different activities. If you would like to use the model that was default prior to 07-30-2023, select v0.2 under 'Marker augmenter model' under 'Advanced Settings'.", 30000);
+    apiInfo("The default marker augmenter model was upgraded (from v0.2 to v0.3). The new model (v0.3) should be more accurate and more robust to different activities. If you would like to use the model that was default prior to 07-30-2023, select v0.2 under 'Marker augmenter model' under 'Advanced Settings'.", 5000);
     this.loadSession(this.$route.params.id)
     this.loadSubjects()
     if (this.$route.query.autoRecord) {
@@ -819,7 +818,7 @@ export default {
               res.data.status === "processing" &&
               res.data.status !== this.lastPolledStatus
             ) {
-              apiInfo("Processing: the subject can relax.");
+              apiInfo("Processing: the subject can relax.", 5000);
             }
             this.lastPolledStatus = res.data.status;
             window.setTimeout(this.pollStatus, 1000);
