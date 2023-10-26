@@ -158,19 +158,6 @@ export default {
             apiErrorRes(res_trial, 'Finished with error')
             this.busy = false;
 
-            const resStatus = await axios.get(`/sessions/${this.$route.params.id}/status/`, {})
-
-            this.n_cameras_connected = resStatus.data.n_cameras_connected
-            this.n_videos_uploaded = resStatus.data.n_videos_uploaded
-
-            const resCalibratedCameras = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
-
-            this.n_calibrated_cameras = resCalibratedCameras.data.data
-
-            if (this.n_videos_uploaded !== this.n_calibrated_cameras) {
-              const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
-              apiError(this.n_calibrated_cameras + " cameras expected and " + this.n_videos_uploaded + " were uploaded. Please reconnect the missing " + num_missing_cameras + " cameras to the session using the QR code at the top of the screen.");
-            }
             break;
 
           }
@@ -179,7 +166,16 @@ export default {
               res.data.status === "processing" &&
               res.data.status !== this.lastPolledStatus
             ) {
-              apiInfo("Processing.");
+              const resCalibratedCameras = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
+
+              this.n_calibrated_cameras = resCalibratedCameras.data.data
+
+              if (this.n_calibrated_cameras < 2) {
+                apiError("Only 1 camera connected to the session and 2+ cameras are required, please re-pair cameras using qr code at top of page.");
+                this.busy = false
+              } else {
+                apiInfo("Processing.");
+              }
             }
             this.lastPolledStatus = res.data.status;
             window.setTimeout(this.pollStatus, 1000);
