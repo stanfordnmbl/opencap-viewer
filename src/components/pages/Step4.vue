@@ -811,6 +811,10 @@ export default {
             break;
           }
           default: {
+            const resStatus = await axios.get(`/sessions/${this.$route.params.id}/status/`, {})
+
+            this.n_videos_uploaded = resStatus.data.n_videos_uploaded
+
             if (
               res.data.status === "processing" &&
               res.data.status !== this.lastPolledStatus

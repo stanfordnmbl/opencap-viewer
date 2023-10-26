@@ -750,20 +750,22 @@ export default {
                             this.trialInProcess = res.data
                             this.addTrial(this.trialInProcess)
 
-                            // Get n_cameras_connected.
-                            const res_status = await axios.get(`/sessions/${this.session.id}/status/`, {})
-
-                            this.n_cameras_connected = res_status.data.n_cameras_connected
-                            if (this.n_cameras_connected === null) {
-                                this.n_cameras_connected = 0
-                                apiError("ERROR")
-                            }
 
                             this.recordingStarted = moment()
                             this.recordingTimePassed = 0
                             this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
 
                             this.state = 'recording'
+
+                            // Wait for cameras to start actually recording.
+                            await new Promise(r => setTimeout(r, 1500));
+
+                            // Get n_cameras_connected.
+                            const res_status = await axios.get(`/sessions/${this.session.id}/status/`, {})
+
+                            this.n_videos_uploaded = res_status.data.n_videos_uploaded
+                            this.n_cameras_connected = res_status.data.n_cameras_connected
+
                         } catch (error) {
                             apiError(error)
                         }

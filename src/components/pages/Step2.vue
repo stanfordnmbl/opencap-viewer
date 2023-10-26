@@ -9,6 +9,12 @@
     @right="onNext">
 
     <v-card class="step-2-1 flex-grow-1">
+      <v-card-text class="d-flex align-center">
+        <p>Videos uploaded: {{ n_videos_uploaded }} / {{ n_cameras_connected }}</p>
+      </v-card-text>
+    </v-card>
+
+    <v-card class="step-2-2 mt-4 flex-grow-1">
       <v-card-title class="justify-center">
         Place a checkerboard in the scene
       </v-card-title>
@@ -76,6 +82,8 @@ export default {
       busy: false,
       imgs: null,
       lastPolledStatus: "",
+      n_cameras_connected: 0,
+      n_videos_uploaded: 0
     }
   },
   computed: {
@@ -130,7 +138,17 @@ export default {
         switch (res.data.status) {
           case "done": {
             this.$toasted.clear()
-            this.$router.push(`/${this.session.id}/step4`)
+
+            const resCalibratedCameras = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
+
+            this.n_calibrated_cameras = resCalibratedCameras.data.data
+
+            if (this.n_calibrated_cameras < 2) {
+              apiError("Only 1 camera connected to the session and 2+ cameras are required, please re-pair cameras using qr code at top of page.");
+            } else {
+              apiInfo(this.n_calibrated_cameras + " cameras calibrated successfully.");
+              this.$router.push(`/${this.session.id}/step4`)
+            }
             break;
           }
           case "error": {
@@ -138,7 +156,22 @@ export default {
             this.$toasted.clear()
             apiErrorRes(res_trial, 'Finished with error')
             this.busy = false;
+
+            const resStatus = await axios.get(`/sessions/${this.$route.params.id}/status/`, {})
+
+            this.n_cameras_connected = resStatus.data.n_cameras_connected
+            this.n_videos_uploaded = resStatus.data.n_videos_uploaded
+
+            const resCalibratedCameras = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
+
+            this.n_calibrated_cameras = resCalibratedCameras.data.data
+
+            if (this.n_videos_uploaded !== this.n_calibrated_cameras) {
+              const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
+              apiError(this.n_calibrated_cameras + " cameras expected and " + this.n_videos_uploaded + " were uploaded. Please reconnect the missing " + num_missing_cameras + " cameras to the session using the QR code at the top of the screen.");
+            }
             break;
+
           }
           default: {
             if (
@@ -152,6 +185,12 @@ export default {
             break;
           }
         }
+
+        // Get n_cameras_connected.
+        const res_status = await axios.get(`/sessions/${this.session.id}/status/`, {})
+
+        this.n_videos_uploaded = res_status.data.n_videos_uploaded
+        this.n_cameras_connected = res_status.data.n_cameras_connected
       } catch (error) {
         apiError(error);
       }
