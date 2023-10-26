@@ -145,8 +145,9 @@ export default {
 
             if (this.n_calibrated_cameras < 2) {
               apiError("Only 1 camera connected to the session and 2+ cameras are required, please re-pair cameras using qr code at top of page.");
+              this.busy = false
             } else {
-              apiInfo(this.n_calibrated_cameras + " cameras calibrated successfully.");
+              apiInfo(this.n_calibrated_cameras + " cameras calibrated successfully.", 5000);
               this.$router.push(`/${this.session.id}/step4`)
             }
             break;

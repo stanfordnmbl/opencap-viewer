@@ -4,8 +4,6 @@
 
             <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
 
-                <p>Expected cameras: {{ n_calibrated_cameras }}</p>
-
                 <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
 
                     <v-text-field v-show="show_controls" v-model="trialName" label="Trial name" class="flex-grow-0"
@@ -16,7 +14,7 @@
                     {{ buttonCaption }}
                 </v-btn>
                 <p v-if="state === 'recording'">{{ n_cameras_connected }} cameras are recording, do not refresh</p>
-                <p v-if="state === 'processing'">{{ n_videos_uploaded  }}/{{ n_cameras_connected }} videos uploaded, do not refresh.</p>
+                <p v-if="state === 'processing'">{{ n_videos_uploaded  }}/{{ n_calibrated_cameras }} videos uploaded, do not refresh.</p>
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
@@ -938,7 +936,8 @@ export default {
                     this.n_cameras_connected = res.data.n_cameras_connected
                     this.n_videos_uploaded = res.data.n_videos_uploaded
                     if (this.n_cameras_connected !== this.n_calibrated_cameras) {
-                        apiErrorRes(res.data, this.n_calibrated_cameras + ' cameras calibrated and ' + this.n_cameras_connected +  ' are connected. Please reconnect the ' + this.n_calibrated_cameras + ' calibrated cameras to the session using the QR code at the top of the screen')
+                        const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
+                        apiErrorRes(res.data, this.n_calibrated_cameras + " cameras expected and " + this.n_videos_uploaded + " were uploaded. Please reconnect the missing " + num_missing_cameras + " cameras to the session using the QR code at the top of the screen.");
                     }
                     this.startPoll()
                 }
