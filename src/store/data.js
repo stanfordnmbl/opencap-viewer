@@ -307,9 +307,18 @@ export default {
     async loadSession ({ state, commit }, id) {
       const sessionId = id || state.session.id
 
-      const res = await axios.get(`/sessions/${sessionId}/`)
+      var res;
+      try {
+        res = await axios.get(`/sessions/${sessionId}/`)
+        commit('setSession', res.data)
+      } catch (e) {
+        console.log(e.response.status)
+        if (e.response.status === 401) {
+          router.push({ name: 'Login' })
+        }
+      }
 
-      commit('setSession', res.data)
+
     },
     // async trashExistingTrial ({ state, commit }, trial) {
     //   const sessionId = id || state.session.id
