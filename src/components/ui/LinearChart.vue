@@ -198,7 +198,12 @@ export default {
       // });
       // const selectedText = selectedOption ? selectedOption.text : "";
       // console.log(chroma)
-      var colors = chroma.scale("Viridis").correctLightness().gamma(2).cache(false).colors(this.y_selected.length);
+      // var colors = chroma.scale("Viridis").correctLightness().gamma(2).cache(false).colors(this.y_selected.length);      
+      // Viridis palette: Viridis: ['#440154', '#482777', '#3f4a8a', '#31678e', '#26838f', '#1f9d8a', '#6cce5a', '#b6de2b', '#fee825']
+      // Let's remove the first color, which is too dark
+      // var colors = chroma.scale(['#482777', '#3f4a8a', '#31678e', '#26838f', '#1f9d8a', '#6cce5a', '#b6de2b', '#fee825']).correctLightness().gamma(2).cache(false).colors(this.y_selected.length);
+      // Let's make the first color a bit lighter
+      var colors = chroma.scale(['#562f8f', '#3f4a8a', '#31678e', '#26838f', '#1f9d8a', '#6cce5a', '#b6de2b', '#fee825']).correctLightness().gamma(2).cache(false).colors(this.y_selected.length);
       // console.log(colors)
       // if (selectedText == "Spectral" || selectedText == "Rainbow" || selectedText == "Red-Yellow-Blue" || selectedText == "Yellow-Green-Blue")
       //     colors = chroma.scale(this.chart_color_scales_selected).colors(this.y_quantities_selected.length);
