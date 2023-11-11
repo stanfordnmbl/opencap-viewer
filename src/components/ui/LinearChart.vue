@@ -7,7 +7,11 @@
           :items="result.y_axis"
           label="Y Quantities"
           multiple outlined dense
-        ></v-select>
+        >
+          <template v-slot:selection="{ item, index }">
+            <span v-if="index === 0">{{ y_selected.length }} items selected</span>
+          </template>
+        </v-select>
       </div>
 
     <div class="content-chart" style="width: 100%;background-color: black;position: relative;top: 0px;">
