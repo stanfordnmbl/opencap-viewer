@@ -144,10 +144,10 @@ export default {
             this.n_calibrated_cameras = resCalibratedCameras.data.data
 
             if (this.n_calibrated_cameras < 2) {
-              apiError("Only 1 camera connected to the session and 2+ cameras are required, please re-pair cameras using qr code at top of page.");
+              apiError("Only 1 device connected to the session and 2+ devices are required, please re-pair your devices using qr code at top of page.");
               this.busy = false
             } else {
-              apiInfo(this.n_calibrated_cameras + " cameras calibrated successfully.", 5000);
+              apiSuccess(this.n_calibrated_cameras + " devices calibrated successfully.", 5000);
               this.$router.push(`/${this.session.id}/step4`)
             }
             break;
@@ -171,7 +171,7 @@ export default {
               this.n_calibrated_cameras = resCalibratedCameras.data.data
 
               if (this.n_calibrated_cameras < 2) {
-                apiError("Only 1 camera connected to the session and 2+ cameras are required, please re-pair cameras using qr code at top of page.");
+                apiError("Only 1 device connected to the session and 2+ devices are required, please re-pair the devices using qr code at top of page.");
                 this.busy = false
               } else {
                 apiInfo("Processing.");

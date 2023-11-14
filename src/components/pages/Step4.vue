@@ -805,7 +805,7 @@ export default {
 
             if (this.n_videos_uploaded !== this.n_calibrated_cameras) {
               const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
-              apiError(this.n_calibrated_cameras + " cameras expected and " + this.n_videos_uploaded + " were uploaded. Please reconnect the missing " + num_missing_cameras + " cameras to the session using the QR code at the top of the screen.");
+              apiError(this.n_calibrated_cameras + " devices expected and " + this.n_videos_uploaded + " videos were uploaded. Please reconnect the missing " + num_missing_cameras + " devices to the session using the QR code at the top of the screen.");
             }
 
             break;
