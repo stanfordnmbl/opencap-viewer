@@ -31,14 +31,6 @@
     <div v-else class="step-4-1 d-flex flex-column">
 
       <v-card class="mb-4">
-        <v-card-text>
-        <p>
-        <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded.</p>
-
-        </v-card-text>
-      </v-card>
-
-      <v-card class="mb-4">
         <v-card-title class="justify-center subject-title">
           Session Info
         </v-card-title>
@@ -224,6 +216,15 @@
     </div>
 
     <v-card class="step-4-2 ml-4 d-flex images-box">
+
+      <v-card class="mb-0">
+        <v-card-text style="padding-top: 0; padding-bottom: 0">
+        <p>
+        <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded.</p>
+        </v-card-text>
+      </v-card>
+
+
         <v-card-title class="justify-center">
           Record a neutral pose
         </v-card-title>
