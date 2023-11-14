@@ -494,10 +494,10 @@ export default {
         "Share processed data",
         "Share no data",
       ],
-      pose_model: 'openpose',
+      pose_model: 'hrnet',
       pose_models: [
-        {"text": "OpenPose (recommended, non-commercial research use only, default)", "value": "openpose"},
         {"text": "HRNet", "value": "hrnet"},
+        {"text": "OpenPose (recommended, non-commercial research use only, default)", "value": "openpose"},
       ],
       framerate: 60,
       framerates_available: [
