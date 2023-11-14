@@ -31,13 +31,6 @@
     <div v-else class="step-4-1 d-flex flex-column">
 
       <v-card class="mb-4">
-        <v-card-text>
-        <p>Videos uploaded: {{ n_videos_uploaded }} / {{ n_calibrated_cameras }}</p>
-
-        </v-card-text>
-      </v-card>
-
-      <v-card class="mb-4">
         <v-card-title class="justify-center subject-title">
           Session Info
         </v-card-title>
@@ -223,6 +216,15 @@
     </div>
 
     <v-card class="step-4-2 ml-4 d-flex images-box">
+
+      <v-card class="mb-0">
+        <v-card-text style="padding-top: 0; padding-bottom: 0">
+        <p>
+        <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded.</p>
+        </v-card-text>
+      </v-card>
+
+
         <v-card-title class="justify-center">
           Record a neutral pose
         </v-card-title>
@@ -804,7 +806,7 @@ export default {
 
             if (this.n_videos_uploaded !== this.n_calibrated_cameras) {
               const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
-              apiError(this.n_calibrated_cameras + " cameras expected and " + this.n_videos_uploaded + " were uploaded. Please reconnect the missing " + num_missing_cameras + " cameras to the session using the QR code at the top of the screen.");
+              apiError(this.n_calibrated_cameras + " devices expected and " + this.n_videos_uploaded + " videos were uploaded. Please reconnect the missing " + num_missing_cameras + " devices to the session using the QR code at the top of the screen.");
             }
 
             break;

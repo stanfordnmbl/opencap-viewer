@@ -13,8 +13,8 @@
                 <v-btn class="mb-4 w-100" v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
                 </v-btn>
-                <p v-if="state === 'recording'">{{ n_cameras_connected }} cameras are recording, do not refresh</p>
-                <p v-if="state === 'processing'">{{ n_videos_uploaded  }}/{{ n_calibrated_cameras }} videos uploaded, do not refresh.</p>
+                <p v-if="state === 'recording'">{{ n_cameras_connected }} devices are recording, do not refresh</p>
+                <p v-if="state === 'processing'">{{ n_videos_uploaded  }} of {{ n_cameras_connected }} videos uploaded, do not refresh.</p>
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
@@ -935,7 +935,7 @@ export default {
                       this.n_videos_uploaded = res.data.n_videos_uploaded
                       if (this.n_cameras_connected !== this.n_calibrated_cameras) {
                           const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
-                          apiErrorRes(res.data, this.n_calibrated_cameras + " cameras expected and " + this.n_videos_uploaded + " were uploaded. Please reconnect the missing " + num_missing_cameras + " cameras to the session using the QR code at the top of the screen.");
+                          apiErrorRes(res.data, this.n_calibrated_cameras + " devices expected and " + this.n_videos_uploaded + " videos were uploaded. Please reconnect the missing " + num_missing_cameras + " devices to the session using the QR code at the top of the screen.");
                       }
                     }
                     this.state = 'ready'
