@@ -8,7 +8,7 @@
     @left="$router.push(`/${session.id}/step1`)"
     @right="onNext">
 
-    <v-card class="step-2-1 flex-grow-1">
+    <v-card class="step-2-1">
       <v-card-text class="d-flex align-center">
         <p style="margin-bottom: 0">{{ n_videos_uploaded }} of {{ n_cameras_connected }} videos uploaded.</p>
       </v-card-text>
