@@ -10,7 +10,7 @@
 
     <v-card class="step-2-1 flex-grow-1">
       <v-card-text class="d-flex align-center">
-        <p>Videos uploaded: {{ n_videos_uploaded }} / {{ n_cameras_connected }}</p>
+        <p>{{ n_videos_uploaded }} of {{ n_cameras_connected }} videos uploaded.</p>
       </v-card-text>
     </v-card>
 

@@ -32,7 +32,8 @@
 
       <v-card class="mb-4">
         <v-card-text>
-        <p>Videos uploaded: {{ n_videos_uploaded }} / {{ n_calibrated_cameras }}</p>
+        <p>
+        <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded.</p>
 
         </v-card-text>
       </v-card>
