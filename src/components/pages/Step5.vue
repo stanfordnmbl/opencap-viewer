@@ -996,7 +996,7 @@ export default {
           } catch (error) {
             apiError(error)
           }
-        }.bind(this),
+        },
         async updateTrialWithData(trial, data) {
             const index = this.session.trials.findIndex(x => x.id === trial.id)
             if (index >= 0) {
