@@ -41,7 +41,7 @@ export default {
     sex: 'woman',
     gender: 'woman',
     data_sharing: '',
-    pose_model: 'openpose',
+    pose_model: 'hrnet',
     framerate: 60,
     openSimModel: 'LaiUhlrich2022',
     augmenter_model: 'v0.3',
