@@ -987,7 +987,7 @@ export default {
               }
           }
         },
-        async renameTrial(trial, index, trialNewName) => {
+        async renameTrial(trial, index, trialNewName) {
           try {
             let oldName = trial.name
             console.log(trial.name + " will be renamed to " + trialNewName);
@@ -996,7 +996,7 @@ export default {
           } catch (error) {
             apiError(error)
           }
-        },
+        }.bind(this),
         async updateTrialWithData(trial, data) {
             const index = this.session.trials.findIndex(x => x.id === trial.id)
             if (index >= 0) {
