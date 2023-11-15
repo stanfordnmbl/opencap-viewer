@@ -496,8 +496,8 @@ export default {
       ],
       pose_model: 'hrnet',
       pose_models: [
-        {"text": "HRNet", "value": "hrnet"},
-        {"text": "OpenPose (recommended, non-commercial research use only, default)", "value": "openpose"},
+        {"text": "HRNet (recommended, default)", "value": "hrnet"},
+        {"text": "OpenPose (non-commercial research use only)", "value": "openpose"},
       ],
       framerate: 60,
       framerates_available: [
