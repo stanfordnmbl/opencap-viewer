@@ -924,15 +924,15 @@ export default {
         startPoll() {
             this.statusPoll = window.setTimeout(async () => {
                 const res = await axios.get(`/sessions/${this.session.id}/status/`)
+                this.n_cameras_connected = res.data.n_cameras_connected
+                this.n_videos_uploaded = res.data.n_videos_uploaded
 
                 if (res.data.status !== 'uploading') {
                     // Show error if any
                     if (res.data.status === 'error') {
                         apiErrorRes(res.data, 'Finished with error')
                     }
-                    if (res.data.status === 'processing') {
-                      this.n_cameras_connected = res.data.n_cameras_connected
-                      this.n_videos_uploaded = res.data.n_videos_uploaded
+                    if (res.data.status === 'ready') {
                       if (this.n_cameras_connected !== this.n_calibrated_cameras) {
                           const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
                           apiErrorRes(res.data, this.n_calibrated_cameras + " devices expected and " + this.n_videos_uploaded + " videos were uploaded. Please reconnect the missing " + num_missing_cameras + " devices to the session using the QR code at the top of the screen.");
