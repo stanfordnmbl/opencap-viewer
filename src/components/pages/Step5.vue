@@ -987,7 +987,7 @@ export default {
               }
           }
         },
-        async renameTrial(trial, index, trialNewName) {
+        async renameTrial(trial, index, trialNewName) => {
           try {
             let oldName = trial.name
             console.log(trial.name + " will be renamed to " + trialNewName);
