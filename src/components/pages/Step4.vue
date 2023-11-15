@@ -623,7 +623,7 @@ export default {
     },
   },
   async mounted() {
-    apiInfo("The default marker augmenter model was upgraded (from v0.2 to v0.3). The new model (v0.3) should be more accurate and more robust to different activities. If you would like to use the model that was default prior to 07-30-2023, select v0.2 under 'Marker augmenter model' under 'Advanced Settings'.", 5000);
+    apiInfo("The default pose model was changed from OpenPose to HRNet on 11/14/23. The default marker augmenter model was upgraded (from v0.2 to v0.3) on 07-30-2023. You can select prior defaults in 'Advanced Settings'.", 5000);
     this.loadSession(this.$route.params.id)
     this.loadSubjects()
     if (this.$route.query.autoRecord) {
