@@ -216,6 +216,15 @@
     </div>
 
     <v-card class="step-4-2 ml-4 d-flex images-box">
+
+      <v-card class="mb-0">
+        <v-card-text style="padding-top: 0; padding-bottom: 0">
+        <p>
+        <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded.</p>
+        </v-card-text>
+      </v-card>
+
+
         <v-card-title class="justify-center">
           Record a neutral pose
         </v-card-title>
@@ -485,10 +494,10 @@ export default {
         "Share processed data",
         "Share no data",
       ],
-      pose_model: 'openpose',
+      pose_model: 'hrnet',
       pose_models: [
-        {"text": "OpenPose (recommended, non-commercial research use only, default)", "value": "openpose"},
-        {"text": "HRNet", "value": "hrnet"},
+        {"text": "HRNet (recommended, default)", "value": "hrnet"},
+        {"text": "OpenPose (non-commercial research use only)", "value": "openpose"},
       ],
       framerate: 60,
       framerates_available: [
@@ -534,7 +543,11 @@ export default {
         if(!isNaN(parseFloat(v)) && v > currentYear) return `The subject's birth year cannot be set in the future. Please ensure that you are using the correct units. The birth year should be earlier than the current year ${currentYear} and specified in years (yyyy) format.`;
         if(!isNaN(parseFloat(v)) && v < 1900) return "It seems unlikely that the subject's birth year predates 1900. Please ensure that you are using the correct units. The birth year should be specified in years (yyyy) format.";
       },
-      checkboxRule: (v) => !!v || 'The subject must agree to continue!'
+      checkboxRule: (v) => !!v || 'The subject must agree to continue!',
+
+      n_calibrated_cameras: 0,
+      n_cameras_connected: 0,
+      n_videos_uploaded: 0
     };
   },
   computed: {
@@ -609,13 +622,17 @@ export default {
       return this.errors;
     },
   },
-  mounted() {
-    apiInfo("The default marker augmenter model was upgraded (from v0.2 to v0.3). The new model (v0.3) should be more accurate and more robust to different activities. If you would like to use the model that was default prior to 07-30-2023, select v0.2 under 'Marker augmenter model' under 'Advanced Settings'.", 30000);
+  async mounted() {
+    apiInfo("The default pose model was changed from OpenPose to HRNet on 11/14/23. The default marker augmenter model was upgraded (from v0.2 to v0.3) on 07-30-2023. You can select prior defaults in 'Advanced Settings'.", 8000);
     this.loadSession(this.$route.params.id)
     this.loadSubjects()
     if (this.$route.query.autoRecord) {
       this.onNext();
     }
+
+    const res = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
+
+    this.n_calibrated_cameras = res.data.data
   },
   methods: {
     ...mapMutations("data", ["setStep4", "setStep3"]),
@@ -663,6 +680,7 @@ export default {
         console.log(this.disabledNextButton)
     },
     async onNext() {
+      console.log("STEP4: onNext")
       if (this.imgs) {
         // Confirm
         this.$router.push({
@@ -717,7 +735,6 @@ export default {
                     }
                 }
             )
-
             const res = await axios.get(
               `/sessions/${this.session.id}/record/`,
               {
@@ -777,14 +794,33 @@ export default {
             this.$toasted.clear();
             apiErrorRes(resTrial, "Error in processing neutral pose");
             this.busy = false;
+
+            const resStatus = await axios.get(`/sessions/${this.$route.params.id}/status/`, {})
+
+            this.n_cameras_connected = resStatus.data.n_cameras_connected
+            this.n_videos_uploaded = resStatus.data.n_videos_uploaded
+
+            const resCalibratedCameras = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
+
+            this.n_calibrated_cameras = resCalibratedCameras.data.data
+
+            if (this.n_videos_uploaded !== this.n_calibrated_cameras) {
+              const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
+              apiError(this.n_calibrated_cameras + " devices expected and " + this.n_videos_uploaded + " videos were uploaded. Please reconnect the missing " + num_missing_cameras + " devices to the session using the QR code at the top of the screen.");
+            }
+
             break;
           }
           default: {
+            const resStatus = await axios.get(`/sessions/${this.$route.params.id}/status/`, {})
+
+            this.n_videos_uploaded = resStatus.data.n_videos_uploaded
+
             if (
               res.data.status === "processing" &&
               res.data.status !== this.lastPolledStatus
             ) {
-              apiInfo("Processing: the subject can relax.");
+              apiInfo("Processing: the subject can relax.", 5000);
             }
             this.lastPolledStatus = res.data.status;
             window.setTimeout(this.pollStatus, 1000);

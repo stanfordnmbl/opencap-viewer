@@ -8,7 +8,13 @@
     @left="$router.push(`/${session.id}/step1`)"
     @right="onNext">
 
-    <v-card class="step-2-1 flex-grow-1">
+    <v-card class="step-2-1">
+      <v-card-text class="d-flex align-center">
+        <p style="margin-bottom: 0">{{ n_videos_uploaded }} of {{ n_cameras_connected }} videos uploaded.</p>
+      </v-card-text>
+    </v-card>
+
+    <v-card class="step-2-2 mt-4 flex-grow-1">
       <v-card-title class="justify-center">
         Place a checkerboard in the scene
       </v-card-title>
@@ -76,6 +82,8 @@ export default {
       busy: false,
       imgs: null,
       lastPolledStatus: "",
+      n_cameras_connected: 0,
+      n_videos_uploaded: 0
     }
   },
   computed: {
@@ -130,7 +138,18 @@ export default {
         switch (res.data.status) {
           case "done": {
             this.$toasted.clear()
-            this.$router.push(`/${this.session.id}/step4`)
+
+            const resCalibratedCameras = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
+
+            this.n_calibrated_cameras = resCalibratedCameras.data.data
+
+            if (this.n_calibrated_cameras < 2) {
+              apiError("Only 1 device connected to the session and 2+ devices are required, please re-pair your devices using qr code at top of page.");
+              this.busy = false
+            } else {
+              apiSuccess(this.n_calibrated_cameras + " devices calibrated successfully.", 5000);
+              this.$router.push(`/${this.session.id}/step4`)
+            }
             break;
           }
           case "error": {
@@ -138,20 +157,37 @@ export default {
             this.$toasted.clear()
             apiErrorRes(res_trial, 'Finished with error')
             this.busy = false;
+
             break;
+
           }
           default: {
             if (
               res.data.status === "processing" &&
               res.data.status !== this.lastPolledStatus
             ) {
-              apiInfo("Processing.");
+              const resCalibratedCameras = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
+
+              this.n_calibrated_cameras = resCalibratedCameras.data.data
+
+              if (this.n_calibrated_cameras < 2) {
+                apiError("Only 1 device connected to the session and 2+ devices are required, please re-pair the devices using qr code at top of page.");
+                this.busy = false
+              } else {
+                apiInfo("Processing.");
+              }
             }
             this.lastPolledStatus = res.data.status;
             window.setTimeout(this.pollStatus, 1000);
             break;
           }
         }
+
+        // Get n_cameras_connected.
+        const res_status = await axios.get(`/sessions/${this.session.id}/status/`, {})
+
+        this.n_videos_uploaded = res_status.data.n_videos_uploaded
+        this.n_cameras_connected = res_status.data.n_cameras_connected
       } catch (error) {
         apiError(error);
       }

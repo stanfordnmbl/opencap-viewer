@@ -13,8 +13,8 @@
                 <v-btn class="mb-4 w-100" v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
                 </v-btn>
-                <p v-if="state === 'recording'">Videos are recording, do not refresh</p>
-                <p v-if="state === 'processing'">Videos are uploading, do not refresh</p>
+                <p v-if="state === 'recording'">{{ n_cameras_connected }} devices are recording, do not refresh</p>
+                <p v-if="state === 'processing'">{{ n_videos_uploaded  }} of {{ n_cameras_connected }} videos uploaded, do not refresh.</p>
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
@@ -579,7 +579,11 @@ export default {
             recordingTimer: null,
 
             trialsPoll: null,
-            showSessionMenuButtons: true
+            showSessionMenuButtons: true,
+
+            n_calibrated_cameras: 0,
+            n_cameras_connected: 0,
+            n_videos_uploaded: 0
         }
     },
     computed: {
@@ -633,11 +637,17 @@ export default {
     },
     async mounted() {
         await this.loadSession(this.$route.params.id)
+
+        // Get number of expected cameras.
+        const res = await axios.get(`/sessions/${this.session.id}/get_n_calibrated_cameras/`, {})
+        this.n_calibrated_cameras = res.data.data
+
         await this.loadAnalysisFunctions()
         await this.loadAnalysisFunctionsPending()
         await this.loadAnalysisFunctionsStates()
 
         await this.analysisFunctionsPolls()
+        
         console.log(this.user_id)
         console.log(this.session.user)
         this.show_controls = (this.user_id == this.session.user)
@@ -651,6 +661,8 @@ export default {
             console.log(doneTrials[0])
             this.loadTrial(doneTrials[0])
         }
+
+
     },
     beforeDestroy() {
         this.cancelPoll()
@@ -736,11 +748,22 @@ export default {
                             this.trialInProcess = res.data
                             this.addTrial(this.trialInProcess)
 
+
                             this.recordingStarted = moment()
                             this.recordingTimePassed = 0
                             this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
 
                             this.state = 'recording'
+
+                            // Wait for cameras to start actually recording.
+                            await new Promise(r => setTimeout(r, 1500));
+
+                            // Get n_cameras_connected.
+                            const res_status = await axios.get(`/sessions/${this.session.id}/status/`, {})
+
+                            this.n_videos_uploaded = res_status.data.n_videos_uploaded
+                            this.n_cameras_connected = res_status.data.n_cameras_connected
+
                         } catch (error) {
                             apiError(error)
                         }
@@ -901,13 +924,20 @@ export default {
         startPoll() {
             this.statusPoll = window.setTimeout(async () => {
                 const res = await axios.get(`/sessions/${this.session.id}/status/`)
+                this.n_cameras_connected = res.data.n_cameras_connected
+                this.n_videos_uploaded = res.data.n_videos_uploaded
 
                 if (res.data.status !== 'uploading') {
                     // Show error if any
                     if (res.data.status === 'error') {
                         apiErrorRes(res.data, 'Finished with error')
                     }
-
+                    if (res.data.status === 'processing' || res.data.status === 'ready') {
+                      if (this.n_cameras_connected !== this.n_calibrated_cameras) {
+                          const num_missing_cameras = this.n_calibrated_cameras - this.n_videos_uploaded
+                          apiErrorRes(res.data, this.n_calibrated_cameras + " devices expected and " + this.n_videos_uploaded + " videos were uploaded. Please reconnect the missing " + num_missing_cameras + " devices to the session using the QR code at the top of the screen.");
+                      }
+                    }
                     this.state = 'ready'
                 } else {
                     this.startPoll()
