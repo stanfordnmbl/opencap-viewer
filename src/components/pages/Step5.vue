@@ -14,7 +14,7 @@
                     {{ buttonCaption }}
                 </v-btn>
                 <p v-if="state === 'recording'">{{ n_cameras_connected }} devices are recording, do not refresh</p>
-                <p v-if="state === 'uploading'">{{ n_videos_uploaded  }} of {{ n_cameras_connected }} videos uploaded, do not refresh.</p>
+                <p v-if="state === 'processing'">{{ n_videos_uploaded  }} of {{ n_cameras_connected }} videos uploaded, do not refresh.</p>
             </ValidationObserver>
 
             <div class="trials flex-grow-1">
