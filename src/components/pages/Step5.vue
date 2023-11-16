@@ -61,7 +61,7 @@
                                       <p>
                                         Insert a new name for trial {{t.name}}:
                                       </p>
-                                      <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
+                                      <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr" v-slot="{ invalid }">
                                         <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
 
                                             <v-text-field v-model="trialNewName" label="Trial new name" class="flex-grow-0"
