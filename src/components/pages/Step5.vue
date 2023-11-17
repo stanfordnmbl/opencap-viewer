@@ -58,19 +58,25 @@
                                       <v-icon x-large color="orange">mdi-rename-box</v-icon>
                                     </v-col>
                                     <v-col cols="10">
-                                      <p>
+                                      <p v-if="t.status === 'processing' || t.status === 'uploading'" class="text-orange">
+                                        Impossible to rename a trial that is processing or uploading.
+                                      </p>
+                                      <p v-else>
                                         Insert a new name for trial {{t.name}}:
                                       </p>
                                       <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr" v-slot="{ invalid }">
                                         <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
 
                                             <v-text-field v-model="trialNewName" label="Trial new name" class="flex-grow-0"
-                                                :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
+                                                :disabled="state !== 'ready' || t.status === 'processing' || t.status === 'uploading'"
+                                                          dark
+                                                          :error="errors.length > 0" :error-messages="errors[0]" />
                                         </ValidationProvider>
 
                                         <v-spacer></v-spacer>
 
-                                        <v-btn class="text-right" :disabled="invalid" @click="t.isMenuOpen = false; remove_dialog = false; renameTrial(t, index, trialNewName);">
+                                        <v-btn class="text-right" :disabled="invalid || t.status === 'processing' || t.status === 'uploading'"
+                                               @click="t.isMenuOpen = false; remove_dialog = false; renameTrial(t, index, trialNewName);">
                                             Rename Trial
                                         </v-btn>
                                       </ValidationObserver>
@@ -1408,6 +1414,10 @@ export default {
 <style lang="scss">
 .trashed {
   color: gray !important;
+}
+
+.text-orange {
+  color: orange !important;
 }
 
 .step-5 {
