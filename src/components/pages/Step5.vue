@@ -279,7 +279,7 @@
                                     text
                                     @click="t.isMenuOpen = false; permanent_delete_dialog = false"
                                   >
-                                    No++'
+                                    No
                                   </v-btn>
                                   <v-btn
                                     color="red darken-1"
