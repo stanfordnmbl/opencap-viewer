@@ -82,7 +82,7 @@ function processErrorMessage (err, operation) {
  */
 function apiError (error, operation) {
   if (error == "Error: Network Error") {
-    error = "Something went wrong! Our server is currently down. Please try again later."
+    error = "Could not reach server. Check your internet connection and try again."
   }
   Vue.toasted.error(processErrorMessage(error, operation),{duration: 10000})
 }
