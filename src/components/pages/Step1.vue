@@ -47,6 +47,7 @@
 
 <script>
 import { mapMutations, mapActions, mapState } from 'vuex'
+import { apiInfo } from "@/util/ErrorMessage.js";
 import MainLayout from '@/layout/MainLayout'
 
 export default {
