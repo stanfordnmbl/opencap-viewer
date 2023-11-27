@@ -61,6 +61,7 @@ export default {
     }
   },
   async mounted () {
+    apiInfo("We're experiencing issues with devices running on iOS 17.x. We're working on a fix. Please use devices running on iOS 16.x for now");
     if (this.$router.params != undefined) {
         await this.loadSession(this.$route.params.id)
     } else {
