@@ -62,7 +62,7 @@ export default {
     }
   },
   async mounted () {
-    apiInfo("We're experiencing issues with iPhones running on iOS 17.x. We're working on a fix. Please use iPhones running on iOS 16.x for now");
+    apiInfo("We're experiencing issues with some (not all) iPhones running on iOS 17.x. The calibration phase takes a long time and eventually fails (because video upload fails). We're working on a fix. Please use iPhones running on iOS 16.x if you're experiencing such issues.");
     if (this.$router.params != undefined) {
         await this.loadSession(this.$route.params.id)
     } else {
