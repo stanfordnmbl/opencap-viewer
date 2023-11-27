@@ -47,6 +47,7 @@
 
 <script>
 import { mapMutations, mapActions, mapState } from 'vuex'
+import { apiInfo } from "@/util/ErrorMessage.js";
 import MainLayout from '@/layout/MainLayout'
 
 export default {
@@ -61,6 +62,7 @@ export default {
     }
   },
   async mounted () {
+    apiInfo("We're experiencing issues with iPhones running on iOS 17.x. We're working on a fix. Please use iPhones running on iOS 16.x for now");
     if (this.$router.params != undefined) {
         await this.loadSession(this.$route.params.id)
     } else {
