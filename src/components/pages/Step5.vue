@@ -438,7 +438,7 @@
               </v-col>
               <v-col cols="10">
                 <p v-if="session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'" class="text-orange">
-                  Impossible to rename a trial that is processing or uploading.
+                    You can't rename a trial while it's being uploaded or processed. Please wait before attempting to rename the trial.
                 </p>
                 <p v-else>
                   Insert a new name for trial {{session.trials[trial_rename_index].name}}:
