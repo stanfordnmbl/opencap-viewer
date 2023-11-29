@@ -237,7 +237,7 @@
                                     text
                                     @click="t.isMenuOpen = false; permanent_delete_dialog = false"
                                   >
-                                    No++'
+                                    No
                                   </v-btn>
                                   <v-btn
                                     color="red darken-1"
@@ -643,19 +643,30 @@ export default {
     async mounted() {
         await this.loadSession(this.$route.params.id)
 
+        // Check if something went wrong with loading session. Usually there was a redirect to Login page.
+        if (this.session.id == undefined) {
+            return
+        }
+
         // Get number of expected cameras.
         const res = await axios.get(`/sessions/${this.session.id}/get_n_calibrated_cameras/`, {})
         this.n_calibrated_cameras = res.data.data
 
-        await this.loadAnalysisFunctions()
-        await this.loadAnalysisFunctionsPending()
-        await this.loadAnalysisFunctionsStates()
+        if (this.user_id == this.session.user) {
+            this.show_controls = true
+            this.showSessionMenuButtons = true
 
-        await this.analysisFunctionsPolls()
-        
+            await this.loadAnalysisFunctions()
+            await this.loadAnalysisFunctionsPending()
+            await this.loadAnalysisFunctionsStates()
+            await this.analysisFunctionsPolls()
+        } else {
+            this.show_controls = false
+            this.showSessionMenuButtons = false
+        }
+
         console.log(this.user_id)
         console.log(this.session.user)
-        this.show_controls = (this.user_id == this.session.user)
 
         this.startTrialsPoll()
 
@@ -666,7 +677,6 @@ export default {
             console.log(doneTrials[0])
             this.loadTrial(doneTrials[0])
         }
-
     },
     beforeDestroy() {
         this.cancelPoll()
