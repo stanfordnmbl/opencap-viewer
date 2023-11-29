@@ -42,44 +42,8 @@
                           </v-btn>
                         </template>
                         <v-list>
-                          <v-list-item link v-if="t.name !== 'neutral'">
-                            <v-dialog
-                                    v-model="rename_dialog"
-                                    v-click-outside="clickOutsideDialogTrialHideMenu"
-                                    max-width="500">
-                              <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Rename</v-list-item-title>
-                              </template>
-
-                              <v-card>
-                                <v-card-text class="pt-4">
-                                  <v-row class="m-0">
-                                    <v-col cols="2">
-                                      <v-icon x-large color="orange">mdi-rename-box</v-icon>
-                                    </v-col>
-                                    <v-col cols="10">
-                                      <p>
-                                        Insert a new name for trial {{t.name}}:
-                                      </p>
-                                      <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
-                                        <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
-
-                                            <v-text-field v-model="trialNewName" label="Trial new name" class="flex-grow-0"
-                                                :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
-                                        </ValidationProvider>
-
-                                        <v-spacer></v-spacer>
-
-                                        <v-btn class="text-right" :disabled="invalid" @click="t.isMenuOpen = false; remove_dialog = false; renameTrial(t, index, trialNewName);">
-                                            Rename Trial
-                                        </v-btn>
-                                      </ValidationObserver>
-                                    </v-col>
-                                  </v-row>
-                                </v-card-text>
-                              </v-card>
-                            </v-dialog>
-
+                          <v-list-item link v-if="t.name !== 'neutral'" @click="renameTrialDialog(t)">
+                            <v-list-item-title>Rename</v-list-item-title>
                           </v-list-item>
                           <v-list-item link v-if="!t.trashed && t.name !== 'neutral'">
                             <v-dialog
@@ -273,7 +237,7 @@
                                     text
                                     @click="t.isMenuOpen = false; permanent_delete_dialog = false"
                                   >
-                                    No++'
+                                    No
                                   </v-btn>
                                   <v-btn
                                     color="red darken-1"
@@ -462,6 +426,44 @@
                 :disabled="videoControlsDisabled" @play="togglePlay(true)" @pause="togglePlay(false)"
                 @input="onNavigate" class="mb-2" />
         </div>
+
+      <v-dialog
+            v-model="trial_rename_dialog"
+            max-width="500">
+        <v-card>
+          <v-card-text class="pt-4">
+            <v-row class="m-0">
+              <v-col cols="2">
+                <v-icon x-large color="orange">mdi-rename-box</v-icon>
+              </v-col>
+              <v-col cols="10">
+                <p v-if="session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'" class="text-orange">
+                    You can't rename a trial while it's being uploaded or processed. Please wait before attempting to rename the trial.
+                </p>
+                <p v-else>
+                  Insert a new name for trial {{session.trials[trial_rename_index].name}}:
+                </p>
+                <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr" v-slot="{ invalid }">
+                  <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
+
+                      <v-text-field v-model="trialNewName" label="Trial new name" class="flex-grow-0"
+                          :disabled="state !== 'ready' || session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'"
+                                    dark
+                                    :error="errors.length > 0" :error-messages="errors[0]" />
+                  </ValidationProvider>
+
+                  <v-spacer></v-spacer>
+
+                  <v-btn class="text-right" :disabled="invalid || session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'"
+                         @click="trial_rename_dialog = false; renameTrial(session.trials[trial_rename_index], trial_rename_index, trialNewName);">
+                      Rename Trial
+                  </v-btn>
+                </ValidationObserver>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
     </div>
 </template>
 
@@ -583,7 +585,10 @@ export default {
 
             n_calibrated_cameras: 0,
             n_cameras_connected: 0,
-            n_videos_uploaded: 0
+            n_videos_uploaded: 0,
+
+            trial_rename_dialog: false,
+            trial_rename_index: 0
         }
     },
     computed: {
@@ -638,19 +643,30 @@ export default {
     async mounted() {
         await this.loadSession(this.$route.params.id)
 
+        // Check if something went wrong with loading session. Usually there was a redirect to Login page.
+        if (this.session.id == undefined) {
+            return
+        }
+
         // Get number of expected cameras.
         const res = await axios.get(`/sessions/${this.session.id}/get_n_calibrated_cameras/`, {})
         this.n_calibrated_cameras = res.data.data
 
-        await this.loadAnalysisFunctions()
-        await this.loadAnalysisFunctionsPending()
-        await this.loadAnalysisFunctionsStates()
+        if (this.user_id == this.session.user) {
+            this.show_controls = true
+            this.showSessionMenuButtons = true
 
-        await this.analysisFunctionsPolls()
-        
+            await this.loadAnalysisFunctions()
+            await this.loadAnalysisFunctionsPending()
+            await this.loadAnalysisFunctionsStates()
+            await this.analysisFunctionsPolls()
+        } else {
+            this.show_controls = false
+            this.showSessionMenuButtons = false
+        }
+
         console.log(this.user_id)
         console.log(this.session.user)
-        this.show_controls = (this.user_id == this.session.user)
 
         this.startTrialsPoll()
 
@@ -661,8 +677,6 @@ export default {
             console.log(doneTrials[0])
             this.loadTrial(doneTrials[0])
         }
-
-
     },
     beforeDestroy() {
         this.cancelPoll()
@@ -986,6 +1000,12 @@ export default {
                 t.isMenuOpen = false;
               }
           }
+        },
+        async renameTrialDialog(trial) {
+          const index = this.session.trials.findIndex(x => x.id === trial.id)
+          this.trial_rename_index = index;
+          this.trialNewName = trial.name;
+          this.trial_rename_dialog = true;
         },
         async renameTrial(trial, index, trialNewName) {
           try {
@@ -1399,6 +1419,10 @@ export default {
 <style lang="scss">
 .trashed {
   color: gray !important;
+}
+
+.text-orange {
+  color: orange !important;
 }
 
 .step-5 {
