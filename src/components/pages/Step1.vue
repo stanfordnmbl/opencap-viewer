@@ -62,7 +62,7 @@ export default {
     }
   },
   async mounted () {
-    apiInfo("We're experiencing issues with iPhones running on iOS 17.x. We're working on a fix. Please use iPhones running on iOS 16.x for now");
+    apiInfo("Please update the iOS app to build 1.6 (29), the previous release contained a bug.");
     if (this.$router.params != undefined) {
         await this.loadSession(this.$route.params.id)
     } else {
