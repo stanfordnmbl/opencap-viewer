@@ -126,6 +126,24 @@ export default {
 
       router.push({ name: 'Login' })
     },
+    logoutNoNavigate ({ commit }) {
+      commit('setLoggedIn', {
+        loggedIn: false,
+        username: '',
+        user_id: null,
+      })
+
+      commit('setVerified', {
+        verified: false
+      })
+
+      delete axios.defaults.headers.common['Authorization']
+      localStorage.removeItem('auth_verified')
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('auth_user')
+      localStorage.removeItem('auth_user_id')
+      localStorage.removeItem('valid_till')
+    },
     async register ({ commit }, data) {
       await axios.post('/register/', data)
     },

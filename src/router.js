@@ -5,6 +5,7 @@ import store from '@/store/store.js'
 import Login from '@/components/pages/Login'
 import Verify from '@/components/pages/Verify'
 import Register from '@/components/pages/Register'
+import RegisterLoggedInMessage from '@/components/pages/RegisterLoggedInMessage'
 import Step1 from '@/components/pages/Step1'
 import Step2 from '@/components/pages/Step2'
 import Step3 from '@/components/pages/Step3'
@@ -39,6 +40,11 @@ var router = new Router({
       path: '/register-nmbl',
       name: 'Register',
       component: Register
+    },
+    {
+      path: '/register-logged-in',
+      name: 'RegisterLoggedInMessage',
+      component: RegisterLoggedInMessage
     },
     {
       path: '/sessions',
@@ -116,7 +122,8 @@ const routesWithOutAuth = [
   'ResetPassword',
   'NewPassword',
   'Dashboard',
-  'AnalysisDashboard'
+  'AnalysisDashboard',
+  'RegisterLoggedInMessage'
   // 'Step4'
   
 ]
@@ -144,7 +151,8 @@ const acceptedRoutes = [
   'ResetPassword',
   'NewPassword',
   'RecycleBin',
-  'Subjects'
+  'Subjects',
+  'RegisterLoggedInMessage'
 ]
 
 router.beforeEach((to, from, next) => {

@@ -320,6 +320,7 @@
 </template>
 
 <script>
+import router from '@/router'
 import { mapActions, mapState } from "vuex";
 import { apiSuccess, apiError } from "@/util/ErrorMessage.js";
 import VueCountryDropdown from 'vue-country-dropdown'
@@ -355,7 +356,13 @@ export default {
   computed: {
     ...mapState({
       sessions: (state) => state.data.sessions,
+      loggedIn: state => state.auth.loggedIn
     }),
+  },
+  async mounted() {
+    if (this.loggedIn) {
+      router.push({ name: 'RegisterLoggedInMessage' })
+    }
   },
   methods: {
     ...mapActions("auth", ["register"]),
