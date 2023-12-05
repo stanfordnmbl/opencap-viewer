@@ -17,13 +17,6 @@
             class="dropdown-element"
             tag="li"
             :to="{ name: 'SelectSession' }">
-              <i class="mdi mdi-account inline-icon"></i>
-              Your Profile
-          </router-link>
-          <router-link
-            class="dropdown-element"
-            tag="li"
-            :to="{ name: 'SelectSession' }">
               <i class="mdi mdi-magnify inline-icon"></i>
               Your Sessions
           </router-link>
