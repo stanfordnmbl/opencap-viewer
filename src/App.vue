@@ -36,7 +36,7 @@
       </v-btn>
 
 
-    <profile-dropdown></profile-dropdown>
+    <profile-dropdown v-if="verified"></profile-dropdown>
 
     </v-app-bar>
 

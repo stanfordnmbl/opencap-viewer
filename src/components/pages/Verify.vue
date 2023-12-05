@@ -30,7 +30,7 @@
         </ValidationProvider>
 
         <v-btn
-          type="submit" 
+          type="submit"
           class="white--text mx-0 align-self-center"
           :disabled="(submitted && invalid) || loading"
           @click="onLogin()">Verify</v-btn>            
@@ -83,7 +83,7 @@ export default {
             console.log('onLogin:this.remember_device_flag', this.remember_device_flag)
           const remember_device_timestamp = localStorage.getItem('remember_device_timestamp')
           const valid_date = remember_device_timestamp != null ? parseInt(remember_device_timestamp) + 90*24*60*60*1000 >= Date.now() : false
-          let data = {otp_token: this.otp_token}
+          let data = {otp_token: this.otp_token.trim()}
           if (remember_device_timestamp && valid_date || this.remember_device_flag) {
             data.remember_device = true
           }
