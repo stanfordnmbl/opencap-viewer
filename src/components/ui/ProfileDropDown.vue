@@ -16,7 +16,7 @@
           <router-link
             class="dropdown-element"
             tag="li"
-            :to="{ name: 'ProfilePage' }">
+            :to="{ name: 'ProfilePage', params: { username: this.username } }">
               <i class="mdi mdi-account inline-icon"></i>
               Your Profile
           </router-link>

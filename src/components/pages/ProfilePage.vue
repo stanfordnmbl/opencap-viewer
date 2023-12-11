@@ -2,9 +2,14 @@
   <div class="d-flex flex-column">
     <div class="pa-2 d-flex">
       <div class="container">
+
+
+        <div v-if="userExist">
+
+
         <div v-if="!editing_profile" class="row">
           <div class="col-lg-4">
-            <v-card class="d-flex align-center justify-center">
+            <v-card class="d-flex align-center justify-center pb-4">
               <v-row align="center" justify="center">
                 <v-col align="center" justify="center">
                   <v-img
@@ -15,7 +20,7 @@
                   </v-img>
                   <button @click="handleShareProfileClick">
                     <v-card-title align="center" justify="center" class="justify-center pb-0">
-                      {{ username }} <i class="mdi mdi-share ml-1 me-1 vertical-middle"></i>
+                      {{ username_param }} <i class="mdi mdi-share ml-1 me-1 vertical-middle"></i>
                     </v-card-title>
                   </button>
                   <v-card-text class="pa-1">
@@ -29,7 +34,7 @@
                       </p>
                     </a>
                   </v-card-text>
-                  <v-btn class="my-4" @click="handleEditProfile">
+                  <v-btn v-if="editable" class="my-4" @click="handleEditProfile">
                     Edit Profile
                   </v-btn>
                 </v-col>
@@ -48,7 +53,7 @@
                       Full Name
                     </strong>
                   </v-col>
-                  <v-col class="col-lg-4">{{ first_name }} {{ last_name }} </v-col>
+                  <v-col class="col-lg-8">{{ first_name }} {{ last_name }} </v-col>
                 </v-row>
 
                 <v-row v-if="profession">
@@ -58,17 +63,21 @@
                       Profession
                     </strong>
                   </v-col>
-                  <v-col class="col-lg-4">{{ profession }} </v-col>
+                  <v-col class="col-lg-8">{{ profession }} </v-col>
                 </v-row>
 
-                <v-row v-if="personalWebsite">
+                <v-row v-if="website">
                   <v-col class="col-lg-4">
                     <strong>
                       <i class="mdi mdi-web me-1 vertical-middle"></i>
                       Personal Website
                     </strong>
                   </v-col>
-                  <v-col class="col-lg-4">{{ personalWebsite }} </v-col>
+                  <v-col class="col-lg-8">
+                    <a :href="website" target="_blank">
+                      {{ website }}
+                    </a>
+                  </v-col>
                 </v-row>
 
                 <v-row v-if="reason_of_use">
@@ -78,7 +87,7 @@
                       Reason of use
                     </strong>
                   </v-col>
-                  <v-col class="col-lg-4">{{ reason_of_use }} </v-col>
+                  <v-col class="col-lg-8">{{ reason_of_use }} </v-col>
                 </v-row>
 
                 <v-row v-if="country">
@@ -88,7 +97,7 @@
                       Country
                     </strong>
                   </v-col>
-                  <v-col class="col-lg-4">{{ country }} </v-col>
+                  <v-col class="col-lg-8">{{ country }} </v-col>
                 </v-row>
 
               </v-card-text>
@@ -284,6 +293,15 @@
 
           </div>
         </div>
+
+
+        </div>
+        <div v-else>
+          The user "{{username_param}}" does not exist.
+        </div>
+
+
+
       </div>
     </div>
   </div>
@@ -306,29 +324,6 @@ export default {
       username: state => state.auth.username
     }),
   },
-  async mounted () {
-      // If username in url, use that username.
-
-      // If username not in url, use current authenticated user.
-
-      // If username in url does not exist, show error message.
-
-      let res = await axios.post('/get_user_info/', {
-        username: this.username
-      })
-      this.institution = res.data.institution;
-      this.profession = res.data.profession;
-      this.personalWebsite = res.data.personalWebsite;
-      this.first_name = res.data.first_name;
-      this.last_name = res.data.last_name;
-      this.email = res.data.email;
-      this.country = res.data.country;
-      this.reason_of_use = res.data.reason;
-      this.website = res.data.website;
-      this.newsletter = res.data.newsletter;
-      this.countryCode = allCountries.find(country => country.name === this.country)['iso2'];
-      console.log(allCountries.find(country => country.name === this.country)['iso2'])
-  },
   data() {
     return {
       institution: '',
@@ -344,19 +339,59 @@ export default {
       newsletter: '',
       editing_profile: false,
       loading: false,
-      countryCode: ''
+      countryCode: '',
+      editable: false,
+      userExist: true,
+      username_param: '',
     };
   },
   methods: {
     ...mapActions("auth", ["updateProfile"]),
     handleShareProfileClick() {
-      copyProfileUrlToClipboard(this.username);
+      copyProfileUrlToClipboard(this.username_param);
     },
     handleEditProfile() {
       this.editing_profile = true;
     },
     handleDiscard() {
       this.editing_profile = false;
+    },
+    async fetchData (username) {
+      // Get username from url
+      this.username_param = username
+
+      // If username from url is authenticated user, editable, if not, not editable.
+      if (this.username_param !== this.username) {
+        this.editable = false;
+        this.editing_profile = false;
+      } else {
+        this.editable = true
+      }
+
+      try {
+        let res = await axios.post('/get_user_info/', {
+          username: this.username_param
+        })
+        this.institution = res.data.institution;
+        this.profession = res.data.profession;
+        this.personalWebsite = res.data.personalWebsite;
+        this.first_name = res.data.first_name;
+        this.last_name = res.data.last_name;
+        this.email = res.data.email;
+        this.country = res.data.country;
+        this.reason_of_use = res.data.reason;
+        this.website = res.data.website;
+        this.newsletter = res.data.newsletter;
+        let countryFound = allCountries.find(country => country.name === this.country)
+        if(countryFound)
+          this.countryCode = countryFound['iso2'];
+      } catch (error) {
+        if (error.response.status === 404) {
+        console.log(error)
+          this.userExist = false;
+          apiError("The user \"" + this.username_param + "\" does not exist.")
+        }
+      }
     },
     async onChangeProfile() {
       this.loading = true;
@@ -388,8 +423,19 @@ export default {
     },
     onSelectCountry({name, iso2, dialCode}) {
         this.country = name;
+        this.countryCode = allCountries.find(country => country.name === this.country)['iso2'];
     },
-  }
+  },
+  watch: {
+    '$route.params': {
+        handler(newValue) {
+            const { username } = newValue
+
+            this.fetchData(username)
+        },
+        immediate: true,
+    }
+}
 };
 </script>
 
