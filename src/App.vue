@@ -19,24 +19,6 @@
 
       <QRCodeDialog/>
 
-      <v-btn
-        v-if="!verified"
-        href="https://github.com/stanfordnmbl/opencap-core"
-        target="_blank"
-        text>
-        <span class="mr-2">Find on GitHub</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
-
-      <v-btn
-        v-if="loggedIn && !verified"
-        @click="logout"
-        text>
-        <span class="mr-2">LOGOUT</span>
-        <v-icon>mdi-logout</v-icon>
-      </v-btn>
-
-
     <profile-dropdown v-if="verified"></profile-dropdown>
 
     </v-app-bar>
