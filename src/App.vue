@@ -20,6 +20,7 @@
       <QRCodeDialog/>
 
       <v-btn
+        v-if="!verified"
         href="https://github.com/stanfordnmbl/opencap-core"
         target="_blank"
         text>
@@ -28,7 +29,7 @@
       </v-btn>
 
       <v-btn
-        v-if="loggedIn"
+        v-if="loggedIn && !verified"
         @click="logout"
         text>
         <span class="mr-2">LOGOUT</span>

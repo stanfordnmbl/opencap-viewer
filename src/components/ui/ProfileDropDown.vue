@@ -16,6 +16,13 @@
           <router-link
             class="dropdown-element"
             tag="li"
+            :to="{ name: 'ProfilePage', params: { username: this.username } }">
+              <i class="mdi mdi-account inline-icon"></i>
+              Your Profile
+          </router-link>
+          <router-link
+            class="dropdown-element"
+            tag="li"
             :to="{ name: 'SelectSession' }">
               <i class="mdi mdi-magnify inline-icon"></i>
               Your Sessions
@@ -27,6 +34,12 @@
             <li>
                   <i class="mdi mdi-forum inline-icon"></i>
                   Forum
+            </li>
+          </a>
+          <a target="_blank" href="https://github.com/stanfordnmbl/opencap-core">
+            <li>
+                  <i class="mdi mdi-forum inline-icon"></i>
+                  Find on GitHub
             </li>
           </a>
           <a target="_blank" href="https://www.opencap.ai/best-practices">
