@@ -405,7 +405,7 @@ export default {
             country: this.country,
             institution: this.institution,
             profession: this.profession,
-            reason: this.reason,
+            reason: this.reason_of_use,
             website: this.website,
             newsletter: this.newsletter,
           });

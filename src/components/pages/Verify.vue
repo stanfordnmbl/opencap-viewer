@@ -36,6 +36,10 @@
           @click="onLogin()">Verify</v-btn>            
       </ValidationObserver>
 
+      <router-link class="text-center mt-6" @click.native="handleGoBack" :to="{ name: 'Login' }">
+        Back to Login
+      </router-link>
+
       <!--router-link
         class="mt-4 text-center"
         :to="{ name: 'Register' }">Don't have an account yet? Sign Up</router-link-->
@@ -71,7 +75,7 @@ export default {
       }
     },
     methods: {
-    ...mapActions('auth', ['verify', 'set_skip_forcing_otp']),
+    ...mapActions('auth', ['verify', 'set_skip_forcing_otp', 'logout']),
     ...mapActions('data', ['loadExistingSessions']),
     async onLogin () {
       this.loading = true
@@ -107,6 +111,9 @@ export default {
       }
 
       this.loading = false
+    },
+    async handleGoBack() {
+      this.logout();
     }
   }
 }
