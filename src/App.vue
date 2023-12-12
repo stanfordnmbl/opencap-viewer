@@ -19,7 +19,7 @@
 
       <QRCodeDialog/>
 
-    <profile-dropdown v-if="verified"></profile-dropdown>
+    <profile-dropdown v-if="verified" class="ml-8"></profile-dropdown>
 
     </v-app-bar>
 
