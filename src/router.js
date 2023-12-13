@@ -19,6 +19,7 @@ import NewPassword from '@/components/pages/NewPassword'
 import RecycleBin from "@/components/pages/RecycleBin.vue";
 import Subjects from "@/components/pages/Subjects.vue";
 import ProfilePage from '@/components/pages/ProfilePage'
+import License from '@/components/pages/License'
 
 Vue.use(Router)
 
@@ -35,6 +36,11 @@ var router = new Router({
       path: '/verify',
       name: 'Verify',
       component: Verify
+    },
+    {
+      path: '/license',
+      name: 'License',
+      component: License
     },
     {
       path: '/register-nmbl',
@@ -139,6 +145,7 @@ const acceptedRoutes = [
   'Login',
   'Verify',
   'Register',
+  'License',
   'SelectSession',
   'Step1',
   'Step1ForId',

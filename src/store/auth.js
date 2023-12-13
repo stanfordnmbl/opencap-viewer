@@ -63,6 +63,7 @@ export default {
 
       localStorage.setItem('valid_till', date.toJSON())
       localStorage.setItem('auth_token', res.data.token)
+      localStorage.setItem('institutional_use', res.data.institutional_use)
       localStorage.setItem('auth_user', username)
       localStorage.setItem('auth_user_id', res.data.user_id)
       commit('setSkipForcingOTP', { value: res.data.otp_challenge_sent })
@@ -123,6 +124,7 @@ export default {
       localStorage.removeItem('auth_user')
       localStorage.removeItem('auth_user_id')
       localStorage.removeItem('valid_till')
+      localStorage.removeItem('institutional_use')
 
       router.push({ name: 'Login' })
     },
