@@ -53,13 +53,14 @@ export default {
     },
   },
   mounted() {
-    this.institutionalUse = localStorage.getItem('institutionalUse')
+    this.institutionalUse = localStorage.getItem('institutional_use')
   },
   methods: {
     submit () {
-      axios.post('/api/set-institutional-use/', {
-        institutionalUse: this.institutionalUse,
+      axios.post('/set-institutional-use/', {
+        institutional_use: this.institutionalUse,
       }).then((response) => {
+        localStorage.setItem('institutional_use', this.institutionalUse)
         this.$router.push({name: 'Login'})
       }).catch((error) => {
         apiError(error)
