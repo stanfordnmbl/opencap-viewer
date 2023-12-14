@@ -6,12 +6,18 @@
 
       <v-card>
         <v-card-text>
-          <h3 class="white--text text-center">
+          <h3 class="white--text text-center" v-if="!secondaryMessage">
+            OpenCap is free for academic research and educational use
+            (link <a href="https://www.opencap.ai/terms-conditions">Terms</a>).
+            Please identify how you use / intend to use OpenCap:</h3>
+          <h3 class="white--text text-center" v-else>
+            Your previously indicated that you intended to use OpenCap for
+            an application not permitted by the OpenCap license. Has you intended use changed?
             OpenCap is free for academic research and educational use
             (link <a href="https://www.opencap.ai/terms-conditions">Terms</a>).
             Please identify how you use / intend to use OpenCap:</h3>
 
-          <v-radio-group v-model="institutionalUse">
+          <v-radio-group v-model="institutionalUse" @change="submit(false)">
             <v-radio label="Patient care" value="patient_care"></v-radio>
             <v-radio label="Sports performance assessment" value="sports_performance_assessment"></v-radio>
             <v-radio label="Use in a company or in collaboration with a company" value="use_in_company"></v-radio>
@@ -27,7 +33,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn @click="submit" :disabled="institutionalUse == '' || notPermitted">Submit</v-btn>
+          <v-btn @click="submit(true)" :disabled="institutionalUse == '' || notPermitted">Submit</v-btn>
         </v-card-actions>
       </v-card>
 
@@ -45,6 +51,7 @@ export default {
   data () {
     return {
       institutionalUse: '',
+      secondaryMessage: false,
     }
   },
   computed: {
@@ -54,14 +61,17 @@ export default {
   },
   mounted() {
     this.institutionalUse = localStorage.getItem('institutional_use')
+    if (this.notPermitted) {
+      this.secondaryMessage = true
+    }
   },
   methods: {
-    submit () {
+    submit (reroute) {
       axios.post('/set-institutional-use/', {
         institutional_use: this.institutionalUse,
       }).then((response) => {
         localStorage.setItem('institutional_use', this.institutionalUse)
-        this.$router.push({name: 'Login'})
+        if (reroute) { this.$router.push({name: 'SelectSession'}) }
       }).catch((error) => {
         apiError(error)
       })
