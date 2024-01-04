@@ -191,9 +191,9 @@
                           <v-icon
                             class="show-pass-icon"
                             :tabindex="-1"
-                            @click="show_confirm_password = !show_confirm_password"
+                            @click="show_password = !show_password"
                           >
-                            {{ show_confirm_password ? 'mdi-eye' : 'mdi-eye-off' }}
+                            {{ show_password ? 'mdi-eye' : 'mdi-eye-off' }}
                           </v-icon>
                         </template>
                        </v-text-field>

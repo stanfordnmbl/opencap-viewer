@@ -30,11 +30,15 @@
         </ValidationProvider>
 
         <v-btn
-          type="submit" 
+          type="submit"
           class="white--text mx-0 align-self-center"
           :disabled="(submitted && invalid) || loading"
           @click="onLogin()">Verify</v-btn>            
       </ValidationObserver>
+
+      <router-link class="text-center mt-6" @click.native="handleGoBack" :to="{ name: 'Login' }">
+        Back to Login
+      </router-link>
 
       <!--router-link
         class="mt-4 text-center"
@@ -71,7 +75,7 @@ export default {
       }
     },
     methods: {
-    ...mapActions('auth', ['verify', 'set_skip_forcing_otp']),
+    ...mapActions('auth', ['verify', 'set_skip_forcing_otp', 'logout']),
     ...mapActions('data', ['loadExistingSessions']),
     async onLogin () {
       this.loading = true
@@ -83,7 +87,7 @@ export default {
             console.log('onLogin:this.remember_device_flag', this.remember_device_flag)
           const remember_device_timestamp = localStorage.getItem('remember_device_timestamp')
           const valid_date = remember_device_timestamp != null ? parseInt(remember_device_timestamp) + 90*24*60*60*1000 >= Date.now() : false
-          let data = {otp_token: this.otp_token}
+          let data = {otp_token: this.otp_token.trim()}
           if (remember_device_timestamp && valid_date || this.remember_device_flag) {
             data.remember_device = true
           }
@@ -107,6 +111,9 @@ export default {
       }
 
       this.loading = false
+    },
+    async handleGoBack() {
+      this.logout();
     }
   }
 }
