@@ -104,6 +104,17 @@ export default {
   methods: {
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
+
+      if (this.isDropdownOpen) {
+        document.body.addEventListener('click', this.closeDropdownOnClickOutside);
+      } else {
+        document.body.removeEventListener('click', this.closeDropdownOnClickOutside);
+      }
+    },
+    closeDropdownOnClickOutside(event) {
+      if (!this.$el.contains(event.target)) {
+        this.isDropdownOpen = false;
+      }
     },
     showHelp() {
       // Add your help logic here
@@ -112,6 +123,9 @@ export default {
     logoutAction() {
       this.logout();
     }
+  },
+  beforeDestroy() {
+    document.body.removeEventListener('click', this.closeDropdownOnClickOutside);
   }
 };
 </script>
