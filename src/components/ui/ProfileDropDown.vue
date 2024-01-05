@@ -99,6 +99,7 @@ export default {
   data() {
     return {
       isDropdownOpen: false,
+      profileImage: '/images/Default_pfp.svg',
     };
   },
   methods: {
