@@ -19,21 +19,8 @@
 
       <QRCodeDialog/>
 
-      <v-btn
-        href="https://github.com/stanfordnmbl/opencap-core"
-        target="_blank"
-        text>
-        <span class="mr-2">Find on GitHub</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
+    <profile-dropdown v-if="verified" class="ml-8"></profile-dropdown>
 
-      <v-btn
-        v-if="loggedIn"
-        @click="logout"
-        text>
-        <span class="mr-2">LOGOUT</span>
-        <v-icon>mdi-logout</v-icon>
-      </v-btn>      
     </v-app-bar>
 
     <v-main>      
@@ -45,10 +32,13 @@
 <script>
 import { mapActions, mapState } from 'vuex'
 import QRCodeDialog from './components/ui/QRCodeDialog.vue'
+import ProfileDropdown from './components/ui/ProfileDropDown.vue';
 
 export default {
   name: 'App',
-  components: {QRCodeDialog},
+  components: {
+    QRCodeDialog,
+    'profile-dropdown': ProfileDropdown},
   computed: {
     ...mapState({
       loggedIn: state => state.auth.loggedIn,
