@@ -455,10 +455,10 @@ export default {
           // If current user, update profile picture state. If not, not update (so only picture in profile, and not in
           // dropdown, is changed. In this case, we assign and show default image.
           if (this.username_param === this.username) {
-            this.set_profile_picture_url({profile_picture_url: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg"})
-            this.current_user_page_profile_url = "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg"
+            this.set_profile_picture_url({profile_picture_url: '/images/Default_pfp.svg'})
+            this.current_user_page_profile_url = '/images/Default_pfp.svg'
           } else {
-            this.current_user_page_profile_url = "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg"
+            this.current_user_page_profile_url = '/images/Default_pfp.svg'
           }
         // If current user, update profile picture state. If not, not update (so only picture in profile, and not in
         // dropdown, is changed. In this case we assign and show user's uploaded profile image.
