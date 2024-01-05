@@ -38,14 +38,20 @@
           </a>
           <a target="_blank" href="https://github.com/stanfordnmbl/opencap-core">
             <li>
-                  <i class="mdi mdi-forum inline-icon"></i>
+                  <i class="mdi mdi-source-repository inline-icon"></i>
                   Find on GitHub
+            </li>
+          </a>
+          <a target="_blank" href="https://github.com/stanfordnmbl/opencap-processing">
+            <li>
+                  <i class="mdi mdi-file-chart inline-icon"></i>
+                  Data Analysis and Processing
             </li>
           </a>
           <a target="_blank" href="https://www.opencap.ai/best-practices">
             <li>
                 <i class="mdi mdi-help inline-icon"></i>
-                Help
+                Best Practices
             </li>
           </a>
           <a target="_blank" href="https://mobilize.stanford.edu/wp-content/uploads/2022/12/OpenCap-QA-Final.pdf">
@@ -57,16 +63,16 @@
           <a target="_blank" href="https://www.opencap.ai/terms-conditions">
             <li>
                   <i class="mdi mdi-file-document-edit inline-icon"></i>
-                  Terms of Service
+                  Terms and Conditions
             </li>
           </a>
           <a target="_blank" href="https://docs.google.com/document/d/1DBw9LVAuUwgz713037VQjsaD8sj2-AN_hzga_7kXtXI/edit">
             <li>
                 <i class="mdi mdi-eye inline-icon"></i>
-                Data Privacy
+                Data Privacy and Security
             </li>
           </a>
-          <a target="_blank" href="https://github.com/stanfordnmbl/opencap-viewer/issues">
+          <a target="_blank" href="https://github.com/stanfordnmbl/opencap-core/issues">
             <li>
                 <i class="mdi mdi-bug inline-icon"></i>
                 Bug Report
