@@ -129,9 +129,6 @@ export default {
     async register ({ commit }, data) {
       await axios.post('/register/', data)
     },
-    async updateProfile ({ commit }, data) {
-      await axios.post('/update_profile/', data)
-    },
     async reset({commit }, {email}) {
       var host = window.location.protocol + "//" + window.location.host;
       return await axios.post('/reset-password/', {email, host})

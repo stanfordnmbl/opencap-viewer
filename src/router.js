@@ -18,7 +18,6 @@ import ResetPassword from '@/components/pages/ResetPassword'
 import NewPassword from '@/components/pages/NewPassword'
 import RecycleBin from "@/components/pages/RecycleBin.vue";
 import Subjects from "@/components/pages/Subjects.vue";
-import ProfilePage from '@/components/pages/ProfilePage'
 
 Vue.use(Router)
 
@@ -106,11 +105,6 @@ var router = new Router({
       path: '/subjects',
       name: 'Subjects',
       component: Subjects
-    },
-    {
-      path: '/profile/:username/',
-      name: 'ProfilePage',
-      component: ProfilePage
     }
   ]
 })
@@ -122,8 +116,7 @@ const routesWithOutAuth = [
   'ResetPassword',
   'NewPassword',
   'Dashboard',
-  'AnalysisDashboard',
-  'ProfilePage'
+  'AnalysisDashboard'
   // 'Step4'
   
 ]
@@ -151,8 +144,7 @@ const acceptedRoutes = [
   'ResetPassword',
   'NewPassword',
   'RecycleBin',
-  'Subjects',
-  'ProfilePage'
+  'Subjects'
 ]
 
 router.beforeEach((to, from, next) => {
