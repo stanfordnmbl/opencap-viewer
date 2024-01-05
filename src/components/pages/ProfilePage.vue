@@ -14,7 +14,7 @@
                 <v-col align="center" justify="center">
                   <v-img
                     max-width="50%"
-                    src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg"
+                    src="/images/Default_pfp.svg"
                     alt="Profile Picture"
                     class="rounded-circle img-fluid mt-4">
                   </v-img>

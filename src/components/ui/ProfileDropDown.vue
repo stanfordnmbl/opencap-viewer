@@ -98,7 +98,7 @@ export default {
   data() {
     return {
       isDropdownOpen: false,
-      profileImage: 'https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg',
+      profileImage: '/images/Default_pfp.svg',
     };
   },
   methods: {
