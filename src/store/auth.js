@@ -57,6 +57,7 @@ export default {
           let res = await axios.post('/get_user_info/', {
             username: localStorage.getItem('auth_user')
           })
+
           if(res.data.profile_picture)
             dispatch('set_profile_picture_url', {profile_picture_url: res.data.profile_picture})
         } catch (error) {
@@ -90,7 +91,8 @@ export default {
         let res = await axios.post('/get_user_info/', {
           username: username
         })
-       dispatch('set_profile_picture_url', {profile_picture_url: res.data.profile_picture})
+        if(res.data.profile_picture)
+          dispatch('set_profile_picture_url', {profile_picture_url: res.data.profile_picture})
       } catch (error) {
         apiError("Error retrieving user info.")
       }
