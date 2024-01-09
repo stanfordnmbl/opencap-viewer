@@ -10,7 +10,7 @@ export default {
     verified: false,
     username: '',
     user_id: '',
-    profile_picture_url: '',
+    profile_picture_url: '/images/Default_pfp.svg',
     sessionTime: 1000 * 60 * 60 * 12,
     remember_device_flag: false,
     skip_forcing_otp: false
@@ -57,7 +57,8 @@ export default {
           let res = await axios.post('/get_user_info/', {
             username: localStorage.getItem('auth_user')
           })
-         dispatch('set_profile_picture_url', {profile_picture_url: res.data.profile_picture})
+          if(res.data.profile_picture)
+            dispatch('set_profile_picture_url', {profile_picture_url: res.data.profile_picture})
         } catch (error) {
           apiError("Error retrieving user info.")
         }

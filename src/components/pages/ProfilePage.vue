@@ -296,8 +296,8 @@
           </div>
         </div>
 
-          <div v-if="changingImage" class="popup">
-              <div class="popup-content">
+          <div v-if="changingImage" class="popup" @click="function(){changingImage = false;}">
+              <div class="popup-content" @click.stop>
                 <h2>Upload Image</h2>
                 <img class="profile-image-preview rounded-circle img-fluid mt-4" v-if="selectedImage" :src="selectedImage" alt="Uploaded Image">
                 <br/>
@@ -382,7 +382,16 @@ export default {
     },
     handleChangeImage() {
       this.changingImage = true;
-      console.log(this.changingImage);
+      if (this.changingImage) {
+        document.body.addEventListener('click', this.closePopupOnClickOutside);
+      } else {
+        document.body.removeEventListener('click', this.closePopupOnClickOutside);
+      }
+    },
+    closePopupOnClickOutside(event) {
+      if (!this.$el.contains(event.target)) {
+        this.changingImage = false;
+      }
     },
     handleImageUploaded(event) {
       this.selectedImageFile = event.target.files[0];
