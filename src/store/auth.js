@@ -60,6 +60,8 @@ export default {
 
           if(res.data.profile_picture)
             dispatch('set_profile_picture_url', {profile_picture_url: res.data.profile_picture})
+          else
+            dispatch('set_profile_picture_url', {profile_picture_url: '/images/Default_pfp.svg'})
         } catch (error) {
           apiError("Error retrieving user info.")
         }
@@ -93,6 +95,9 @@ export default {
         })
         if(res.data.profile_picture)
           dispatch('set_profile_picture_url', {profile_picture_url: res.data.profile_picture})
+        else
+          dispatch('set_profile_picture_url', {profile_picture_url: '/images/Default_pfp.svg'})
+
       } catch (error) {
         apiError("Error retrieving user info.")
       }
