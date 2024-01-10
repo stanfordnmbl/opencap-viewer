@@ -14,10 +14,12 @@
                 <v-col align="center" justify="center">
                   <v-img
                     max-width="50%"
-                    src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg"
+                    :src="current_user_page_profile_url"
                     alt="Profile Picture"
-                    class="rounded-circle img-fluid mt-4">
+                    class="rounded-circle img-fluid mt-4 mb-8">
                   </v-img>
+                  <v-btn v-if="editable" @click="handleChangeImage">Change image</v-btn>
+                  <br v-if="editable"/>
                   <button @click="handleShareProfileClick">
                     <v-card-title align="center" justify="center" class="justify-center pb-0">
                       {{ username_param }} <i class="mdi mdi-share ml-1 me-1 vertical-middle"></i>
@@ -294,8 +296,23 @@
           </div>
         </div>
 
+          <div v-if="changingImage" class="popup" @click="function(){changingImage = false;}">
+              <div class="popup-content" @click.stop>
+                <h2>Upload Image</h2>
+                <img class="profile-image-preview rounded-circle img-fluid mt-4" v-if="selectedImage" :src="selectedImage" alt="Uploaded Image">
+                <br/>
+                <input type="file" @change="handleImageUploaded" accept="image/*">
+                <br/>
+                <v-btn class="my-4" @click="handleSaveImage()">Save Image</v-btn>
+                <br/>
+                <router-link class="text-center mt-6" @click.native="handleDiscard" :to="{ name: 'ProfilePage', params: { username: this.username } }">
+                  Discard Changes
+                </router-link>
+              </div>
+          </div>
 
         </div>
+
         <div v-else>
           The user "{{username_param}}" does not exist.
         </div>
@@ -321,7 +338,8 @@ export default {
   },
   computed: {
     ...mapState({
-      username: state => state.auth.username
+      username: state => state.auth.username,
+      profile_picture_url: state => state.auth.profile_picture_url
     }),
   },
   data() {
@@ -343,10 +361,15 @@ export default {
       editable: false,
       userExist: true,
       username_param: '',
+      changingImage: false,
+      selectedImage: null,
+      profile_picture: null,
+      selectedImageFile: null,
+      current_user_page_profile_url: '',
     };
   },
   methods: {
-    ...mapActions("auth", ["updateProfile"]),
+    ...mapActions("auth", ["updateProfile", "updateProfilePicture", "set_profile_picture_url"]),
     handleShareProfileClick() {
       copyProfileUrlToClipboard(this.username_param);
     },
@@ -355,6 +378,53 @@ export default {
     },
     handleDiscard() {
       this.editing_profile = false;
+      this.changingImage = false;
+    },
+    handleChangeImage() {
+      this.changingImage = true;
+      if (this.changingImage) {
+        document.body.addEventListener('click', this.closePopupOnClickOutside);
+      } else {
+        document.body.removeEventListener('click', this.closePopupOnClickOutside);
+      }
+    },
+    closePopupOnClickOutside(event) {
+      if (!this.$el.contains(event.target)) {
+        this.changingImage = false;
+      }
+    },
+    handleImageUploaded(event) {
+      this.selectedImageFile = event.target.files[0];
+      if (this.selectedImageFile) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.selectedImage = reader.result;
+        };
+        reader.readAsDataURL(this.selectedImageFile);
+      }
+    },
+    async handleSaveImage() {
+      this.loading = true;
+
+      try {
+          const formData = new FormData();
+          formData.append('username', this.username);
+          formData.append('profile_picture', this.selectedImageFile);
+
+          await this.updateProfilePicture(formData);
+
+          // Fetch data again to update profile picture.
+          this.fetchData(this.username);
+
+          apiSuccess("Profile picture updated.");
+
+          this.changingImage = false;
+          this.loading = false;
+      } catch (error) {
+        apiError(error, "updating profile picture.");
+      }
+
+      this.loading = false;
     },
     async fetchData (username) {
       // Get username from url
@@ -383,8 +453,31 @@ export default {
         this.website = res.data.website;
         this.newsletter = res.data.newsletter;
         let countryFound = allCountries.find(country => country.name === this.country)
+
         if(countryFound)
           this.countryCode = countryFound['iso2'];
+
+        let profile_picture_url_from_server = res.data.profile_picture;
+
+        // If profile picture image is null or undefined, show default image.
+        if (profile_picture_url_from_server === undefined || profile_picture_url_from_server === null) {
+          // If current user, update profile picture state. If not, not update (so only picture in profile, and not in
+          // dropdown, is changed. In this case, we assign and show default image.
+          if (this.username_param === this.username) {
+            this.set_profile_picture_url({profile_picture_url: '/images/Default_pfp.svg'})
+            this.current_user_page_profile_url = '/images/Default_pfp.svg'
+          } else {
+            this.current_user_page_profile_url = '/images/Default_pfp.svg'
+          }
+        // If current user, update profile picture state. If not, not update (so only picture in profile, and not in
+        // dropdown, is changed. In this case we assign and show user's uploaded profile image.
+        } else if (this.username_param === this.username) {
+          this.set_profile_picture_url({profile_picture_url: profile_picture_url_from_server})
+          this.current_user_page_profile_url = profile_picture_url_from_server
+        } else {
+          this.current_user_page_profile_url = profile_picture_url_from_server
+        }
+
       } catch (error) {
         if (error.response.status === 404) {
         console.log(error)
@@ -439,6 +532,36 @@ export default {
 };
 </script>
 
-<style scoped>
-/* Add your component-specific styles here */
+<style>
+/* Style your popup as needed */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background: #222;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.profile-image-preview {
+  width: 20em;
+  height: 20em;
+  border-radius: 50%;
+}
 </style>

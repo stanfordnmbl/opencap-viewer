@@ -1,6 +1,6 @@
 <template>
   <div class="profile-dropdown mr-4" @click="toggleDropdown">
-    <img :src="profileImage" alt="Profile" class="profile-image" />
+    <img :src="profile_picture_url" alt="Profile" class="profile-image" />
     <transition name="fade">
       <div v-if="isDropdownOpen" class="dropdown-content">
         <ul>
@@ -98,13 +98,14 @@ export default {
   computed: {
     ...mapActions('auth', ['logout']),
     ...mapState({
-      username: state => state.auth.username
+      username: state => state.auth.username,
+      profile_picture_url: state => state.auth.profile_picture_url
     }),
   },
   data() {
     return {
       isDropdownOpen: false,
-      profileImage: 'https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg',
+      profileImage: '/images/Default_pfp.svg',
     };
   },
   methods: {

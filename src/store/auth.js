@@ -1,5 +1,6 @@
 import router from '@/router'
 import axios from 'axios'
+import { apiSuccess, apiError } from "@/util/ErrorMessage.js";
 import Vue from "vue";
 
 export default {
@@ -9,6 +10,7 @@ export default {
     verified: false,
     username: '',
     user_id: '',
+    profile_picture_url: '/images/Default_pfp.svg',
     sessionTime: 1000 * 60 * 60 * 12,
     remember_device_flag: false,
     skip_forcing_otp: false
@@ -27,6 +29,9 @@ export default {
     },
     setSkipForcingOTP (state, {value}) {
       state.skip_forcing_otp = value
+    },
+    setProfilePicture (state, {value}) {
+      state.profile_picture_url = value
     }
   },
   actions: {
@@ -39,18 +44,33 @@ export default {
         verified: verified
       })
 
-      if (verified && token && new Date() < date) {        
+      if (verified && token && new Date() < date) {
         axios.defaults.headers.common['Authorization'] = 'Token ' + token
-          commit('setLoggedIn', {
-              loggedIn: true,
-              username: localStorage.getItem('auth_user'),
-              user_id: localStorage.getItem('auth_user_id'),
+        commit('setLoggedIn', {
+            loggedIn: true,
+            username: localStorage.getItem('auth_user'),
+            user_id: localStorage.getItem('auth_user_id'),
+        })
+
+
+        try {
+          let res = await axios.post('/get_user_info/', {
+            username: localStorage.getItem('auth_user')
           })
+
+          if(res.data.profile_picture)
+            dispatch('set_profile_picture_url', {profile_picture_url: res.data.profile_picture})
+          else
+            dispatch('set_profile_picture_url', {profile_picture_url: '/images/Default_pfp.svg'})
+        } catch (error) {
+          apiError("Error retrieving user info.")
+        }
+
         // await dispatch('data/loadExistingSessions', {reroute: false, quantity: 20}, { root: true })
         // await dispatch('data/loadSubjects', null, { root: true })
       }
     },
-    async login ({ state, commit }, { username, password }) {
+    async login ({ state, commit, dispatch }, { username, password }) {
       let res = await axios.post('/login/', {
         username,
         password
@@ -68,6 +88,19 @@ export default {
       commit('setSkipForcingOTP', { value: res.data.otp_challenge_sent })
 
       axios.defaults.headers.common['Authorization'] = `Token ${res.data.token}`
+
+      try {
+        let res = await axios.post('/get_user_info/', {
+          username: username
+        })
+        if(res.data.profile_picture)
+          dispatch('set_profile_picture_url', {profile_picture_url: res.data.profile_picture})
+        else
+          dispatch('set_profile_picture_url', {profile_picture_url: '/images/Default_pfp.svg'})
+
+      } catch (error) {
+        apiError("Error retrieving user info.")
+      }
 
       commit('setLoggedIn', {
         loggedIn: true,
@@ -132,12 +165,18 @@ export default {
     async updateProfile ({ commit }, data) {
       await axios.post('/update_profile/', data)
     },
+    async updateProfilePicture ({ commit }, data) {
+      await axios.post('/update_profile_picture/', data)
+    },
     async reset({commit }, {email}) {
       var host = window.location.protocol + "//" + window.location.host;
       return await axios.post('/reset-password/', {email, host})
     },
     async new_password({ commit }, data) {
       return await axios.post('/new-password/', data)
+    },
+    set_profile_picture_url({ commit }, data) {
+      commit('setProfilePicture', { value: data.profile_picture_url })
     }
   }
 }
