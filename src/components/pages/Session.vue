@@ -509,7 +509,7 @@ var a2 = 2;
 const objLoader = new OBJLoader();
 
 export default {
-    name: 'Step5',
+    name: 'Session',
     components: {
         Status,
         VideoNavigation,
@@ -724,7 +724,7 @@ export default {
     },
     methods: {
         ...mapMutations('data', [
-            'setStep5',
+            'setSession',
             'clearAll',
             'setSessionId',
             'addTrial',
@@ -749,7 +749,7 @@ export default {
 
                         try {
                             // store in vuex
-                            this.setStep5(this.trialName)
+                            this.setSession(this.trialName)
 
                             // api
                             const res = await axios.get(`/sessions/${this.session.id}/record/`, {
@@ -925,7 +925,7 @@ export default {
         },
         newSession() {
             this.clearAll()
-            this.$router.push({ name: 'Step1' })
+            this.$router.push({ name: 'ConnectDevices' })
         },
         setPublic(p) {
             console.log(p)
@@ -933,7 +933,7 @@ export default {
         },
         async newSessionSameSetup() {
             await this.initSessionSameSetup()
-            this.$router.push({ name: 'Step4', params: { id: this.session.id } })
+            this.$router.push({ name: 'Neutral', params: { id: this.session.id } })
         },
         startPoll() {
             this.statusPoll = window.setTimeout(async () => {

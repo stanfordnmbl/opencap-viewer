@@ -2,7 +2,7 @@
   <div class="select-session d-flex flex-column">
     <div class="pa-2 d-flex">
       <v-btn
-        @click="$router.push({ name: 'Step1' })">
+        @click="$router.push({ name: 'ConnectDevices' })">
         New session
       </v-btn>
 
@@ -322,7 +322,7 @@ export default {
         await this.loadExistingSessions({reroute: true, quantity:-1})
       } catch (error) {
         apiError(error)
-        this.$router.push({ name: 'Step1' })
+        this.$router.push({ name: 'ConnectDevices' })
       }
     },
     async trashSession (id) {

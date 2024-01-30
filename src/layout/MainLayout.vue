@@ -52,11 +52,11 @@ export default {
   data () {
     return {
       routes: [
-        { title: 'Step 1', path: '/step1' },
-        { title: 'Step 2', path: '/step2' },
+        { title: 'Connect Devices', path: '/connect-devices' },
+        { title: 'Calibration', path: '/calibration' },
         { title: 'Step 3', path: '/step3' },
-        { title: 'Step 4', path: '/step4' },
-        { title: 'Step 5', path: '/step5' }
+        { title: 'Neutral', path: '/neutral' },
+        { title: 'Session', path: '/session' }
       ]
     }
   },

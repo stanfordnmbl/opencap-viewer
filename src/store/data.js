@@ -206,18 +206,18 @@ export default {
         // Vue.set(state.analysisFunctions, index, analysisFunction);
       }
     },
-    setStep1 (state, { cameras }) {
+    setConnectDevices (state, { cameras }) {
       state.cameras = cameras
     },
-    setStep2 (state, { rows, cols, squareSize }) {
+    setCalibration (state, { rows, cols, squareSize }) {
       state.rows = rows
       state.cols = cols
       state.squareSize = squareSize
     },
-    setStep3 (state, trialId) {
+    setTrialId (state, trialId) {
       state.trialId = trialId
     },
-    setStep4 (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model }) {
+    setNeutral (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model }) {
       // state.identifier = identifier
       // state.weight = weight
       // state.height = height
@@ -229,7 +229,7 @@ export default {
       state.openSimModel = openSimModel
       state.augmenter_model = augmenter_model
     },
-    setStep5 (state, { trialName }) {
+    setSession (state, { trialName }) {
       state.trialName = trialName
     },
     clearAll (state) {
@@ -375,7 +375,7 @@ export default {
           console.log('rerouting to select session')
           router.push({ name: 'SelectSession' })
         } else {
-          router.push({ name: 'Step1' })
+          router.push({ name: 'ConnectDevices' })
         }  
       }
     },
