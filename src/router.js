@@ -7,7 +7,6 @@ import Verify from '@/components/pages/Verify'
 import Register from '@/components/pages/Register'
 import ConnectDevices from '@/components/pages/ConnectDevices'
 import Calibration from '@/components/pages/Calibration'
-import Step3 from '@/components/pages/Step3'
 import Neutral from '@/components/pages/Neutral'
 import Session from '@/components/pages/Session'
 import SelectSession from '@/components/pages/SelectSession'
@@ -61,11 +60,6 @@ var router = new Router({
       path: '/:id/calibration',
       name: 'Calibration',
       component: Calibration
-    },
-    {
-      path: '/:id/step3',
-      name: 'Step3',
-      component: Step3
     },
     {
       path: '/:id/neutral',
@@ -130,7 +124,6 @@ const routesWithOutAuth = [
 const routesRequireSession = [
   'ConnectDevicesForId',
   'Calibration',
-  'Step3',
   'Neutral'
 ]
 
@@ -142,7 +135,6 @@ const acceptedRoutes = [
   'ConnectDevices',
   'ConnectDevicesForId',
   'Calibration',
-  'Step3',
   'Neutral',
   'Session',
   'Dashboard',

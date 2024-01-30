@@ -54,7 +54,6 @@ export default {
       routes: [
         { title: 'Connect Devices', path: '/connect-devices' },
         { title: 'Calibration', path: '/calibration' },
-        { title: 'Step 3', path: '/step3' },
         { title: 'Neutral', path: '/neutral' },
         { title: 'Session', path: '/session' }
       ]

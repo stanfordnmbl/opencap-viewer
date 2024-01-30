@@ -724,7 +724,7 @@ export default {
     },
     methods: {
         ...mapMutations('data', [
-            'setSession',
+            'setSessionStep5',
             'clearAll',
             'setSessionId',
             'addTrial',
@@ -749,7 +749,7 @@ export default {
 
                         try {
                             // store in vuex
-                            this.setSession(this.trialName)
+                            this.setSessionStep5(this.trialName)
 
                             // api
                             const res = await axios.get(`/sessions/${this.session.id}/record/`, {

@@ -229,7 +229,7 @@ export default {
       state.openSimModel = openSimModel
       state.augmenter_model = augmenter_model
     },
-    setSession (state, { trialName }) {
+    setSessionStep5 (state, { trialName }) {
       state.trialName = trialName
     },
     clearAll (state) {
