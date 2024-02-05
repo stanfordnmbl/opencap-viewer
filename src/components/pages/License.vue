@@ -8,13 +8,13 @@
         <v-card-text>
           <h3 class="white--text text-center" v-if="!secondaryMessage">
             OpenCap is free for academic research and educational use
-            (link <a href="https://www.opencap.ai/terms-conditions">Terms</a>).
+            (<a href="https://www.opencap.ai/terms-conditions" style="color: #7799cf; text-decoration: underline;" >Terms & Conditions</a>).
             Please identify how you use / intend to use OpenCap:</h3>
           <h3 class="white--text text-center" v-else>
             Your previously indicated that you intended to use OpenCap for
             an application not permitted by the OpenCap license. Has you intended use changed?
             OpenCap is free for academic research and educational use
-            (link <a href="https://www.opencap.ai/terms-conditions">Terms</a>).
+            (<a href="https://www.opencap.ai/terms-conditions" style="color: #7799cf; text-decoration: underline;" >Terms & Conditions</a>).
             Please identify how you use / intend to use OpenCap:</h3>
 
           <v-radio-group v-model="institutionalUse" @change="submit(false)">
