@@ -371,12 +371,17 @@ export default {
       }
 
       if (reroute) {
-        if (state.sessions.length > 0) {
-          console.log('rerouting to select session')
-          router.push({ name: 'SelectSession' })
+        let institutionalUse = localStorage.getItem('institutional_use')
+        if (institutionalUse === '' || institutionalUse === 'patient_care' || institutionalUse === 'sports_performance_assessment' || institutionalUse === 'use_in_company') {
+          router.push({name: 'License'})
         } else {
-          router.push({ name: 'Step1' })
-        }  
+          if (state.sessions.length > 0) {
+            console.log('rerouting to select session')
+            router.push({ name: 'SelectSession' })
+          } else {
+            router.push({ name: 'Step1' })
+          }
+        }
       }
     },
     async loadSubjects ({ state, commit }) {
