@@ -305,7 +305,7 @@
           <v-col align="center" justify="center" class="mt-8">
             <v-row align="center" justify="center">
               <p>
-                Remove your account and all data associated to it. This includes every session, trial, subject and result that you have ever created.
+                Remove your account and all associated data. This includes every session, trial, subject, and result that you have ever created. This process is irreversible.
               </p>
             </v-row>
             <v-row align="center" justify="center">
@@ -326,14 +326,14 @@
               <div class="popup-content" @click.stop>
                 <h2 style="color: #f44336!important;">Delete Account</h2>
                 <br/>
-                <span style="color: #f44336!important;">DANGER!</span> This action will remove your account and all of the
+                <span style="color: #f44336!important;">WARNING!</span> This action will permanently remove your account and all
                 <br/>
-                 data associated to it.This includes every session and every
+                associated data. This includes every session, trial, subject,
                 <br/>
-                trial and subject you have ever created.
+                and result you have ever created. This process is irreversible.
                 <br/>
                 <br/>
-                To remove you account, please type in your username in the
+                If you wish to proceed, please type in your username in the
                 <br/>
                 following box and click on "Delete Account".
                 <br/>
