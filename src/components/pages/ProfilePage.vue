@@ -333,9 +333,7 @@
                 and result you have ever created. This process is irreversible.
                 <br/>
                 <br/>
-                If you wish to proceed, please type in your username in the
-                <br/>
-                following box and click on "Delete Account".
+                If you wish to proceed, please type in your username and click on "Delete Account".
                 <br/>
 
                 <div class="col-md-12">
