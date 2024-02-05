@@ -326,11 +326,11 @@
               <div class="popup-content" @click.stop>
                 <h2 style="color: #f44336!important;">Delete Account</h2>
                 <br/>
-                <span style="color: #f44336!important;">WARNING!</span> This action will permanently remove your account and all
+                <span style="color: #f44336!important;">WARNING!</span> This action will permanently remove your account and all associated data. 
                 <br/>
-                associated data. This includes every session, trial, subject,
+                This includes every session, trial, subject, and result you have ever created.
                 <br/>
-                and result you have ever created. This process is irreversible.
+                This process is irreversible.
                 <br/>
                 <br/>
                 If you wish to proceed, please type in your username and click on "Delete Account".
