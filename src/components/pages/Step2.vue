@@ -154,7 +154,6 @@ export default {
           }
           case "error": {
             const res_trial = await axios.get(`/trials/${this.trialId}/`)
-            this.$toasted.clear()
             apiErrorRes(res_trial, 'Finished with error')
             this.busy = false;
 
