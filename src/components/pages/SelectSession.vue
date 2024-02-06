@@ -238,6 +238,10 @@ export default {
       this.loadExistingSessions({reroute: false, quantity: -1})
       this.loadAnalysisDashboardList()
   },
+  mounted() {
+      this.$toasted.clear()
+      console.log("MOUNTED")
+  },
   data () {
     return {
       remove_dialog: false,
