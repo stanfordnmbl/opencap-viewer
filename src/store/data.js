@@ -67,6 +67,10 @@ export default {
       "non-binary": "Non-Binary/Non-Conforming",
       "prefer-not-respond": "Prefer not to respond",
     },
+    subjectTags: {
+      "unimpaired": "Unimpaired",
+      "impaired": "Impaired"
+    },
     isSyncDownloadAllowed: JSON.parse(localStorage.getItem("isSyncDownloadAllowed")),
     analysis: {}
   },
@@ -384,9 +388,26 @@ export default {
         }
       }
     },
-    async loadSubjects ({ state, commit }) {
-      const res = await axios.get('/subjects/')
-      commit('setSubjects', res.data)
+    async loadSubjects({ state, commit }) {
+      try {
+        const res = await axios.get('/subjects/');
+        const tagPromises = [];
+
+        for (let i = 0; i < res.data.length; i++) {
+          const tagPromise = axios.get(`/subject-tags/${res.data[i].id}/get_tags_subject/`)
+            .then((tags) => {
+              res.data[i].subject_tags = tags.data.map(tag => tag.tag);
+              console.log(res.data[i].subject_tags);
+            });
+
+          tagPromises.push(tagPromise);
+        }
+
+        await Promise.all(tagPromises); // Wait for all tag promises to resolve
+        commit('setSubjects', res.data);
+      } catch (error) {
+        console.error('Error loading subjects:', error);
+      }
     },
     async loadAnalysisFunctions({ state, commit }){
       const response = await axios.get('/analysis-functions/');
