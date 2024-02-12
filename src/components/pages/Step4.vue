@@ -383,6 +383,15 @@
               label="Gender (Optional)"
               :items="gendersOptions"
           ></v-select>
+          <v-select
+              clearable
+              multiple
+              v-model="edited_subject.subject_tags"
+              item-title="text"
+              item-value="value"
+              label="Subject Tags"
+              :items="tagsOptions"
+          ></v-select>
           <v-textarea
             v-model="edited_subject.characteristics"
             label="Characteristics (Optional)"
@@ -474,9 +483,9 @@ export default {
       },
       advancedSettingsDialog: false,
       new_subject_dialog: false,
-      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
+      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", subject_tags:"", characteristics:""},
       selected: null,
-      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
+      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", subject_tags:"", characteristics:""},
 
       sessionName: "",
       subject: null,
@@ -554,6 +563,7 @@ export default {
     ...mapState({
       subjects: (state) => state.data.subjects,
       session: (state) => state.data.session,
+      subjectTags: state => state.data.subjectTags,
       trialId: (state) => state.data.trialId,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
@@ -567,6 +577,7 @@ export default {
         display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.birth_year})`,
         name: s.name,
         birth_year: s.birth_year,
+        subject_tags: s.subject_tags,
         characteristics: s.characteristics,
         gender: s.gender,
         gender_display: this.genders[s.gender],
@@ -584,6 +595,9 @@ export default {
     },
     gendersOptions () {
       return Object.entries(this.genders).map((s) => ({ text: s[1], value: s[0] }))
+    },
+    tagsOptions () {
+      return Object.entries(this.subjectTags).map((s) => ({ text: s[1], value: s[0] }))
     },
     rightButtonCaption() {
       return this.imgs
