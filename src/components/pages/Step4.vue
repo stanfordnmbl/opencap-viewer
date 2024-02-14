@@ -208,6 +208,30 @@
                     v-bind:items="augmenter_models"
                   />
               </v-card-text>
+
+              <v-card-title class="justify-center data-title">
+                <span class="mr-2">Select filter frequency</span>
+                <v-tooltip bottom="" max-width="500px">
+                  <template v-slot:activator="{ on }">
+                    <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                  </template>
+                  OpenCap uses a low-pass Butterworth filter to smooth the 2D video keypoints. The filter frequency is the cutoff frequency of the filter.
+                  <br><br>                  
+                  By default, OpenCap uses a filter frequency of half the framerate (if the framerate is 60fps, the filter frequency is 30Hz), except for gait activities, for which the filter frequency is 12 Hz.
+                  <br><br>
+                  You can here select a different filter frequency. WARNING: this filter frequency will be applied to all motion trials of your session. As per the Nyquist Theorem, the filter frequency should be less than half the framerate.
+                  If you select a filter frequency higher than half the frame rate, we will use half the framerate as the filter frequency instead.
+                  <br><br>
+                  We recommend consulting the literature to find a suitable filter frequency for your specific task. If you are unsure, we recommend using the default filter frequency.
+                </v-tooltip>
+              </v-card-title>
+              <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+                <v-select
+                    v-model="filter_frequency"
+                    label="Filter frequency"
+                    v-bind:items="filter_frequencies"
+                  />
+              </v-card-text>
             </v-card>
           </v-dialog>
         </div>
@@ -219,7 +243,6 @@
 
       <v-card class="mb-0">
         <v-card-text style="padding-top: 0; padding-bottom: 0">
-        <p>
         <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded.</p>
         </v-card-text>
       </v-card>
