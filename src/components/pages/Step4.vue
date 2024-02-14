@@ -482,7 +482,7 @@
 <script>
 import axios from "axios";
 import { mapMutations, mapActions, mapState } from "vuex";
-import { apiError, apiSuccess, apiErrorRes, apiInfo, clearToastMessages } from "@/util/ErrorMessage.js";
+import { apiError, apiSuccess, apiErrorRes, apiWarning, apiInfo, clearToastMessages } from "@/util/ErrorMessage.js";
 import MainLayout from "@/layout/MainLayout";
 import ExampleImage from "@/components/ui/ExampleImage";
 
@@ -959,14 +959,15 @@ export default {
       const inputFrequency = parseFloat(this.tempFilterFrequency);
 
       if (!isNaN(inputFrequency) && inputFrequency > 0) {
+        
         if (inputFrequency > maxAllowedFrequency) {
           this.filter_frequency = `${maxAllowedFrequency}`;
-          // this.showWarning(`Filter frequency set to the maximum allowed ${maxAllowedFrequency}Hz.`);
+          apiWarning("Too large filter frequency. Using half the framerate {} instead.".format(maxAllowedFrequency));
         } else {
           this.filter_frequency = `${inputFrequency}`;
         }
       } else {
-        // this.showWarning("Invalid filter frequency. Using default.");
+        apiWarning("Invalid filter frequency. Using default.");
         this.filter_frequency = 'default';
       }
 
