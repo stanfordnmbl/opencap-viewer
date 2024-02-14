@@ -217,20 +217,25 @@
                   </template>
                   OpenCap uses a low-pass Butterworth filter to smooth the 2D video keypoints. The filter frequency is the cutoff frequency of the filter.
                   <br><br>                  
-                  By default, OpenCap uses a filter frequency of half the framerate (if the framerate is 60fps, the filter frequency is 30Hz), except for gait activities, for which the filter frequency is 12 Hz.
+                  By default, OpenCap uses a filter frequency of half the framerate (if the framerate is 60fps, the filter frequency is 30Hz), except for gait activities, for which the filter frequency is 12Hz.
                   <br><br>
-                  You can here select a different filter frequency. WARNING: this filter frequency will be applied to all motion trials of your session. As per the Nyquist Theorem, the filter frequency should be less than half the framerate.
+                  You can here select a different filter frequency. WARNING: this filter frequency will be applied to ALL motion trials of your session. As per the Nyquist Theorem, the filter frequency should be less than half the framerate.
                   If you select a filter frequency higher than half the frame rate, we will use half the framerate as the filter frequency instead.
                   <br><br>
-                  We recommend consulting the literature to find a suitable filter frequency for your specific task. If you are unsure, we recommend using the default filter frequency.
+                  We recommend consulting the literature to find a suitable filter frequency for your specific taska. If you are unsure, we recommend using the default filter frequency.
                 </v-tooltip>
               </v-card-title>
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
-                <v-select
-                    v-model="filter_frequency"
-                    label="Filter frequency"
-                    v-bind:items="filter_frequencies"
-                  />
+                <v-combobox
+                  v-model="filter_frequency"
+                  label="Filter frequency"
+                  :items="filter_frequencies"
+                  :allow-custom="true"
+                  :return-object="false"
+                  @input="validateFrequency"
+                  item-text="text"
+                  item-value="value"
+                ></v-combobox>
               </v-card-text>
             </v-card>
           </v-dialog>
@@ -536,6 +541,10 @@ export default {
         {"text": "v0.3 (default)", "value": "v0.3"},
         {"text": "v0.2 (old model, default until 07-30-2023)", "value": "v0.2"},
       ],
+      filter_frequency: 'default',
+      filter_frequencies: [        
+        {"text": "12Hz for gait activities, half the framerate otherwise (default)", "value": "default"},
+      ],
       busy: false,
       disabledNextButton: true,
       imgs: null,
@@ -729,6 +738,7 @@ export default {
             framerate: this.framerate,
             openSimModel: this.openSimModel,
             augmenter_model: this.augmenter_model,
+            filter_frequency: this.filter_frequency,
           });
           try {
             const resUpdate = await axios.get(
@@ -745,7 +755,8 @@ export default {
                   settings_framerate: this.framerate,
                   settings_session_name: this.sessionName,
                   settings_openSimModel: this.openSimModel,
-                  settings_augmenter_model: this.augmenter_model,                
+                  settings_augmenter_model: this.augmenter_model,
+                  settings_filter_frequency: this.filter_frequency,            
                 },
               }
             );
