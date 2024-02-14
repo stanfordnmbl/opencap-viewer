@@ -131,7 +131,7 @@
                 <v-btn color="primary-dark" @click="advancedSettingsDialog = false">✖</v-btn>
               </v-card-actions>
               <v-card-title class="justify-center data-title">
-                <span class="mr-2">Select human pose estimation model</span>
+                <span class="mr-2">Human pose estimation model</span>
                 <v-tooltip bottom="" max-width="500px">
                   <template v-slot:activator="{ on }">
                     <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
@@ -146,24 +146,24 @@
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="pose_model"
-                    label="Human pose estimation model"
+                    label="Select human pose estimation model"
                     v-bind:items="pose_models"
                   />
               </v-card-text>
   
               <v-card-title class="justify-center data-title">
-                Select framerate
+                Framerate
               </v-card-title>
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="framerate"
-                    label="Framerate"
+                    label="Select framerate"
                     v-bind:items="framerates_available"
                   />
               </v-card-text>
 
               <v-card-title class="justify-center data-title">
-                <span class="mr-2">Select musculoskeletal model</span>
+                <span class="mr-2">Musculoskeletal model</span>
                 <v-tooltip bottom="" max-width="500px">
                   <template v-slot:activator="{ on }">
                     <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
@@ -176,13 +176,13 @@
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="openSimModel"
-                    label="Musculoskeletal model"
+                    label="Select musculoskeletal model"
                     v-bind:items="openSimModels"
                   />
               </v-card-text>
 
               <v-card-title class="justify-center data-title">
-                <span class="mr-2">Select marker augmenter model</span>
+                <span class="mr-2">Marker augmenter model</span>
                 <v-tooltip bottom="" max-width="500px">
                   <template v-slot:activator="{ on }">
                     <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
@@ -204,13 +204,13 @@
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="augmenter_model"
-                    label="Marker augmenter model"
+                    label="Select marker augmenter model"
                     v-bind:items="augmenter_models"
                   />
               </v-card-text>
 
               <v-card-title class="justify-center data-title">
-                <span class="mr-2">Select filter frequency</span>
+                <span class="mr-2">Filter frequency</span>
                 <v-tooltip bottom="" max-width="500px">
                   <template v-slot:activator="{ on }">
                     <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
@@ -219,8 +219,8 @@
                   <br><br>                  
                   By default, OpenCap uses a filter frequency of half the framerate (if the framerate is 60fps, the filter frequency is 30Hz), except for gait activities, for which the filter frequency is 12Hz.
                   <br><br>
-                  You can here select a different filter frequency. WARNING: this filter frequency will be applied to ALL motion trials of your session. As per the Nyquist Theorem, the filter frequency should be less than half the framerate.
-                  If you select a filter frequency higher than half the frame rate, we will use half the framerate as the filter frequency instead.
+                  You can here enter a different filter frequency. WARNING: this filter frequency will be applied to ALL motion trials of your session. As per the Nyquist Theorem, the filter frequency should be less than half the framerate.
+                  If you enter a filter frequency higher than half the frame rate, we will use half the framerate as the filter frequency instead.
                   <br><br>
                   We recommend consulting the literature to find a suitable filter frequency for your specific taska. If you are unsure, we recommend using the default filter frequency.
                 </v-tooltip>
@@ -228,7 +228,7 @@
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-combobox
                   v-model="filter_frequency"
-                  label="Filter frequency"
+                  label="Enter frequency (Hz) or choose default"
                   :items="filter_frequencies"
                   :allow-custom="true"
                   :return-object="false"
@@ -949,6 +949,29 @@ export default {
       if(this.framerates_available.length == 0) {
         this.framerates_available.push({"text": "60fps (max recording time: 60s, default)", "value": 60})
       }
+    }
+  },
+  validateFrequency() {
+    // Assuming 'framerate' is accessible in your data or computed properties
+    const maxAllowedFrequency = this.framerate / 2;
+
+    // Convert input to a number for comparison, assuming filter_frequency is bound to a numeric value
+    let inputFrequency = Number(this.filter_frequency);
+
+    // Check if the input is a number and less than half the framerate
+    if (!isNaN(inputFrequency) && inputFrequency > maxAllowedFrequency) {
+      // Optionally, alert the user or handle this case as needed
+      console.warn(`Filter frequency should be less than half the framerate. Setting to ${maxAllowedFrequency}Hz.`);
+      
+      // Adjust the filter_frequency to the maximum allowed value
+      this.filter_frequency = `${maxAllowedFrequency}`;
+    }
+
+    // If the input is not a number or less than 0, reset to default or handle accordingly
+    if (isNaN(inputFrequency) || inputFrequency <= 0) {
+      console.warn("Invalid filter frequency. Please enter a positive number.");
+      // Reset to default or handle as needed
+      this.filter_frequency = 'default';
     }
   },
 };
