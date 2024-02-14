@@ -157,7 +157,7 @@
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="framerate"
-                    label="Select framerate"
+                    label="Select ramerate"
                     v-bind:items="framerates_available"
                   />
               </v-card-text>
@@ -227,14 +227,15 @@
               </v-card-title>
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-combobox
-                  v-model="filter_frequency"
-                  label="Enter frequency (Hz) or choose default"
-                  :items="filter_frequencies"
-                  :allow-custom="true"
-                  :return-object="false"
-                  @input="validateFrequency"
-                  item-text="text"
-                  item-value="value"
+                :key="componentKey"
+                v-model="tempFilterFrequency"
+                label="Filter frequency"
+                :items="filter_frequencies"
+                :allow-custom="true"
+                :return-object="false"
+                @blur="validateAndSetFrequency"
+                item-text="text"
+                item-value="value"
                 ></v-combobox>
               </v-card-text>
             </v-card>
@@ -579,7 +580,10 @@ export default {
 
       n_calibrated_cameras: 0,
       n_cameras_connected: 0,
-      n_videos_uploaded: 0
+      n_videos_uploaded: 0,
+
+      tempFilterFrequency: '', // Temporary input holder
+      componentKey: 0,
     };
   },
   computed: {
@@ -949,30 +953,29 @@ export default {
       if(this.framerates_available.length == 0) {
         this.framerates_available.push({"text": "60fps (max recording time: 60s, default)", "value": 60})
       }
-    }
-  },
-  validateFrequency() {
-    // Assuming 'framerate' is accessible in your data or computed properties
-    const maxAllowedFrequency = this.framerate / 2;
+    },
+    validateAndSetFrequency() {
+      const maxAllowedFrequency = this.framerate / 2;
+      const inputFrequency = parseFloat(this.tempFilterFrequency);
 
-    // Convert input to a number for comparison, assuming filter_frequency is bound to a numeric value
-    let inputFrequency = Number(this.filter_frequency);
+      if (!isNaN(inputFrequency) && inputFrequency > 0) {
+        if (inputFrequency > maxAllowedFrequency) {
+          this.filter_frequency = `${maxAllowedFrequency}`;
+          // this.showWarning(`Filter frequency set to the maximum allowed ${maxAllowedFrequency}Hz.`);
+        } else {
+          this.filter_frequency = `${inputFrequency}`;
+        }
+      } else {
+        // this.showWarning("Invalid filter frequency. Using default.");
+        this.filter_frequency = 'default';
+      }
 
-    // Check if the input is a number and less than half the framerate
-    if (!isNaN(inputFrequency) && inputFrequency > maxAllowedFrequency) {
-      // Optionally, alert the user or handle this case as needed
-      console.warn(`Filter frequency should be less than half the framerate. Setting to ${maxAllowedFrequency}Hz.`);
-      
-      // Adjust the filter_frequency to the maximum allowed value
-      this.filter_frequency = `${maxAllowedFrequency}`;
-    }
+      // Reset the temp input to reflect the validated value or clear it
+      this.tempFilterFrequency = this.filter_frequency;
 
-    // If the input is not a number or less than 0, reset to default or handle accordingly
-    if (isNaN(inputFrequency) || inputFrequency <= 0) {
-      console.warn("Invalid filter frequency. Please enter a positive number.");
-      // Reset to default or handle as needed
-      this.filter_frequency = 'default';
-    }
+      // Optional: Force reactivity if needed
+      this.componentKey += 1;
+    },
   },
 };
 </script>
