@@ -229,11 +229,11 @@
                 <v-combobox
                 :key="componentKey"
                 v-model="tempFilterFrequency"
-                label="Filter frequency"
+                label="Enter frequency (Hz) or choose default"
                 :items="filter_frequencies"
                 :allow-custom="true"
                 :return-object="false"
-                @blur="validateAndSetFrequency"
+                @change="validateAndSetFrequency"
                 item-text="text"
                 item-value="value"
                 ></v-combobox>
@@ -582,7 +582,7 @@ export default {
       n_cameras_connected: 0,
       n_videos_uploaded: 0,
 
-      tempFilterFrequency: '', // Temporary input holder
+      tempFilterFrequency: 'default', // Temporary input holder
       componentKey: 0,
     };
   },
@@ -956,25 +956,24 @@ export default {
     },
     validateAndSetFrequency() {
       const maxAllowedFrequency = this.framerate / 2;
-      const inputFrequency = parseFloat(this.tempFilterFrequency);
 
-      if (!isNaN(inputFrequency) && inputFrequency > 0) {
-        
-        if (inputFrequency > maxAllowedFrequency) {
-          this.filter_frequency = `${maxAllowedFrequency}`;
-          apiWarning("Too large filter frequency. Using half the framerate {} instead.".format(maxAllowedFrequency));
-        } else {
-          this.filter_frequency = `${inputFrequency}`;
-        }
-      } else {
-        apiWarning("Invalid filter frequency. Using default.");
+      if (this.tempFilterFrequency === 'default') {
         this.filter_frequency = 'default';
+      } else {
+        const inputFrequency = parseFloat(this.tempFilterFrequency);
+        if (!isNaN(inputFrequency) && inputFrequency > 0) {
+          if (inputFrequency > maxAllowedFrequency) {
+            this.filter_frequency = `${maxAllowedFrequency}`;
+            apiWarning("Too large filter frequency. Using half the framerate (" + maxAllowedFrequency + "Hz) instead.");
+          } else {
+            this.filter_frequency = `${inputFrequency}`;
+          }
+        } else {
+          apiWarning("Invalid filter frequency. Using default.");
+          this.filter_frequency = 'default';
+        }
       }
-
-      // Reset the temp input to reflect the validated value or clear it
       this.tempFilterFrequency = this.filter_frequency;
-
-      // Optional: Force reactivity if needed
       this.componentKey += 1;
     },
   },
