@@ -544,7 +544,7 @@ export default {
       ],
       filter_frequency: 'default',
       filter_frequencies: [        
-        {"text": "12Hz for gait activities, half the framerate otherwise (default)", "value": "default"},
+        {"text": "12Hz for gait, half the framerate otherwise (default)", "value": "default"},
       ],
       busy: false,
       disabledNextButton: true,
