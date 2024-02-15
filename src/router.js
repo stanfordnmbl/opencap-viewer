@@ -167,6 +167,11 @@ router.beforeEach((to, from, next) => {
   if (store.state.auth.loggedIn) {
     // If the user has verified their identity.
     if(store.state.auth.verified) {
+      let institutionalUse = localStorage.getItem('institutional_use')
+      if (to.name !== 'License' && (institutionalUse === '' || institutionalUse === 'patient_care' || institutionalUse === 'sports_performance_assessment' || institutionalUse === 'use_in_company')) {
+        next({ name: 'License' })
+      }
+
       // If there are no sessions and the next route requires at least one, go to step1 to create a session.
       if (!store.state.data.session && routesRequireSession.includes(to.name)) {
         next({ name: 'Step1' })
