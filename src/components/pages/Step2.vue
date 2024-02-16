@@ -144,7 +144,7 @@ export default {
             this.n_calibrated_cameras = resCalibratedCameras.data.data
 
             if (this.n_calibrated_cameras < 2) {
-              apiError(this.n_calibrated_cameras + " device(s) connected to the session and 2+ devices are required, please re-pair your devices using qr code at top of page.");
+              apiError(this.n_calibrated_cameras + " device(s) connected to the session and 2+ devices are required, please re-pair your devices using qr code at top of page.", 10000);
               this.busy = false
             } else {
               apiSuccess(this.n_calibrated_cameras + " devices calibrated successfully.", 5000);
@@ -154,7 +154,6 @@ export default {
           }
           case "error": {
             const res_trial = await axios.get(`/trials/${this.trialId}/`)
-            this.$toasted.clear()
             apiErrorRes(res_trial, 'Finished with error')
             this.busy = false;
 
@@ -171,7 +170,7 @@ export default {
               this.n_calibrated_cameras = resCalibratedCameras.data.data
 
               if (this.n_calibrated_cameras < 2) {
-                apiError(this.n_calibrated_cameras + " device(s) connected to the session and 2+ devices are required, please re-pair the devices using qr code at top of page.");
+                apiError(this.n_calibrated_cameras + " device(s) connected to the session and 2+ devices are required, please re-pair the devices using qr code at top of page.", 10000);
                 this.busy = false
               } else {
                 apiInfo("Processing.");
