@@ -45,6 +45,7 @@ export default {
     framerate: 60,
     openSimModel: 'LaiUhlrich2022',
     augmenter_model: 'v0.3',
+    filter_frequency: 'default',
 
     // step 5
     trialName: '',
@@ -217,7 +218,7 @@ export default {
     setStep3 (state, trialId) {
       state.trialId = trialId
     },
-    setStep4 (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model }) {
+    setStep4 (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model, filter_frequency }) {
       // state.identifier = identifier
       // state.weight = weight
       // state.height = height
@@ -228,6 +229,7 @@ export default {
       state.pose_model = pose_model
       state.openSimModel = openSimModel
       state.augmenter_model = augmenter_model
+      state.filter_frequency = filter_frequency
     },
     setStep5 (state, { trialName }) {
       state.trialName = trialName
@@ -251,6 +253,7 @@ export default {
       state.pose_model = 'openpose'
       state.openSimModel = 'LaiUhlrich2022'
       state.augmenter_model = 'v0.3'
+      state.filter_frequency = 'default'
       // step 5
       state.trialName = ''       
     },
