@@ -157,7 +157,7 @@
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="framerate"
-                    label="Select ramerate"
+                    label="Select framerate"
                     v-bind:items="framerates_available"
                   />
               </v-card-text>
