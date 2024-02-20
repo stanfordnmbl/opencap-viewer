@@ -956,8 +956,11 @@ export default {
       }
     },
     updateFrequency() {
-      if (this.filter_frequency > (this.framerate / 2)) {
-        this.filter_frequency = this.framerate / 2
+      const maxAllowedFrequency = this.framerate / 2;
+      if (this.filter_frequency > maxAllowedFrequency) {
+        this.filter_frequency = maxAllowedFrequency
+        this.tempFilterFrequency = maxAllowedFrequency
+        apiWarning("Too large filter frequency. Using half the framerate (" + maxAllowedFrequency + "Hz) instead.");
       }
     },
     validateAndSetFrequency() {
