@@ -159,6 +159,7 @@
                     v-model="framerate"
                     label="Select framerate"
                     v-bind:items="framerates_available"
+                    @change="updateFrequency"
                   />
               </v-card-text>
 
@@ -952,6 +953,11 @@ export default {
       // If not, or we did not recognize them (different to 60, 120 or 240), set 60 as default.
       if(this.framerates_available.length == 0) {
         this.framerates_available.push({"text": "60fps (max recording time: 60s, default)", "value": 60})
+      }
+    },
+    updateFrequency() {
+      if (this.filter_frequency > (this.framerate / 2)) {
+        this.filter_frequency = this.framerate / 2
       }
     },
     validateAndSetFrequency() {
