@@ -2,7 +2,16 @@
   <div class="scalar-wrapper">
     <div v-for="(row, row_name, row_idx) in result.metrics" :key="row_idx"
          :class="row.classes">
-      <h2 class="h5 plot-caption">{{ row.label }}</h2>
+      <h2 class="h5 plot-caption">
+        {{ row.label }}
+
+        <v-tooltip bottom v-if="row.info">
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+          </template>
+          <p v-html="row.info.replace(/\n/g, '<br>')" />
+        </v-tooltip>
+      </h2>
 
       <div class="scalar-plot-container d-flex" style="margin-top: 45px;margin-bottom: 55px;">
         <div class="scalar-plot-bar scalar-plot-bar-left text-right" :style="buildBarStyles(row, 'left')">
