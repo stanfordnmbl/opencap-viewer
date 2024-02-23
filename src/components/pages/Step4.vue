@@ -221,9 +221,9 @@
                   By default, OpenCap uses a filter frequency of half the framerate (if the framerate is 60fps, the filter frequency is 30Hz), except for gait activities, for which the filter frequency is 12Hz.
                   <br><br>
                   You can here enter a different filter frequency. WARNING: this filter frequency will be applied to ALL motion trials of your session. As per the Nyquist Theorem, the filter frequency should be less than half the framerate.
-                  If you enter a filter frequency higher than half the frame rate, we will use half the framerate as the filter frequency instead.
+                  If you enter a filter frequency higher than half the framerate, we will use half the framerate as the filter frequency instead.
                   <br><br>
-                  We recommend consulting the literature to find a suitable filter frequency for your specific taska. If you are unsure, we recommend using the default filter frequency.
+                  We recommend consulting the literature to find a suitable filter frequency for your specific tasks. If you are unsure, we recommend using the default filter frequency.
                 </v-tooltip>
               </v-card-title>
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
