@@ -62,7 +62,7 @@ export default {
     }
   },
   async mounted () {
-    apiInfo("Please update the iOS app to build 1.6 (29), the previous release contained a bug.");
+    // apiInfo("Please update the iOS app to build 1.6 (29), the previous release contained a bug.");
     if (this.$router.params != undefined) {
         await this.loadSession(this.$route.params.id)
     } else {

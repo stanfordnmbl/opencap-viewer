@@ -58,7 +58,17 @@
                                     <v-card-text v-if="analysisFunctions.length > 0">
 
                                         <v-row v-for="func in analysisFunctionsWithMenu" :key="func.id">
-                                            <v-col cols="3">{{ func.title }}</v-col>
+                                            <v-col cols="3">
+                                              {{ func.title }}
+
+                                              <v-tooltip bottom v-if="func.info.length > 0">
+                                                <template v-slot:activator="{ on }">
+                                                  <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                                                </template>
+                                                <p v-html="func.info.replace(/\n/g, '<br>')" />
+                                              </v-tooltip>
+
+                                            </v-col>
                                             <v-col cols="5">{{ func.description }}</v-col>
                                             <v-col cols="4">
                                               <v-btn small v-if="func.trials.includes(t.id)" :disabled="t.id in func.trials">
@@ -589,6 +599,11 @@ export default {
 
             trial_rename_dialog: false,
             trial_rename_index: 0
+        }
+    },
+    filters: {
+        nl2br: function (value) {
+            return value.replace(/\n/g, '<br>')
         }
     },
     computed: {

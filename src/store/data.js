@@ -45,6 +45,7 @@ export default {
     framerate: 60,
     openSimModel: 'LaiUhlrich2022',
     augmenter_model: 'v0.3',
+    filter_frequency: 'default',
 
     // step 5
     trialName: '',
@@ -217,7 +218,7 @@ export default {
     setTrialId (state, trialId) {
       state.trialId = trialId
     },
-    setNeutral (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model }) {
+    setNeutral (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model, filter_frequency }) {
       // state.identifier = identifier
       // state.weight = weight
       // state.height = height
@@ -228,6 +229,7 @@ export default {
       state.pose_model = pose_model
       state.openSimModel = openSimModel
       state.augmenter_model = augmenter_model
+      state.filter_frequency = filter_frequency
     },
     setSession (state, { trialName }) {
       state.trialName = trialName
@@ -251,6 +253,7 @@ export default {
       state.pose_model = 'openpose'
       state.openSimModel = 'LaiUhlrich2022'
       state.augmenter_model = 'v0.3'
+      state.filter_frequency = 'default'
       // step 5
       state.trialName = ''       
     },
@@ -371,12 +374,17 @@ export default {
       }
 
       if (reroute) {
-        if (state.sessions.length > 0) {
-          console.log('rerouting to select session')
-          router.push({ name: 'SelectSession' })
+        let institutionalUse = localStorage.getItem('institutional_use')
+        if (institutionalUse === '' || institutionalUse === 'patient_care' || institutionalUse === 'sports_performance_assessment' || institutionalUse === 'use_in_company') {
+          router.push({name: 'License'})
         } else {
-          router.push({ name: 'ConnectDevices' })
-        }  
+          if (state.sessions.length > 0) {
+            console.log('rerouting to select session')
+            router.push({ name: 'SelectSession' })
+          } else {
+            router.push({ name: 'ConnectDevices' })
+          }
+        }
       }
     },
     async loadSubjects ({ state, commit }) {

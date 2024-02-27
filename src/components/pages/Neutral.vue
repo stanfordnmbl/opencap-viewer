@@ -131,7 +131,7 @@
                 <v-btn color="primary-dark" @click="advancedSettingsDialog = false">✖</v-btn>
               </v-card-actions>
               <v-card-title class="justify-center data-title">
-                <span class="mr-2">Select human pose estimation model</span>
+                <span class="mr-2">Human pose estimation model</span>
                 <v-tooltip bottom="" max-width="500px">
                   <template v-slot:activator="{ on }">
                     <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
@@ -146,24 +146,25 @@
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="pose_model"
-                    label="Human pose estimation model"
+                    label="Select human pose estimation model"
                     v-bind:items="pose_models"
                   />
               </v-card-text>
   
               <v-card-title class="justify-center data-title">
-                Select framerate
+                Framerate
               </v-card-title>
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="framerate"
-                    label="Framerate"
+                    label="Select framerate"
                     v-bind:items="framerates_available"
+                    @change="updateFrequency"
                   />
               </v-card-text>
 
               <v-card-title class="justify-center data-title">
-                <span class="mr-2">Select musculoskeletal model</span>
+                <span class="mr-2">Musculoskeletal model</span>
                 <v-tooltip bottom="" max-width="500px">
                   <template v-slot:activator="{ on }">
                     <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
@@ -176,13 +177,13 @@
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="openSimModel"
-                    label="Musculoskeletal model"
+                    label="Select musculoskeletal model"
                     v-bind:items="openSimModels"
                   />
               </v-card-text>
 
               <v-card-title class="justify-center data-title">
-                <span class="mr-2">Select marker augmenter model</span>
+                <span class="mr-2">Marker augmenter model</span>
                 <v-tooltip bottom="" max-width="500px">
                   <template v-slot:activator="{ on }">
                     <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
@@ -204,9 +205,39 @@
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="augmenter_model"
-                    label="Marker augmenter model"
+                    label="Select marker augmenter model"
                     v-bind:items="augmenter_models"
                   />
+              </v-card-text>
+
+              <v-card-title class="justify-center data-title">
+                <span class="mr-2">Filter frequency</span>
+                <v-tooltip bottom="" max-width="500px">
+                  <template v-slot:activator="{ on }">
+                    <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                  </template>
+                  OpenCap uses a low-pass Butterworth filter to smooth the 2D video keypoints. The filter frequency is the cutoff frequency of the filter.
+                  <br><br>                  
+                  By default, OpenCap uses a filter frequency of half the framerate (if the framerate is 60fps, the filter frequency is 30Hz), except for gait activities, for which the filter frequency is 12Hz.
+                  <br><br>
+                  You can here enter a different filter frequency. WARNING: this filter frequency will be applied to ALL motion trials of your session. As per the Nyquist Theorem, the filter frequency should be less than half the framerate.
+                  If you enter a filter frequency higher than half the framerate, we will use half the framerate as the filter frequency instead.
+                  <br><br>
+                  We recommend consulting the literature to find a suitable filter frequency for your specific tasks. If you are unsure, we recommend using the default filter frequency.
+                </v-tooltip>
+              </v-card-title>
+              <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+                <v-combobox
+                :key="componentKey"
+                v-model="tempFilterFrequency"
+                label="Enter frequency (Hz) or choose default"
+                :items="filter_frequencies"
+                :allow-custom="true"
+                :return-object="false"
+                @change="validateAndSetFrequency"
+                item-text="text"
+                item-value="value"
+                ></v-combobox>
               </v-card-text>
             </v-card>
           </v-dialog>
@@ -219,7 +250,6 @@
 
       <v-card class="mb-0">
         <v-card-text style="padding-top: 0; padding-bottom: 0">
-        <p>
         <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded.</p>
         </v-card-text>
       </v-card>
@@ -453,7 +483,7 @@
 <script>
 import axios from "axios";
 import { mapMutations, mapActions, mapState } from "vuex";
-import { apiError, apiSuccess, apiErrorRes, apiInfo, clearToastMessages } from "@/util/ErrorMessage.js";
+import { apiError, apiSuccess, apiErrorRes, apiWarning, apiInfo, clearToastMessages } from "@/util/ErrorMessage.js";
 import MainLayout from "@/layout/MainLayout";
 import ExampleImage from "@/components/ui/ExampleImage";
 
@@ -513,6 +543,10 @@ export default {
         {"text": "v0.3 (default)", "value": "v0.3"},
         {"text": "v0.2 (old model, default until 07-30-2023)", "value": "v0.2"},
       ],
+      filter_frequency: 'default',
+      filter_frequencies: [        
+        {"text": "12Hz for gait, half the framerate otherwise (default)", "value": "default"},
+      ],
       busy: false,
       disabledNextButton: true,
       imgs: null,
@@ -547,7 +581,10 @@ export default {
 
       n_calibrated_cameras: 0,
       n_cameras_connected: 0,
-      n_videos_uploaded: 0
+      n_videos_uploaded: 0,
+
+      tempFilterFrequency: 'default', // Temporary input holder
+      componentKey: 0,
     };
   },
   computed: {
@@ -705,6 +742,7 @@ export default {
             framerate: this.framerate,
             openSimModel: this.openSimModel,
             augmenter_model: this.augmenter_model,
+            filter_frequency: this.filter_frequency,
           });
           try {
             const resUpdate = await axios.get(
@@ -721,7 +759,8 @@ export default {
                   settings_framerate: this.framerate,
                   settings_session_name: this.sessionName,
                   settings_openSimModel: this.openSimModel,
-                  settings_augmenter_model: this.augmenter_model,                
+                  settings_augmenter_model: this.augmenter_model,
+                  settings_filter_frequency: this.filter_frequency,            
                 },
               }
             );
@@ -914,7 +953,37 @@ export default {
       if(this.framerates_available.length == 0) {
         this.framerates_available.push({"text": "60fps (max recording time: 60s, default)", "value": 60})
       }
-    }
+    },
+    updateFrequency() {
+      const maxAllowedFrequency = this.framerate / 2;
+      if (this.filter_frequency > maxAllowedFrequency) {
+        this.filter_frequency = maxAllowedFrequency
+        this.tempFilterFrequency = maxAllowedFrequency
+        apiWarning("Too large filter frequency. Using half the framerate (" + maxAllowedFrequency + "Hz) instead.");
+      }
+    },
+    validateAndSetFrequency() {
+      const maxAllowedFrequency = this.framerate / 2;
+
+      if (this.tempFilterFrequency === 'default') {
+        this.filter_frequency = 'default';
+      } else {
+        const inputFrequency = parseFloat(this.tempFilterFrequency);
+        if (!isNaN(inputFrequency) && inputFrequency > 0) {
+          if (inputFrequency > maxAllowedFrequency) {
+            this.filter_frequency = `${maxAllowedFrequency}`;
+            apiWarning("Too large filter frequency. Using half the framerate (" + maxAllowedFrequency + "Hz) instead.");
+          } else {
+            this.filter_frequency = `${inputFrequency}`;
+          }
+        } else {
+          apiWarning("Invalid filter frequency. Using default.");
+          this.filter_frequency = 'default';
+        }
+      }
+      this.tempFilterFrequency = this.filter_frequency;
+      this.componentKey += 1;
+    },
   },
 };
 </script>
