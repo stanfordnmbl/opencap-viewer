@@ -67,10 +67,7 @@ export default {
       "non-binary": "Non-Binary/Non-Conforming",
       "prefer-not-respond": "Prefer not to respond",
     },
-    subjectTags: {
-      "unimpaired": "Unimpaired",
-      "impaired": "Impaired"
-    },
+    tags: {},
     isSyncDownloadAllowed: JSON.parse(localStorage.getItem("isSyncDownloadAllowed")),
     analysis: {}
   },
@@ -281,6 +278,9 @@ export default {
       if (index >= 0) {
         Vue.set(state.subjects, index, subject);
       }
+    },
+    updateSubjectTags (state, tags) {
+      state.subjectTags = tags;
     }
   },
   actions: {
@@ -438,7 +438,24 @@ export default {
       res.data.created_at = formatDate(res.data.created_at);
 
       commit('updateSubject', res.data)
-    }
+    },
+    async loadSubjectTags({ state, commit }) {
+      console.log("LOAD2")
+      const response = await fetch('/tags/subjectTags.json');
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      const resultObject = {};
 
+      data["subject_tags"].forEach(tag => {
+          resultObject[tag.value] = tag.label;
+      });
+
+      commit("updateSubjectTags", resultObject)
+      this.subjectTags = resultObject
+      console.log(this.subjectTags)
+    }
   }
+
 }

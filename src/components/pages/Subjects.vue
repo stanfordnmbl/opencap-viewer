@@ -595,6 +595,7 @@ export default {
   },
   mounted () {
     this.loadSubjects()
+    this.loadSubjectTags()
   },
   watch:{
     showArchiveDialog(newShowArchiveDialog, oldShowArchiveDialog){
@@ -607,7 +608,7 @@ export default {
   },
   methods: {
     ...mapActions('data', [
-        'loadExistingSessions', 'loadSubjects',
+        'loadExistingSessions', 'loadSubjects', 'loadSubjectTags',
         'trashExistingSubject', 'restoreTrashedSubject']),
     onSelect ({ item, value }) {
       if (item && value) {
