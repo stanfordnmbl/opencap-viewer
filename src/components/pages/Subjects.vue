@@ -392,6 +392,16 @@
               label="Gender (Optional)"
               :items="gendersOptions"
           ></v-select>
+
+          <v-select
+              clearable
+              multiple
+              v-model="edited_subject.subject_tags"
+              item-title="text"
+              item-value="value"
+              label="Subject Tags"
+              :items="tagsOptions"
+          ></v-select>
           <v-textarea
             v-model="edited_subject.characteristics"
             label="Characteristics (Optional)"
@@ -494,6 +504,7 @@ export default {
         { text: 'Birth year', value: 'birth_year' },
         { text: 'Sex', value: 'sex_display' },
         { text: 'Gender', value: 'gender_display' },
+        { text: 'Subject Tags', value: 'subject_tags' },
         { text: 'Characteristics', value: 'characteristics' }
       ],
       sessionHeaders: [
@@ -502,9 +513,9 @@ export default {
         { text: 'Trials', value: 'trials.length' },
         { text: 'Date', value: 'created_at' },
       ],
-      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
+      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", subject_tags:"", characteristics:""},
       selected: null,
-      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
+      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", subject_tags:"", characteristics:""},
       heightRule: (v) => {
         if (!v.trim()) return true;
         if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0) return true;
@@ -532,6 +543,7 @@ export default {
       sessions: state => state.data.sessions,
       subjects: state => state.data.subjects,
       genders: state => state.data.genders,
+      subjectTags: state => state.data.subjectTags,
       sexes: state => state.data.sexes,
       isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
     }),
@@ -540,6 +552,7 @@ export default {
         id: s.id,
         name: s.name,
         birth_year: s.birth_year,
+        subject_tags: s.subject_tags,
         characteristics: s.characteristics,
         gender: s.gender,
         gender_display: this.genders[s.gender],
@@ -561,6 +574,9 @@ export default {
     gendersOptions () {
       return Object.entries(this.genders).map((s) => ({ text: s[1], value: s[0] }))
     },
+    tagsOptions () {
+      return Object.entries(this.subjectTags).map((s) => ({ text: s[1], value: s[0] }))
+    },
     selectedSessions () {
       return this.sessions.map(s => ({
         id: s.id,
@@ -579,6 +595,7 @@ export default {
   },
   mounted () {
     this.loadSubjects()
+    this.loadSubjectTags()
   },
   watch:{
     showArchiveDialog(newShowArchiveDialog, oldShowArchiveDialog){
@@ -591,7 +608,7 @@ export default {
   },
   methods: {
     ...mapActions('data', [
-        'loadExistingSessions', 'loadSubjects',
+        'loadExistingSessions', 'loadSubjects', 'loadSubjectTags',
         'trashExistingSubject', 'restoreTrashedSubject']),
     onSelect ({ item, value }) {
       if (item && value) {
