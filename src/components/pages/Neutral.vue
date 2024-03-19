@@ -5,7 +5,7 @@
     :step="4"
     :rightDisabled="busy || disabledNextButton"
     :rightSpinner="busy && !imgs"
-    @left="$router.push(`/${session.id}/step2`)"
+    @left="$router.push(`/${session.id}/calibration`)"
     @right="onNext"
   >
     <v-card v-if="imgs" class="step-4-1 pa-2 d-flex flex-column">
@@ -497,7 +497,7 @@ import MainLayout from "@/layout/MainLayout";
 import ExampleImage from "@/components/ui/ExampleImage";
 
 export default {
-  name: "Step4",
+  name: "Neutral",
   components: {
     MainLayout,
     ExampleImage,
@@ -686,7 +686,7 @@ export default {
     this.n_calibrated_cameras = res.data.data
   },
   methods: {
-    ...mapMutations("data", ["setStep4", "setStep3"]),
+    ...mapMutations("data", ["setNeutral", "setTrialId"]),
     ...mapActions("data", ["loadSubjects", "loadSession"]),
     isSomeInputInvalid(state, input) {
       setTimeout(() => {
@@ -731,7 +731,6 @@ export default {
         console.log(this.disabledNextButton)
     },
     async onNext() {
-      console.log("STEP4: onNext")
       if (this.imgs) {
         // Confirm
         this.$router.push({
@@ -745,7 +744,7 @@ export default {
           this.lastPolledStatus = "";
           // Record press
           this.busy = true;
-          this.setStep4({
+          this.setNeutral({
               subject: this.subject,
             // identifier: this.identifier,
             // weight: this.weight,
@@ -803,7 +802,7 @@ export default {
                 },
               }
             );
-            this.setStep3(res.data.id); // sets trialID
+            this.setTrialId(res.data.id);
             this.pollStatus();
           } catch (error) {
             apiError(error);

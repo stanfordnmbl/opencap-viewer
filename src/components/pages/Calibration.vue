@@ -5,7 +5,7 @@
     rightButton="Calibrate"
     :step="2"
     :rightDisabled="busy"
-    @left="$router.push(`/${session.id}/step1`)"
+    @left="$router.push(`/${session.id}/connect-devices`)"
     @right="onNext">
 
     <v-card class="step-2-1">
@@ -70,7 +70,7 @@ import { apiError, apiSuccess, apiErrorRes, apiInfo} from '@/util/ErrorMessage.j
 import MainLayout from '@/layout/MainLayout'
 
 export default {
-  name: 'Step2',
+  name: 'Calibration',
   components: {
     MainLayout
   },
@@ -96,16 +96,16 @@ export default {
       this.loadSession(this.$route.params.id)
   },
   methods: {
-    ...mapMutations('data', ['setStep2', 'setStep3']),
+    ...mapMutations('data', ['setCalibration', 'setTrialId']),
     ...mapActions('data', ['loadSession']),
     async onNext () {
       if (this.imgs) {
-        this.$router.push(`/${this.session.id}/step4`)
+        this.$router.push(`/${this.session.id}/neutral`)
       } else {
         this.lastPolledStatus = "";
         // Record press
         this.busy = true
-        this.setStep2({
+        this.setCalibration({
           rows: this.rows,
           cols: this.cols,
           squareSize: this.squareSize
@@ -125,7 +125,7 @@ export default {
               name: 'calibration',
             }
           })
-          this.setStep3(res.data.id)
+          this.setTrialId(res.data.id)
           this.pollStatus()
         } catch (error) {
           apiError(error)
@@ -148,7 +148,7 @@ export default {
               this.busy = false
             } else {
               apiSuccess(this.n_calibrated_cameras + " devices calibrated successfully.", 5000);
-              this.$router.push(`/${this.session.id}/step4`)
+              this.$router.push(`/${this.session.id}/neutral`)
             }
             break;
           }
