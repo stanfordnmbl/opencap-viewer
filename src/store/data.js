@@ -45,6 +45,7 @@ export default {
     framerate: 60,
     openSimModel: 'LaiUhlrich2022',
     augmenter_model: 'v0.3',
+    filter_frequency: 'default',
 
     // step 5
     trialName: '',
@@ -67,6 +68,7 @@ export default {
       "non-binary": "Non-Binary/Non-Conforming",
       "prefer-not-respond": "Prefer not to respond",
     },
+    tags: {},
     isSyncDownloadAllowed: JSON.parse(localStorage.getItem("isSyncDownloadAllowed")),
     analysis: {}
   },
@@ -217,7 +219,7 @@ export default {
     setTrialId (state, trialId) {
       state.trialId = trialId
     },
-    setNeutral (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model }) {
+    setNeutral (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model, filter_frequency }) {
       // state.identifier = identifier
       // state.weight = weight
       // state.height = height
@@ -228,6 +230,7 @@ export default {
       state.pose_model = pose_model
       state.openSimModel = openSimModel
       state.augmenter_model = augmenter_model
+      state.filter_frequency = filter_frequency
     },
     setSessionStep5 (state, { trialName }) {
       state.trialName = trialName
@@ -251,6 +254,7 @@ export default {
       state.pose_model = 'openpose'
       state.openSimModel = 'LaiUhlrich2022'
       state.augmenter_model = 'v0.3'
+      state.filter_frequency = 'default'
       // step 5
       state.trialName = ''       
     },
@@ -277,6 +281,9 @@ export default {
       if (index >= 0) {
         Vue.set(state.subjects, index, subject);
       }
+    },
+    updateSubjectTags (state, tags) {
+      state.subjectTags = tags;
     }
   },
   actions: {
@@ -371,17 +378,39 @@ export default {
       }
 
       if (reroute) {
-        if (state.sessions.length > 0) {
-          console.log('rerouting to select session')
-          router.push({ name: 'SelectSession' })
+        let institutionalUse = localStorage.getItem('institutional_use')
+        if (institutionalUse === '' || institutionalUse === 'patient_care' || institutionalUse === 'sports_performance_assessment' || institutionalUse === 'use_in_company') {
+          router.push({name: 'License'})
         } else {
-          router.push({ name: 'ConnectDevices' })
-        }  
+          if (state.sessions.length > 0) {
+            console.log('rerouting to select session')
+            router.push({ name: 'SelectSession' })
+          } else {
+            router.push({ name: 'ConnectDevices' })
+          }
+        }
       }
     },
-    async loadSubjects ({ state, commit }) {
-      const res = await axios.get('/subjects/')
-      commit('setSubjects', res.data)
+    async loadSubjects({ state, commit }) {
+      try {
+        const res = await axios.get('/subjects/');
+        const tagPromises = [];
+
+        for (let i = 0; i < res.data.length; i++) {
+          const tagPromise = axios.get(`/subject-tags/${res.data[i].id}/get_tags_subject/`)
+            .then((tags) => {
+              res.data[i].subject_tags = tags.data.map(tag => tag.tag);
+              console.log(res.data[i].subject_tags);
+            });
+
+          tagPromises.push(tagPromise);
+        }
+
+        await Promise.all(tagPromises); // Wait for all tag promises to resolve
+        commit('setSubjects', res.data);
+      } catch (error) {
+        console.error('Error loading subjects:', error);
+      }
     },
     async loadAnalysisFunctions({ state, commit }){
       const response = await axios.get('/analysis-functions/');
@@ -412,7 +441,24 @@ export default {
       res.data.created_at = formatDate(res.data.created_at);
 
       commit('updateSubject', res.data)
-    }
+    },
+    async loadSubjectTags({ state, commit }) {
+      console.log("LOAD2")
+      const response = await fetch('/tags/subjectTags.json');
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      const resultObject = {};
 
+      data["subject_tags"].forEach(tag => {
+          resultObject[tag.value] = tag.label;
+      });
+
+      commit("updateSubjectTags", resultObject)
+      this.subjectTags = resultObject
+      console.log(this.subjectTags)
+    }
   }
+
 }

@@ -3,11 +3,9 @@
     <div class="pa-2 d-flex">
       <div class="container">
 
-
         <div v-if="userExist">
 
-
-        <div v-if="!editing_profile" class="row">
+        <div v-if="!editing_profile && !editing_settings" class="row">
           <div class="col-lg-4">
             <v-card class="d-flex align-center justify-center pb-4">
               <v-row align="center" justify="center">
@@ -36,9 +34,16 @@
                       </p>
                     </a>
                   </v-card-text>
-                  <v-btn v-if="editable" class="my-4" @click="handleEditProfile">
-                    Edit Profile
-                  </v-btn>
+                  <v-row align="center" justify="center">
+                    <v-btn v-if="editable" class="my-4" @click="handleEditProfile">
+                      Edit Profile
+                    </v-btn>
+                  </v-row>
+                  <v-row align="center" justify="center">
+                    <v-btn v-if="editable" class="mb-2" @click="handleEditSettings">
+                      Settings
+                    </v-btn>
+                  </v-row>
                 </v-col>
               </v-row>
             </v-card>
@@ -107,7 +112,7 @@
           </div>
         </div>
 
-        <div v-else class="row">
+        <div v-else-if="editing_profile" class="row">
           <div class="col-lg-12">
             <h1 class="white--text text-center col-md-12">Editing Profile</h1>
 
@@ -296,6 +301,70 @@
           </div>
         </div>
 
+        <div v-else-if="editing_settings" class="row">
+          <v-col align="center" justify="center" class="mt-8">
+            <v-row align="center" justify="center">
+              <p>
+                Remove your account and all associated data. This includes every session, trial, subject, and result that you have ever created. This process is irreversible.
+              </p>
+            </v-row>
+            <v-row align="center" justify="center">
+              <v-btn v-if="editable" class="mb-2 red--text" @click="handleOpenDeleteAccount">
+                Delete Account
+              </v-btn>
+            </v-row>
+
+            <v-row align="center" justify="center">
+              <router-link class="text-center mt-6" @click.native="handleDiscard" :to="{ name: 'ProfilePage' }">
+                Discard Changes
+              </router-link>
+            </v-row>
+          </v-col>
+        </div>
+
+          <div v-if="deletingAccount" class="popup" @click="function(){deletingAccount = false;}">
+              <div class="popup-content" @click.stop>
+                <h2 style="color: #f44336!important;">Delete Account</h2>
+                <br/>
+                <span style="color: #f44336!important;">WARNING!</span> This action will permanently remove your account and all associated data. 
+                <br/>
+                This includes every session, trial, subject, and result you have ever created.
+                <br/>
+                This process is irreversible.
+                <br/>
+                <br/>
+                If you wish to proceed, please type in your username and click on "Delete Account".
+                <br/>
+
+                <div class="col-md-12">
+                  <div class="form-outline">
+                    <ValidationProvider
+                      rules="required"
+                      v-slot="{ errors }"
+                      name="delete-user-confirm">
+                      <v-text-field
+                        label="Type in your username to confirm the deletion of your account"
+                        v-model="confirm_username"
+                        class="ma-0"
+                        dark
+                        :error="errors.length > 0"
+                        :error-messages="errors[0]"/>
+                    </ValidationProvider>
+
+                    <br/>
+                    <v-btn v-if="editable" class="mb-2 red--text" @click="handleDeleteAccount">
+                      Delete Account
+                    </v-btn>
+                  </div>
+                </div>
+
+                <br/>
+                <router-link class="text-center mt-6" @click.native="handleDiscardDeleteAccount" :to="{ name: 'ProfilePage', params: { username: this.username } }">
+                  Do not remove my account
+                </router-link>
+              </div>
+          </div>
+
           <div v-if="changingImage" class="popup" @click="function(){changingImage = false;}">
               <div class="popup-content" @click.stop>
                 <h2>Upload Image</h2>
@@ -356,29 +425,39 @@ export default {
       website: '',
       newsletter: '',
       editing_profile: false,
+      editing_settings: false,
       loading: false,
       countryCode: '',
       editable: false,
       userExist: true,
       username_param: '',
       changingImage: false,
+      deletingAccount: false,
       selectedImage: null,
       profile_picture: null,
       selectedImageFile: null,
       current_user_page_profile_url: '',
+      confirm_username: ''
     };
   },
   methods: {
-    ...mapActions("auth", ["updateProfile", "updateProfilePicture", "set_profile_picture_url"]),
+    ...mapActions("auth", ["updateProfile", "updateProfilePicture", "set_profile_picture_url", "logout"]),
     handleShareProfileClick() {
       copyProfileUrlToClipboard(this.username_param);
     },
     handleEditProfile() {
       this.editing_profile = true;
     },
+    handleEditSettings() {
+      this.editing_settings = true;
+    },
     handleDiscard() {
       this.editing_profile = false;
+      this.editing_settings = false;
       this.changingImage = false;
+    },
+    handleDiscardDeleteAccount() {
+      this.deletingAccount = false;
     },
     handleChangeImage() {
       this.changingImage = true;
@@ -388,9 +467,30 @@ export default {
         document.body.removeEventListener('click', this.closePopupOnClickOutside);
       }
     },
+    async handleOpenDeleteAccount() {
+      this.deletingAccount = true;
+      if(this.deletingAccount) {
+        document.body.addEventListener('click', this.closePopupOnClickOutside);
+      } else {
+        document.body.removeEventListener('click', this.closePopupOnClickOutside);
+      }
+    },
+    async handleDeleteAccount() {
+      console.log(this.confirm_username)
+      const formData = new FormData();
+      formData.append('username', this.confirm_username);
+      try {
+        const res = await axios.post('/delete-account/', {"confirm":this.confirm_username})
+        apiSuccess(res.data)
+        this.logout()
+      } catch (error) {
+        apiError(error.request.response)
+      }
+    },
     closePopupOnClickOutside(event) {
       if (!this.$el.contains(event.target)) {
         this.changingImage = false;
+        this.deletingAccount = false;
       }
     },
     handleImageUploaded(event) {
