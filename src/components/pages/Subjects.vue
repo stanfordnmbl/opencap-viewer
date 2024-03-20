@@ -401,6 +401,8 @@
               item-value="value"
               label="Subject Tags"
               :items="tagsOptions"
+              :error="formErrors.subject_tags != null"
+              :error-messages="formErrors.subject_tags"
           ></v-select>
           <v-textarea
             v-model="edited_subject.characteristics"
@@ -495,7 +497,8 @@ export default {
       formErrors: {
           weight: null,
           height: null,
-          birth_year: null
+          birth_year: null,
+          subject_tags: null,
       },
       headers: [
         { text: 'Name', value: 'name' },
@@ -649,7 +652,8 @@ export default {
           name: null,
           weight: null,
           height: null,
-          birth_year: null
+          birth_year: null,
+          subject_tags: null,
       }
       console.log('add subject')
     },
@@ -660,7 +664,8 @@ export default {
           name: null,
           weight: null,
           height: null,
-          birth_year: null
+          birth_year: null,
+          subject_tags: null,
       }
       console.log('edit subject', subject)
     },
@@ -671,7 +676,8 @@ export default {
           name: null,
           weight: null,
           height: null,
-          birth_year: null
+          birth_year: null,
+          subject_tags: null,
       }
     },
     async submitSubjectForm() {
@@ -680,7 +686,8 @@ export default {
           name: null,
           weight: null,
           height: null,
-          birth_year: null
+          birth_year: null,
+          subject_tags: null,
       }
 
       if(this.edited_subject.id) {
