@@ -326,7 +326,10 @@
         </v-data-table>
       </v-col>
     </v-row>
-    <v-dialog v-model="edit_dialog" width="500">
+
+    <v-dialog v-model="edit_dialog" width="500" persistent
+      @click:outside="closeDialog">
+
       <ValidationObserver
               tag="form"
               class="d-flex flex-column"
@@ -377,6 +380,20 @@
             :error-messages="formErrors.birth_year"
           ></v-text-field>
           <v-select
+              ref="subjectTagsSelect"
+              clearable
+              multiple
+              v-model="edited_subject.subject_tags"
+              item-title="text"
+              item-value="value"
+              label="Subject Tags"
+              :items="tagsOptions"
+              :rules="[subjectTagsRule]"
+              :error="formErrors.subject_tags != null && formErrors.subject_tags.length != 0"
+              :error-messages="formErrors.subject_tags"
+          ></v-select>
+          <v-select
+              ref="sexAtBirthSelect"
               clearable
               v-model="edited_subject.sex_at_birth"
               item-title="text"
@@ -385,6 +402,7 @@
               :items="sexesOptions"
           ></v-select>
           <v-select
+              ref="genderSelect"
               clearable
               v-model="edited_subject.gender"
               item-title="text"
@@ -393,17 +411,6 @@
               :items="gendersOptions"
           ></v-select>
 
-          <v-select
-              clearable
-              multiple
-              v-model="edited_subject.subject_tags"
-              item-title="text"
-              item-value="value"
-              label="Subject Tags"
-              :items="tagsOptions"
-              :error="formErrors.subject_tags != null"
-              :error-messages="formErrors.subject_tags"
-          ></v-select>
           <v-textarea
             v-model="edited_subject.characteristics"
             label="Characteristics (Optional)"
@@ -516,9 +523,9 @@ export default {
         { text: 'Trials', value: 'trials.length' },
         { text: 'Date', value: 'created_at' },
       ],
-      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", subject_tags:"", characteristics:""},
+      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", subject_tags:null, characteristics:""},
       selected: null,
-      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", subject_tags:"", characteristics:""},
+      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", subject_tags:null, characteristics:""},
       heightRule: (v) => {
         if (!v.trim()) return true;
         if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0) return true;
@@ -537,6 +544,13 @@ export default {
         if (!isNaN(parseFloat(v)) && v >= 1900 && v <= currentYear) return true;
         if(!isNaN(parseFloat(v)) && v > currentYear) return `The subject's birth year cannot be set in the future. Please ensure that you are using the correct units. The birth year should be earlier than the current year ${currentYear} and specified in years (yyyy) format.`;
         if(!isNaN(parseFloat(v)) && v < 1900) return "It seems unlikely that the subject's birth year predates 1900. Please ensure that you are using the correct units. The birth year should be specified in years (yyyy) format.";
+      },
+      subjectTagsRule: (v) => {
+        if (!v) return true;
+        if (Array.isArray(v) && v.length > 0) return true;
+        if (!Array.isArray(v)) return "The subject tags must be contained in an array.";
+        if (Array.isArray(v) && v.length == 0) return "You must add at least one subject tag. For subjects with no conditions, select 'Unimpaired'.";
+
       }
 
     }
@@ -619,6 +633,12 @@ export default {
       }
       this.selected = value ? item : null
     },
+    closeDialog() {
+      if (this.$refs.subjectTagsSelect.isMenuActive || this.$refs.sexAtBirthSelect.isMenuActive || this.$refs.genderSelect.isMenuActive)
+        this.edit_dialog = true;
+      else
+        this.edit_dialog = false;
+    },
     onRowSessionClick (item, params) {
       console.log("LOG: " + item.id)
       this.clicks++;
@@ -700,7 +720,12 @@ export default {
                 this.edit_dialog = true;
               }
             })
-        console.log('update subject', res.data)
+        if (res && res.data) {
+          console.log('update subject', res.data)
+          this.clearEditedSubject();
+        } else {
+          this.edit_dialog = true;
+        }
       } else {
         const res = await axios.post('/subjects/', this.edited_subject)
             .catch(error => {
@@ -711,11 +736,27 @@ export default {
                 this.edit_dialog = true;
               }
             })
-        console.log('submit subject', res.data)
+        if (res && res.data) {
+          console.log('submit subject', res.data)
+          this.clearEditedSubject();
+        } else {
+          this.edit_dialog = true;
+        }
       }
 
       this.edited_subject = this.empty_subject;
-      this.loadSubjects()
+      this.loadSubjects();
+    },
+    clearEditedSubject() {
+      this.edited_subject.id = "";
+      this.edited_subject.name = "";
+      this.edited_subject.weight = "";
+      this.edited_subject.height = "";
+      this.edited_subject.birth_year = "";
+      this.edited_subject.sex_at_birth = "";
+      this.edited_subject.gender = "";
+      this.edited_subject.subject_tags = null;
+      this.edited_subject.characteristics = "";
     },
     async trashSubject (id) {
       try {
