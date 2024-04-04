@@ -1,4 +1,5 @@
 { "subject_tags": [
+    { "value": "healthy", "label": "Unimpaired" },
     { "value": "alzheimers", "label": "Alzheimers" },
     { "value": "athlete", "label": "Athlete" },
     { "value": "blind", "label": "Blind" },
@@ -35,6 +36,5 @@
     { "value": "stroke_left_hemiparesis", "label": "Stroke Left Hemiparesis" },
     { "value": "stroke_right_hemiparesis", "label": "Stroke Right Hemiparesis" },
     { "value": "traumatic_brain_injury", "label": "Traumatic Brain Injury" },
-    { "value": "healthy", "label": "Unimpaired" },
     { "value": "visually_impaired", "label": "Visually Impaired" }
 ]}
