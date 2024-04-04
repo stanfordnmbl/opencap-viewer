@@ -1,5 +1,5 @@
 { "subject_tags": [
-    { "value": "healthy", "label": "Unimpaired" },
+    { "value": "unimpaired", "label": "Unimpaired" },
     { "value": "alzheimers", "label": "Alzheimers" },
     { "value": "athlete", "label": "Athlete" },
     { "value": "blind", "label": "Blind" },
@@ -19,7 +19,7 @@
     { "value": "trans_tibial_amputation_left", "label": "Trans-Tibial Amputation - Left" },
     { "value": "trans_tibial_amputation_right", "label": "Trans-Tibial Amputation - Right" },
     { "value": "multiple_sclerosis", "label": "Multiple Sclerosis" },
-    { "value": "muscular_distrophy", "label": "Muscular Dystrophy" },
+    { "value": "muscular_dystrophy", "label": "Muscular Dystrophy" },
     { "value": "knee_osteoarthritis_left", "label": "Knee Osteoarthritis - Left" },
     { "value": "knee_osteoarthritis_right", "label": "Knee Osteoarthritis - Right" },
     { "value": "osteoarthritis", "label": "Osteoarthritis"},
