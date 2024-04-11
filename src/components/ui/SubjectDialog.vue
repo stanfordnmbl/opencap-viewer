@@ -309,7 +309,6 @@ export default {
                 }
             }
 
-            this.edited_subject = this.empty_subject;
             await this.loadSubjects();
         },
         clearEditedSubject() {
