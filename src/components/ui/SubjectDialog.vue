@@ -269,6 +269,13 @@ export default {
         },
         async submitSubjectForm() {
             this.edit_dialog = false;
+
+            if (this.edited_subject.subject_tags == null || this.edited_subject.subject_tags == "") {
+                this.edit_dialog = true;
+                this.formErrors.subject_tags = ["You must add at least one subject tag. For subjects with no conditions, select 'Unimpaired'."]
+                return;
+            }
+
             this.formErrors = {
                 name: null,
                 weight: null,
