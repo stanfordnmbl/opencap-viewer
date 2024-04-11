@@ -34,28 +34,40 @@
         <v-card-title class="justify-center subject-title">
           Session Info
         </v-card-title>
-        <v-card-text>
-          <v-select
-              @click="reloadSubjects"
-              @change="isAllInputsValid"
-              class="cursor-pointer"
+          <v-card-text>
+            <v-row align="center">
+              <v-col cols="11">
+                <v-select
+                    ref="selectSubjectsRef"
+                    @click="reloadSubjects"
+                    @input="isAllInputsValidSelectSubject"
+                    class="cursor-pointer"
+                    required
+                    v-model="subject"
+                    item-text="display_name"
+                    item-value="id"
+                    label="Subject"
+                    :items="subjectSelectorChoices"
+                    return-object
+                ></v-select>
+              </v-col>
+              <v-col cols="1">
+                <v-btn
+                  icon
+                  @click="openNewSubjectPopup">
+                  <v-icon>mdi-plus</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+            <v-text-field
+              v-model="sessionName"
+              label="Session Name (optional)"
+              type="text"
               required
-              v-model="subject"
-              item-text="display_name"
-              item-value="id"
-              label="Subject"
-              :items="subjectSelectorChoices"
-              return-object
-          ></v-select>
-          <v-text-field
-            v-model="sessionName"
-            label="Session Name (optional)"
-            type="text"
-            required
-            :error="formErrors.name != null"
-            :error-messages="formErrors.name"
-          ></v-text-field>
-        </v-card-text>
+              :error="formErrors.name != null"
+              :error-messages="formErrors.name"
+            ></v-text-field>
+          </v-card-text>
       </v-card>
 
       <v-card class="mb-4">
@@ -451,7 +463,7 @@ export default {
       sexes: state => state.data.sexes,
     }),
     subjectSelectorChoices() {
-      return [{'id':'new', 'display_name': 'New subject'}].concat(this.subjectsMapped);
+      return this.subjectsMapped;
     },
     subjectsMapped () {
       return this.subjects.map(s => ({
@@ -521,6 +533,22 @@ export default {
 
     this.n_calibrated_cameras = res.data.data
   },
+  watch: {
+    subjects(new_val, old_val) {
+      // If no subjects, do nothing.
+      if (old_val.length === 0 & new_val.length === 0) {
+          return
+      // If loading first time and there are subjects, select first.
+      } if (old_val.length === 0 & new_val.length !== 0) {
+          this.subject = new_val[0]
+      // If there are more subjects now than before, that means a new one has been created. Select it.
+      } else if (old_val.length < new_val.length) {
+          this.subject = new_val[new_val.length-1]
+      // Else, do nothing.
+      } else return
+
+    }
+  },
   methods: {
     ...mapMutations("data", ["setStep4", "setStep3"]),
     ...mapActions("data", ["loadSubjects", "loadSession"]),
@@ -530,45 +558,44 @@ export default {
       },0)
     },
     reloadSubjects() {
-      console.log('reloading subjects')
       this.loadSubjects()
     },
-    isAllInputsValid() {
-        console.log(this.subject)
-        this.formErrors = {
-          name: null,
-          weight: null,
-          height: null,
-          birth_year: null,
-          subject_tags: null,
-      }
-      if(this.subject != null && this.subject.id === 'new') {
+    openNewSubjectPopup() {
         this.$refs.dialogRef.edit_dialog = true
-        console.log("!!!")
-        return
-      }
+    },
+    isAllInputsValidSelectSubject() {
+        this.formErrors = {
+            name: null,
+            weight: null,
+            height: null,
+            birth_year: null,
+            subject_tags: null,
+        }
 
-      const arr = ['subject', 'data_sharing_agreement']
+        let inputsInvalidSecond;
+        if(!this.subject || !this.data_sharing || !this.data_sharing_0 ) {
+            inputsInvalidSecond = true
+        }
 
-      let inputsInvalidFirst = true;
-      // const inputsInvalidFirst = arr.some(el => {
-      //   return typeof this.formErrors[el] === 'string'
-      // })
-      let inputsInvalidSecond;
-      if(!this.subject || !this.data_sharing || !this.data_sharing_0 ) {
-        inputsInvalidSecond = true
-      }
+        inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
+    },
+    isAllInputsValid() {
+        this.formErrors = {
+            name: null,
+            weight: null,
+            height: null,
+            birth_year: null,
+            subject_tags: null,
+        }
 
-      console.log(this.subject, this.data_sharing, this.data_sharing_0)
-      console.log(!this.subject || !this.data_sharing || !this.data_sharing_0)
+        let inputsInvalidSecond;
+        if(this.subject === null || this.subject.id === 'new' || !this.subject || !this.data_sharing || !this.data_sharing_0 ) {
+            inputsInvalidSecond = true
+        }
 
-      inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
-      // inputsInvalidFirst || inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
-      // console.log('inputsInvalidFirst', inputsInvalidFirst)
-        console.log(this.disabledNextButton)
+        inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
     },
     async onNext() {
-      console.log("STEP4: onNext")
       if (this.imgs) {
         // Confirm
         this.$router.push({

@@ -249,7 +249,7 @@ export default {
       this.loadSubjectTags()
     },
     methods: {
-        ...mapActions('data', ['loadSubjectTags']),
+        ...mapActions('data', ['loadSubjects', 'loadSubjectTags']),
         closeDialog() {
           if (this.$refs.subjectTagsSelect.isMenuActive || this.$refs.sexAtBirthSelect.isMenuActive || this.$refs.genderSelect.isMenuActive)
             this.edit_dialog = true;
@@ -310,7 +310,7 @@ export default {
             }
 
             this.edited_subject = this.empty_subject;
-            this.$parent.loadSubjects();
+            await this.loadSubjects();
         },
         clearEditedSubject() {
             this.edited_subject.id = "";

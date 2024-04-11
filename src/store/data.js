@@ -130,13 +130,11 @@ export default {
         subjects[i].created_at = formatDate(subjects[i].created_at);
       }
       state.subjects = subjects
-      console.log(state.subjects)
     },
     setAnalysisFunctions(state, functions){
       state.analysisFunctions = functions.map((func) => (
           {...func, trials: [], results: [],
             states: []}));
-      console.log(state.analysisFunctions)
     },
     setAnalysisFunctionPending(state, data) {
       for(let i = 0; i < state.analysisFunctions.length; i++) {
@@ -164,12 +162,10 @@ export default {
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
-        console.log(["setAnalysisFunctionState", functionId, trialId, data])
         Vue.set(state.analysisFunctions[index].states, trialId, data);
       }
     },
     setAnalysisFunctionTrial(state, {functionId, trialId}){
-      console.log(["setAnalysisFunctionTrial", functionId, trialId])
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
@@ -178,7 +174,6 @@ export default {
         }
         // Vue.set(state.analysisFunctions, index, analysisFunction);
       }
-      console.log(state.analysisFunctions);
     },
     removeAnalysisFunctionTrial(state, {functionId, trialId}){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
@@ -190,7 +185,6 @@ export default {
           }
         }
       }
-      console.log(state.analysisFunctions);
     },
     setAnalysisFunctionResult(state, functionId, result){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
@@ -319,7 +313,6 @@ export default {
         res = await axios.get(`/sessions/${sessionId}/`)
         commit('setSession', res.data)
       } catch (e) {
-        console.log(e.response.status)
         if (e.response.status === 401) {
           router.push({ name: 'Login' })
         }
@@ -360,7 +353,6 @@ export default {
       commit('updateSession', res.data)
     },
     async loadExistingSessions ({ state, commit }, {reroute, quantity = -1, subject_id = null}) {
-      console.log(quantity)
       let update_sessions = false;
       let data = {
         quantity: quantity
@@ -383,7 +375,6 @@ export default {
           router.push({name: 'License'})
         } else {
           if (state.sessions.length > 0) {
-            console.log('rerouting to select session')
             router.push({ name: 'SelectSession' })
           } else {
             router.push({ name: 'Step1' })
@@ -400,7 +391,6 @@ export default {
           const tagPromise = axios.get(`/subject-tags/${res.data[i].id}/get_tags_subject/`)
             .then((tags) => {
               res.data[i].subject_tags = tags.data.map(tag => tag.tag);
-              console.log(res.data[i].subject_tags);
             });
 
           tagPromises.push(tagPromise);
@@ -443,7 +433,6 @@ export default {
       commit('updateSubject', res.data)
     },
     async loadSubjectTags({ state, commit }) {
-      console.log("LOAD2")
       const response = await fetch('/tags/subjectTags.json');
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -457,7 +446,6 @@ export default {
 
       commit("updateSubjectTags", resultObject)
       this.subjectTags = resultObject
-      console.log(this.subjectTags)
     }
   }
 
