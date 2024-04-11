@@ -543,7 +543,10 @@ export default {
           this.subject = new_val[0]
       // If there are more subjects now than before, that means a new one has been created. Select it.
       } else if (old_val.length < new_val.length) {
-          this.subject = new_val[new_val.length-1]
+          const serializedArr1 = new Set(old_val.map(item => JSON.stringify(item)));
+
+          // Find the index by comparing serialized objects
+          this.subject = new_val[new_val.findIndex(item => !serializedArr1.has(JSON.stringify(item)))];
       // Else, do nothing.
       } else return
 
