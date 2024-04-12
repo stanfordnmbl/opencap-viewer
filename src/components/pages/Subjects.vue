@@ -8,7 +8,7 @@
         Go back to sessions list
       </v-btn>
       <v-btn class="ml-2"
-        @click="addSubject()">
+        @click="$refs.dialogRef.addSubject()">
         New Subject
       </v-btn>
 
@@ -326,135 +326,11 @@
         </v-data-table>
       </v-col>
     </v-row>
-    <v-dialog v-model="edit_dialog" width="500">
-      <ValidationObserver
-              tag="form"
-              class="d-flex flex-column"
-              ref="observer"
-              v-slot="{ invalid }">
-      <v-form>
-      <v-card>
-        <v-card-title class="headline" v-if="edited_subject.id">Edit subject "{{ edited_subject.name }}"</v-card-title>
-        <v-card-title class="headline" v-else>Create new subject</v-card-title>
-        <v-card-text class="pt-4">
-          <v-text-field
-            v-model="edited_subject.name"
-            label="Name"
-            required
-            :error="formErrors.name != null"
-            :error-messages="formErrors.name"
-          ></v-text-field>
 
-          <v-text-field
-            v-model="edited_subject.weight"
-            label="Weight (kg)"
-            type="number"
-            hide-spin-buttons
-            required
-            :rules="[weightRule]"
-            :error="formErrors.weight != null"
-            :error-messages="formErrors.weight"
-          ></v-text-field>
+    <DialogComponent
+      ref="dialogRef"
+    />
 
-          <v-text-field
-            v-model="edited_subject.height"
-            label="Height (m)"
-            type="number"
-            hide-spin-buttons
-            required
-            :rules="[heightRule]"
-            :error="formErrors.height != null"
-            :error-messages="formErrors.height"
-          ></v-text-field>
-          <v-text-field
-            v-model="edited_subject.birth_year"
-            label="Birth year (yyyy)"
-            type="number"
-            hide-spin-buttons
-            required
-            :rules="[birthYearRule]"
-            :error="formErrors.birth_year != null"
-            :error-messages="formErrors.birth_year"
-          ></v-text-field>
-          <v-select
-              clearable
-              v-model="edited_subject.sex_at_birth"
-              item-title="text"
-              item-value="value"
-              label="Sex assigned at birth (Optional)"
-              :items="sexesOptions"
-          ></v-select>
-          <v-select
-              clearable
-              v-model="edited_subject.gender"
-              item-title="text"
-              item-value="value"
-              label="Gender (Optional)"
-              :items="gendersOptions"
-          ></v-select>
-          <v-textarea
-            v-model="edited_subject.characteristics"
-            label="Characteristics (Optional)"
-            rows=3
-          ></v-textarea>
-
-          <div class="pt-0">
-            <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="Informed consent selection">
-              <v-checkbox v-model="edited_subject.terms" class="mt-0 mb-0"
-                          :error="errors.length > 0"
-                          :error-messages="errors[0]">
-                <template v-slot:label>
-                  <div>I, the research Participant, have provided informed consent to the research Investigator conducting this study.
-                    I have read and I agree to the
-                    <v-tooltip location="bottom">
-                      <template v-slot:activator="{ props }">
-                        <a href="https://www.opencap.ai/terms-conditions"
-                           target="_blank"
-                           v-bind="props"
-                           @click.stop>Terms and Conditions</a>
-                      </template>
-                      Opens in new window
-                    </v-tooltip>
-                    and
-                    <v-tooltip location="bottom">
-                      <template v-slot:activator="{ props }">
-                        <a href="https://docs.google.com/document/d/1DBw9LVAuUwgz713037VQjsaD8sj2-AN_hzga_7kXtXI"
-                           target="_blank"
-                           v-bind="props"
-                           @click.stop>Privacy Policy</a>
-                      </template>
-                    </v-tooltip>
-                    of the OpenCap tool.
-                  </div>
-                </template>
-                Opens in new window
-              </v-checkbox>
-            </ValidationProvider>
-          </div>
-
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="blue darken-1"
-            text
-            @click="cancelSubjectForm()"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            color="green darken-1"
-            text
-            :disabled="invalid"
-            @click="submitSubjectForm()"
-          >
-            Save
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-      </v-form>
-      </ValidationObserver>
-    </v-dialog>
   </div>
 </template>
 <script>
@@ -462,8 +338,13 @@ import Vue from 'vue'
 import { mapActions, mapState } from 'vuex'
 import axios from 'axios'
 import { apiInfo, apiError } from '@/util/ErrorMessage.js'
+import DialogComponent from '@/components/ui/SubjectDialog.vue'
+
 
 export default {
+  components: {
+    DialogComponent
+  },
   name: 'Subjects',
   created: function () {},
   data () {
@@ -472,7 +353,6 @@ export default {
       remove_permanently_dialog: false,
       restore_dialog: false,
       download_dialog: false,
-      edit_dialog: false,
       show_trashed: false,
       downloading: false,
       isArchiveInProgress: false,
@@ -482,11 +362,6 @@ export default {
       delay: 300,
       clicks: 0,
       timer: null,
-      formErrors: {
-          weight: null,
-          height: null,
-          birth_year: null
-      },
       headers: [
         { text: 'Name', value: 'name' },
         { text: 'Weight', value: 'weight' },
@@ -494,6 +369,7 @@ export default {
         { text: 'Birth year', value: 'birth_year' },
         { text: 'Sex', value: 'sex_display' },
         { text: 'Gender', value: 'gender_display' },
+        { text: 'Subject Tags', value: 'subject_tags' },
         { text: 'Characteristics', value: 'characteristics' }
       ],
       sessionHeaders: [
@@ -502,29 +378,7 @@ export default {
         { text: 'Trials', value: 'trials.length' },
         { text: 'Date', value: 'created_at' },
       ],
-      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
       selected: null,
-      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", characteristics:""},
-      heightRule: (v) => {
-        if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0) return true;
-        if(!isNaN(parseFloat(v)) && v > 3.0) return "It seems unlikely that the subject's height exceeds 3 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
-        if(!isNaN(parseFloat(v)) && v < .1) return "It seems unlikely that the subject's height is less than 0.1 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
-      },
-      weightRule: (v) => {
-        if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 1 && v <= 200.0) return true;
-        if(!isNaN(parseFloat(v)) && v > 200.0) return "It seems unlikely that the subject's weight exceeds 200 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
-        if(!isNaN(parseFloat(v)) && v < 1) return "It seems unlikely that the subject's weight is less than 1 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
-      },
-      birthYearRule: (v) => {
-        const currentYear = new Date().getFullYear();
-        if (!v) return true;
-        if (!isNaN(parseFloat(v)) && v >= 1900 && v <= currentYear) return true;
-        if(!isNaN(parseFloat(v)) && v > currentYear) return `The subject's birth year cannot be set in the future. Please ensure that you are using the correct units. The birth year should be earlier than the current year ${currentYear} and specified in years (yyyy) format.`;
-        if(!isNaN(parseFloat(v)) && v < 1900) return "It seems unlikely that the subject's birth year predates 1900. Please ensure that you are using the correct units. The birth year should be specified in years (yyyy) format.";
-      }
-
     }
   },
     computed: {
@@ -540,6 +394,7 @@ export default {
         id: s.id,
         name: s.name,
         birth_year: s.birth_year,
+        subject_tags: s.subject_tags,
         characteristics: s.characteristics,
         gender: s.gender,
         gender_display: this.genders[s.gender],
@@ -554,12 +409,6 @@ export default {
         trashed_at: s.trashed_at,
         isMenuOpen: false
       })).filter(s => this.show_trashed || !s.trashed)
-    },
-    sexesOptions () {
-      return Object.entries(this.sexes).map((s) => ({ text: s[1], value: s[0] }))
-    },
-    gendersOptions () {
-      return Object.entries(this.genders).map((s) => ({ text: s[1], value: s[0] }))
     },
     selectedSessions () {
       return this.sessions.map(s => ({
@@ -590,9 +439,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions('data', [
-        'loadExistingSessions', 'loadSubjects',
-        'trashExistingSubject', 'restoreTrashedSubject']),
+    ...mapActions('data', ['loadExistingSessions', 'loadSubjects', 'trashExistingSubject', 'restoreTrashedSubject']),
     onSelect ({ item, value }) {
       if (item && value) {
           this.loadExistingSessions({reroute: false, quantity: -1, subject_id: item.id})
@@ -625,73 +472,17 @@ export default {
           }
       }
     },
-    async addSubject() {
-      this.edit_dialog = true;
-      this.edited_subject = this.empty_subject;
-      this.formErrors = {
-          name: null,
-          weight: null,
-          height: null,
-          birth_year: null
-      }
-      console.log('add subject')
-    },
     async editSubject(subject) {
-      this.edit_dialog = true;
-      this.edited_subject = subject;
-      this.formErrors = {
+      this.$refs.dialogRef.edit_dialog = true;
+      this.$refs.dialogRef.edited_subject = subject;
+      this.$refs.dialogRef.formErrors = {
           name: null,
           weight: null,
           height: null,
-          birth_year: null
+          birth_year: null,
+          subject_tags: null,
       }
       console.log('edit subject', subject)
-    },
-    async cancelSubjectForm() {
-      this.edit_dialog = false;
-      this.edited_subject = this.empty_subject;
-      this.formErrors = {
-          name: null,
-          weight: null,
-          height: null,
-          birth_year: null
-      }
-    },
-    async submitSubjectForm() {
-      this.edit_dialog = false;
-      this.formErrors = {
-          name: null,
-          weight: null,
-          height: null,
-          birth_year: null
-      }
-
-      if(this.edited_subject.id) {
-        const res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
-            .catch(error => {
-              if(error.response.status === 400) {
-                for (const [key, value] of Object.entries(error.response.data)) {
-                  this.formErrors[key] = value
-                }
-                this.edit_dialog = true;
-              }
-            })
-        console.log('update subject', res.data)
-      } else {
-        const res = await axios.post('/subjects/', this.edited_subject)
-            .catch(error => {
-              if(error.response.status === 400) {
-                for (const [key, value] of Object.entries(error.response.data)) {
-                  this.formErrors[key] = value
-                }
-                this.edit_dialog = true;
-              }
-            })
-        console.log('submit subject', res.data)
-      }
-
-      this.edited_subject = this.empty_subject;
-      this.loadSubjects()
     },
     async trashSubject (id) {
       try {

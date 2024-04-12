@@ -68,6 +68,7 @@ export default {
       "non-binary": "Non-Binary/Non-Conforming",
       "prefer-not-respond": "Prefer not to respond",
     },
+    tags: {},
     isSyncDownloadAllowed: JSON.parse(localStorage.getItem("isSyncDownloadAllowed")),
     analysis: {}
   },
@@ -129,13 +130,11 @@ export default {
         subjects[i].created_at = formatDate(subjects[i].created_at);
       }
       state.subjects = subjects
-      console.log(state.subjects)
     },
     setAnalysisFunctions(state, functions){
       state.analysisFunctions = functions.map((func) => (
           {...func, trials: [], results: [],
             states: []}));
-      console.log(state.analysisFunctions)
     },
     setAnalysisFunctionPending(state, data) {
       for(let i = 0; i < state.analysisFunctions.length; i++) {
@@ -163,12 +162,10 @@ export default {
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
-        console.log(["setAnalysisFunctionState", functionId, trialId, data])
         Vue.set(state.analysisFunctions[index].states, trialId, data);
       }
     },
     setAnalysisFunctionTrial(state, {functionId, trialId}){
-      console.log(["setAnalysisFunctionTrial", functionId, trialId])
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
       if (index >= 0) {
         const analysisFunction = state.analysisFunctions[index];
@@ -177,7 +174,6 @@ export default {
         }
         // Vue.set(state.analysisFunctions, index, analysisFunction);
       }
-      console.log(state.analysisFunctions);
     },
     removeAnalysisFunctionTrial(state, {functionId, trialId}){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
@@ -189,7 +185,6 @@ export default {
           }
         }
       }
-      console.log(state.analysisFunctions);
     },
     setAnalysisFunctionResult(state, functionId, result){
       const index = state.analysisFunctions.findIndex((func) => (func.id === functionId));
@@ -280,6 +275,9 @@ export default {
       if (index >= 0) {
         Vue.set(state.subjects, index, subject);
       }
+    },
+    updateSubjectTags (state, tags) {
+      state.subjectTags = tags;
     }
   },
   actions: {
@@ -315,7 +313,6 @@ export default {
         res = await axios.get(`/sessions/${sessionId}/`)
         commit('setSession', res.data)
       } catch (e) {
-        console.log(e.response.status)
         if (e.response.status === 401) {
           router.push({ name: 'Login' })
         }
@@ -356,7 +353,6 @@ export default {
       commit('updateSession', res.data)
     },
     async loadExistingSessions ({ state, commit }, {reroute, quantity = -1, subject_id = null}) {
-      console.log(quantity)
       let update_sessions = false;
       let data = {
         quantity: quantity
@@ -379,7 +375,6 @@ export default {
           router.push({name: 'License'})
         } else {
           if (state.sessions.length > 0) {
-            console.log('rerouting to select session')
             router.push({ name: 'SelectSession' })
           } else {
             router.push({ name: 'Step1' })
@@ -387,9 +382,25 @@ export default {
         }
       }
     },
-    async loadSubjects ({ state, commit }) {
-      const res = await axios.get('/subjects/')
-      commit('setSubjects', res.data)
+    async loadSubjects({ state, commit }) {
+      try {
+        const res = await axios.get('/subjects/');
+        const tagPromises = [];
+
+        for (let i = 0; i < res.data.length; i++) {
+          const tagPromise = axios.get(`/subject-tags/${res.data[i].id}/get_tags_subject/`)
+            .then((tags) => {
+              res.data[i].subject_tags = tags.data.map(tag => tag.tag);
+            });
+
+          tagPromises.push(tagPromise);
+        }
+
+        await Promise.all(tagPromises); // Wait for all tag promises to resolve
+        commit('setSubjects', res.data);
+      } catch (error) {
+        console.error('Error loading subjects:', error);
+      }
     },
     async loadAnalysisFunctions({ state, commit }){
       const response = await axios.get('/analysis-functions/');
@@ -420,7 +431,22 @@ export default {
       res.data.created_at = formatDate(res.data.created_at);
 
       commit('updateSubject', res.data)
-    }
+    },
+    async loadSubjectTags({ state, commit }) {
+      const response = await fetch('/tags/subjectTags.json');
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      const resultObject = {};
 
+      data["subject_tags"].forEach(tag => {
+          resultObject[tag.value] = tag.label;
+      });
+
+      commit("updateSubjectTags", resultObject)
+      this.subjectTags = resultObject
+    }
   }
+
 }
