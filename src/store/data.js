@@ -91,8 +91,15 @@ export default {
       session.created_at = formatDate(session.created_at); 
       state.session = session;
       const sessionIds = state.sessions.map(session => session.id);
+      console.log('setSession,  sessionIds= ', sessionIds)
+      console.log('setSession,  session= ', session)
       if(!sessionIds.includes(session.id)){
         state.sessions.unshift(session);
+        console.log('setSession,  state.sessions= ', state.sessions)
+      } else {
+        const index = state.sessions.findIndex(s => s.id === session.id);
+        state.sessions.splice(index, 1, session);
+        console.log('setSession,  HI')
       }
     },
     setSessionId (state, id) {
@@ -318,6 +325,7 @@ export default {
       try {
         res = await axios.get(`/sessions/${sessionId}/`)
         commit('setSession', res.data)
+        console.log(res.data)
       } catch (e) {
         console.log(e.response.status)
         if (e.response.status === 401) {

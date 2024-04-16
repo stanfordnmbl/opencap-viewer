@@ -372,14 +372,16 @@ export default {
       'trashExistingSession', 'restoreTrashedSession']),
     onSelect({item, value}) {
       if (value) {
-        this.loadSession(item.id)
-        this.selected = this.sessions.find(s => s.id === item.id)
-        console.log(this.sessions)
+        this.loadSession(item.id).then(() => {
+          console.log('sessions=', this.sessions)
+          this.selected = this.sessions.find(s => s.id === item.id)
+          console.log('selected=', this.selected)
+        })
         // this.selected = this.sessions.find(s => s.id === item.id)
+        // console.log(this.sessions)
       } else {
         this.selected = null
       }
-      console.log('selected=', this.selected)
     },
     onRowClick(item, params) {
       params.select(!params.isSelected);
