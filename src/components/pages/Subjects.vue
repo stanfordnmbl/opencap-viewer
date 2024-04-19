@@ -48,10 +48,8 @@
                       </v-btn>
                     </template>
                     <v-list>
-                      <v-list-item link v-if="!item.trashed">
-                        <v-list-item-title
-                          @click="item.isMenuOpen = false; editSubject(item)"
-                          >Edit</v-list-item-title>
+                      <v-list-item link v-if="!item.trashed" @click="item.isMenuOpen = false; editSubject(item)">
+                        <v-list-item-title>Edit</v-list-item-title>
                       </v-list-item>
                       <v-list-item link v-if="!item.trashed">
                         <v-dialog
@@ -375,7 +373,7 @@ export default {
       sessionHeaders: [
         { text: 'Session ID', value: 'id' },
         { text: 'Session Name', value: 'sessionName' },
-        { text: 'Trials', value: 'trials.length' },
+        { text: 'Trials', value: 'trials_count' },
         { text: 'Date', value: 'created_at' },
       ],
       selected: null,
@@ -415,8 +413,10 @@ export default {
         id: s.id,
         sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
         name: s.name,
-        trials_count: String(s.trials.length),
-        trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+        // trials_count: String(s.trials.length),
+        trials_count: s.trials_count,
+        // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+        trashed_trials_count: s.trashed_trials_count,
         trials: s.trials,
         created_at: s.created_at,
         trashed: s.trashed,

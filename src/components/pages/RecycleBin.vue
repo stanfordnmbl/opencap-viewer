@@ -352,8 +352,9 @@ export default {
         id: s.id,
         sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
         name: s.name,
-        trials_count: String(s.trials.length),
-        trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+        trials_count: s.trials_count, // String(s.trials.length),
+        // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+        trashed_trials_count: s.trashed_trials_count,
         trials: s.trials,
         created_at: s.created_at,
         trashed: s.trashed,
@@ -370,12 +371,16 @@ export default {
       'loadExistingSessions', 'loadSession', 'permanentRemoveExistingSession',
       'trashExistingSession', 'restoreTrashedSession']),
     onSelect({item, value}) {
-      this.selected = value ? item : null
-      console.log('selected=', this.selected)
+      if (value) {
+        this.loadSession(item.id).then(() => {
+          this.selected = this.sessions.find(s => s.id === item.id)
+        })
+      } else {
+        this.selected = null
+      }
     },
     onRowClick(item, params) {
       params.select(!params.isSelected);
-      this.loadSession(item.id)
     },
     clickOutsideDialogSessionHideMenu(e) {
       if (e.target.className === 'v-overlay__scrim') {
