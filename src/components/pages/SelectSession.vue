@@ -284,7 +284,7 @@ export default {
         trashed: s.trashed,
         trashed_at: s.trashed_at,
         isMenuOpen: false
-      })).filter(s => this.show_trashed || !s.trashed)
+      })).filter(s => s.trials_count > 0 && (this.show_trashed || !s.trashed))
     }
   },
   methods: {
