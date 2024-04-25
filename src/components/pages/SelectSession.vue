@@ -77,13 +77,15 @@
                 <v-list-item-title>Dashboard kinematics</v-list-item-title>
               </v-list-item>
 
-              <v-list-item link>
+
                 <v-dialog
                         v-model="rename_dialog"
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Rename</v-list-item-title>
+                    <v-list-item link v-on="on">
+                      <v-list-item-title>Rename</v-list-item-title>
+                    </v-list-item>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">
@@ -118,15 +120,17 @@
                     </v-card-text>
                   </v-card>
                 </v-dialog>
-              </v-list-item>
 
-              <v-list-item link v-if="!item.trashed">
+
+
                 <v-dialog
                         v-model="remove_dialog"
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Trash</v-list-item-title>
+                    <v-list-item link v-if="!item.trashed" v-on="on">
+                      <v-list-item-title>Trash</v-list-item-title>
+                    </v-list-item>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">
@@ -162,14 +166,16 @@
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
-              </v-list-item>
-              <v-list-item link v-else>
+
+
                 <v-dialog
                         v-model="restore_dialog"
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Restore</v-list-item-title>
+                    <v-list-item link v-if="item.trashed" v-on="on">
+                      <v-list-item-title v-on="on">Restore</v-list-item-title>
+                    </v-list-item>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">
@@ -203,7 +209,7 @@
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
-              </v-list-item>
+
             </v-list>
           </v-menu>
         </div>

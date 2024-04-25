@@ -45,13 +45,15 @@
                       </v-btn>
                     </template>
                     <v-list>
-                      <v-list-item link>
+
                         <v-dialog
                                 v-model="restore_session_dialog"
                                 v-click-outside="clickOutsideDialogSessionHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Restore</v-list-item-title>
+                            <v-list-item link v-on="on">
+                              <v-list-item-title>Restore</v-list-item-title>
+                            </v-list-item>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -85,14 +87,16 @@
                             </v-card-actions>
                           </v-card>
                         </v-dialog>
-                      </v-list-item>
-                      <v-list-item link>
+
+
                         <v-dialog
                                 v-model="remove_permanently_session_dialog"
                                 v-click-outside="clickOutsideDialogSessionHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Delete permanently</v-list-item-title>
+                            <v-list-item link v-on="on">
+                              <v-list-item-title>Delete permanently</v-list-item-title>
+                            </v-list-item>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -127,7 +131,7 @@
                             </v-card-actions>
                           </v-card>
                         </v-dialog>
-                      </v-list-item>
+
                     </v-list>
                   </v-menu>
                 </div>
@@ -175,13 +179,16 @@
                           </v-btn>
                         </template>
                         <v-list>
-                          <v-list-item link>
+
+
                             <v-dialog
                                     v-model="restore_trial_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Restore</v-list-item-title>
+                                <v-list-item link v-on="on">
+                                  <v-list-item-title>Restore</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -215,14 +222,16 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link>
+
+
                             <v-dialog
                                     v-model="remove_permanently_trial_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Delete permanently</v-list-item-title>
+                                <v-list-item link v-on="on">
+                                  <v-list-item-title>Delete permanently</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -257,7 +266,7 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
+
                         </v-list>
                       </v-menu>
                     </div>
