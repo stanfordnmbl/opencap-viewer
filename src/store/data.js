@@ -94,6 +94,9 @@ export default {
       const sessionIds = state.sessions.map(session => session.id);
       if(!sessionIds.includes(session.id)){
         state.sessions.unshift(session);
+      } else {
+        const index = state.sessions.findIndex(s => s.id === session.id);
+        state.sessions.splice(index, 1, session);
       }
     },
     setSessionId (state, id) {
@@ -316,6 +319,7 @@ export default {
       try {
         res = await axios.get(`/sessions/${sessionId}/`)
         commit('setSession', res.data)
+        console.log(res.data)
       } catch (e) {
         if (e.response.status === 401) {
           router.push({ name: 'Login' })

@@ -68,15 +68,13 @@
               </v-btn>
             </template>
             <v-list>
-              <v-list-item link>
-                <v-list-item-title
-                    @click="$router.push({ name: 'Session', params: { id: item.id }})"
-                    >Load</v-list-item-title>
+              <v-list-item link
+                @click="$router.push({ name: 'Session', params: { id: item.id }})">
+                <v-list-item-title>Load</v-list-item-title>
               </v-list-item>
-              <v-list-item link>
-                <v-list-item-title
-                  @click="$router.push({ name: 'Dashboard', params: { id: item.id } })"
-                  >Dashboard kinematics</v-list-item-title>
+              <v-list-item link
+                @click="$router.push({ name: 'Dashboard', params: { id: item.id } })">
+                <v-list-item-title>Dashboard kinematics</v-list-item-title>
               </v-list-item>
 
               <v-list-item link>
@@ -278,9 +276,10 @@ export default {
         id: s.id,
         name: s.name,
         sessionName: s.meta !== null && s.meta["sessionName"] ? s.meta["sessionName"] : "",
-        trials_count: s.trials.filter(function (trial, i){
-                return (trial.status === 'done' && trial.name === 'neutral') || trial.name !== 'calibration' && (trial.name !== 'neutral');
-            }).length,
+        trials_count: s.trials_count,
+        // trials_count: s.trials.filter(function (trial, i){
+        //         return (trial.status === 'done' && trial.name === 'neutral') || trial.name !== 'calibration' && (trial.name !== 'neutral');
+        //     }).length,
         created_at: s.created_at,
         trashed: s.trashed,
         trashed_at: s.trashed_at,
