@@ -68,24 +68,24 @@
               </v-btn>
             </template>
             <v-list>
-              <v-list-item link>
-                <v-list-item-title
-                    @click="$router.push({ name: 'Session', params: { id: item.id }})"
-                    >Load</v-list-item-title>
+              <v-list-item link
+                @click="$router.push({ name: 'Session', params: { id: item.id }})">
+                <v-list-item-title>Load</v-list-item-title>
               </v-list-item>
-              <v-list-item link>
-                <v-list-item-title
-                  @click="$router.push({ name: 'Dashboard', params: { id: item.id } })"
-                  >Dashboard kinematics</v-list-item-title>
+              <v-list-item link
+                @click="$router.push({ name: 'Dashboard', params: { id: item.id } })">
+                <v-list-item-title>Dashboard kinematics</v-list-item-title>
               </v-list-item>
 
-              <v-list-item link>
+
                 <v-dialog
                         v-model="rename_dialog"
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Rename</v-list-item-title>
+                    <v-list-item link v-on="on">
+                      <v-list-item-title>Rename</v-list-item-title>
+                    </v-list-item>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">
@@ -120,15 +120,17 @@
                     </v-card-text>
                   </v-card>
                 </v-dialog>
-              </v-list-item>
 
-              <v-list-item link v-if="!item.trashed">
+
+
                 <v-dialog
                         v-model="remove_dialog"
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Trash</v-list-item-title>
+                    <v-list-item link v-if="!item.trashed" v-on="on">
+                      <v-list-item-title>Trash</v-list-item-title>
+                    </v-list-item>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">
@@ -164,14 +166,16 @@
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
-              </v-list-item>
-              <v-list-item link v-else>
+
+
                 <v-dialog
                         v-model="restore_dialog"
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item-title v-on="on">Restore</v-list-item-title>
+                    <v-list-item link v-if="item.trashed" v-on="on">
+                      <v-list-item-title v-on="on">Restore</v-list-item-title>
+                    </v-list-item>
                   </template>
                   <v-card>
                     <v-card-text class="pt-4">
@@ -205,7 +209,7 @@
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
-              </v-list-item>
+
             </v-list>
           </v-menu>
         </div>
@@ -278,14 +282,15 @@ export default {
         id: s.id,
         name: s.name,
         sessionName: s.meta !== null && s.meta["sessionName"] ? s.meta["sessionName"] : "",
-        trials_count: s.trials.filter(function (trial, i){
-                return (trial.status === 'done' && trial.name === 'neutral') || trial.name !== 'calibration' && (trial.name !== 'neutral');
-            }).length,
+        trials_count: s.trials_count,
+        // trials_count: s.trials.filter(function (trial, i){
+        //         return (trial.status === 'done' && trial.name === 'neutral') || trial.name !== 'calibration' && (trial.name !== 'neutral');
+        //     }).length,
         created_at: s.created_at,
         trashed: s.trashed,
         trashed_at: s.trashed_at,
         isMenuOpen: false
-      })).filter(s => this.show_trashed || !s.trashed)
+      })).filter(s => s.trials_count > 0 && (this.show_trashed || !s.trashed))
     }
   },
   methods: {

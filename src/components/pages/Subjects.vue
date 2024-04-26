@@ -48,18 +48,18 @@
                       </v-btn>
                     </template>
                     <v-list>
-                      <v-list-item link v-if="!item.trashed">
-                        <v-list-item-title
-                          @click="item.isMenuOpen = false; editSubject(item)"
-                          >Edit</v-list-item-title>
+                      <v-list-item link v-if="!item.trashed" @click="item.isMenuOpen = false; editSubject(item)">
+                        <v-list-item-title>Edit</v-list-item-title>
                       </v-list-item>
-                      <v-list-item link v-if="!item.trashed">
+
                         <v-dialog
                                 v-model="remove_dialog"
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Trash</v-list-item-title>
+                            <v-list-item link v-if="!item.trashed" v-on="on">
+                              <v-list-item-title>Trash</v-list-item-title>
+                            </v-list-item>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -95,14 +95,16 @@
                             </v-card-actions>
                           </v-card>
                         </v-dialog>
-                      </v-list-item>
-                      <v-list-item link v-if="item.trashed">
+
+
                         <v-dialog
                                 v-model="restore_dialog"
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Restore</v-list-item-title>
+                            <v-list-item link v-if="item.trashed" v-on="on">
+                              <v-list-item-title>Restore</v-list-item-title>
+                            </v-list-item>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -136,14 +138,16 @@
                             </v-card-actions>
                           </v-card>
                         </v-dialog>
-                      </v-list-item>
-                      <v-list-item link v-if="item.trashed">
+
+
                         <v-dialog
                                 v-model="remove_permanently_dialog"
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Delete permanently</v-list-item-title>
+                            <v-list-item link v-if="item.trashed" v-on="on">
+                              <v-list-item-title>Delete permanently</v-list-item-title>
+                            </v-list-item>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -178,14 +182,16 @@
                             </v-card-actions>
                           </v-card>
                         </v-dialog>
-                      </v-list-item>
-                      <v-list-item link v-if="!item.trashed & isSyncDownloadAllowed">
+
+
                         <v-dialog
                                 v-model="download_dialog"
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Download data (old)</v-list-item-title>
+                            <v-list-item link v-if="!item.trashed & isSyncDownloadAllowed" v-on="on">
+                              <v-list-item-title>Download data (old)</v-list-item-title>
+                            </v-list-item>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -222,7 +228,7 @@
                             </v-card-actions>
                           </v-card>
                         </v-dialog>
-                      </v-list-item>
+
                       <!-- Download archive -->
                       <!--
                       <v-list-item link v-if="!item.trashed">
@@ -375,7 +381,7 @@ export default {
       sessionHeaders: [
         { text: 'Session ID', value: 'id' },
         { text: 'Session Name', value: 'sessionName' },
-        { text: 'Trials', value: 'trials.length' },
+        { text: 'Trials', value: 'trials_count' },
         { text: 'Date', value: 'created_at' },
       ],
       selected: null,
@@ -415,8 +421,10 @@ export default {
         id: s.id,
         sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
         name: s.name,
-        trials_count: String(s.trials.length),
-        trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+        // trials_count: String(s.trials.length),
+        trials_count: s.trials_count,
+        // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+        trashed_trials_count: s.trashed_trials_count,
         trials: s.trials,
         created_at: s.created_at,
         trashed: s.trashed,

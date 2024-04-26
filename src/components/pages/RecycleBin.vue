@@ -45,13 +45,15 @@
                       </v-btn>
                     </template>
                     <v-list>
-                      <v-list-item link>
+
                         <v-dialog
                                 v-model="restore_session_dialog"
                                 v-click-outside="clickOutsideDialogSessionHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Restore</v-list-item-title>
+                            <v-list-item link v-on="on">
+                              <v-list-item-title>Restore</v-list-item-title>
+                            </v-list-item>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -85,14 +87,16 @@
                             </v-card-actions>
                           </v-card>
                         </v-dialog>
-                      </v-list-item>
-                      <v-list-item link>
+
+
                         <v-dialog
                                 v-model="remove_permanently_session_dialog"
                                 v-click-outside="clickOutsideDialogSessionHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item-title v-on="on">Delete permanently</v-list-item-title>
+                            <v-list-item link v-on="on">
+                              <v-list-item-title>Delete permanently</v-list-item-title>
+                            </v-list-item>
                           </template>
                           <v-card>
                             <v-card-text class="pt-4">
@@ -127,7 +131,7 @@
                             </v-card-actions>
                           </v-card>
                         </v-dialog>
-                      </v-list-item>
+
                     </v-list>
                   </v-menu>
                 </div>
@@ -175,13 +179,16 @@
                           </v-btn>
                         </template>
                         <v-list>
-                          <v-list-item link>
+
+
                             <v-dialog
                                     v-model="restore_trial_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Restore</v-list-item-title>
+                                <v-list-item link v-on="on">
+                                  <v-list-item-title>Restore</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -215,14 +222,16 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link>
+
+
                             <v-dialog
                                     v-model="remove_permanently_trial_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Delete permanently</v-list-item-title>
+                                <v-list-item link v-on="on">
+                                  <v-list-item-title>Delete permanently</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -257,7 +266,7 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
+
                         </v-list>
                       </v-menu>
                     </div>
@@ -352,8 +361,9 @@ export default {
         id: s.id,
         sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
         name: s.name,
-        trials_count: String(s.trials.length),
-        trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+        trials_count: s.trials_count, // String(s.trials.length),
+        // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+        trashed_trials_count: s.trashed_trials_count,
         trials: s.trials,
         created_at: s.created_at,
         trashed: s.trashed,
@@ -370,12 +380,16 @@ export default {
       'loadExistingSessions', 'loadSession', 'permanentRemoveExistingSession',
       'trashExistingSession', 'restoreTrashedSession']),
     onSelect({item, value}) {
-      this.selected = value ? item : null
-      console.log('selected=', this.selected)
+      if (value) {
+        this.loadSession(item.id).then(() => {
+          this.selected = this.sessions.find(s => s.id === item.id)
+        })
+      } else {
+        this.selected = null
+      }
     },
     onRowClick(item, params) {
       params.select(!params.isSelected);
-      this.loadSession(item.id)
     },
     clickOutsideDialogSessionHideMenu(e) {
       if (e.target.className === 'v-overlay__scrim') {
