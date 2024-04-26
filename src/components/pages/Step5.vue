@@ -48,13 +48,16 @@
                           <v-list-item link v-if="!t.trashed && t.name !== 'neutral'" @click="analysisDialog(t)">
                             <v-list-item-title>Analysis</v-list-item-title>
                           </v-list-item>
-                          <v-list-item link v-if="!t.trashed">
+
+
                             <v-dialog
                                     v-model="remove_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Trash</v-list-item-title>
+                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item-title>Trash</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -90,14 +93,15 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link v-else>
+
                             <v-dialog
                                     v-model="restore_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Restore</v-list-item-title>
+                                <v-list-item link v-if="t.trashed" v-on="on">
+                                  <v-list-item-title>Restore</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -131,14 +135,15 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link v-if="!t.trashed">
+
                             <v-dialog
                                     v-model="permanent_delete_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Delete</v-list-item-title>
+                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item-title >Delete</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -173,7 +178,7 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
+
                         </v-list>
                       </v-menu>
                     </div>
