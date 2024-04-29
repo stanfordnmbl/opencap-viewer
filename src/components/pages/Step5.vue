@@ -486,12 +486,7 @@
       </v-btn>
         </v-card-actions>
     </v-card>
-</v-dialog>
-
-
-
-
-
+    </v-dialog>
     </div>
 </template>
 
