@@ -667,7 +667,7 @@ export default {
             return this.startButtonCaptions[this.state]
           }
         }
-      },
+      }
     },
   async mounted() {
     await this.loadSession(this.$route.params.id)
@@ -737,7 +737,7 @@ export default {
         this.isArchiveInProgress = false;
         this.archiveUrl = "#";
       }
-    },
+    }
     // showAnalysisDialog(newShowAnalysisDialog, oldShowAnalysisDialog){
     //     console.log(newShowAnalysisDialog);
     //     // if(!newShowAnalysisDialog){
