@@ -426,12 +426,12 @@
                   <v-btn
                       small
                       v-if="!func.trials.includes(session.trials[trial_analysis_index].id) && !(session.trials[trial_analysis_index].id in func.states)"
-                      @click="invokeAnalysisFunction(func.id, session.trials[trial_analysis_index].id, session.trials[trial_analysis_index]?.name)"
+                      @click="invokeAnalysisFunction(func.id, session.trials[trial_analysis_index].id, session.trials[trial_analysis_index].name)"
                       >
                       Run
                   </v-btn>
                     <v-btn small v-if="(session.trials[trial_analysis_index].id in func.states) && !func.trials.includes(session.trials[trial_analysis_index].id)">
-                        <span :style="func.states[session.trials[trial_analysis_index].id].state == 'failed'? 'color:red' : 'color:green'">{{ func.states[session.trials[trial_analysis_index].id].state }}</span>
+                        <span :style="func.states[session.trials[trial_analysis_index].id].state == 'failed' ? 'color:red' : 'color:green'">{{ func.states[session.trials[trial_analysis_index].id].state }}</span>
                         <v-menu offset-y>
                             <template v-slot:activator="{ on, attrs }">
                             <v-btn icon dark v-bind="attrs" v-on="on" >
@@ -441,7 +441,7 @@
 
                             <v-list>
                                 <v-list-item link
-                                    @click="invokeAnalysisFunction(func.id, session.trials[trial_analysis_index].id, session.trials[trial_analysis_index]?.name)"
+                                    @click="invokeAnalysisFunction(func.id, session.trials[trial_analysis_index].id, session.trials[trial_analysis_index].name)"
                                     :disabled="trial_analysis_index in func.trials">
                                     Re-run
                                 </v-list-item>
