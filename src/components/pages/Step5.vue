@@ -1,14 +1,14 @@
 <template>
-    <div class="step-5 d-flex">
-        <div class="left d-flex flex-column pa-2">
+  <div class="step-5 d-flex">
+      <div class="left d-flex flex-column pa-2">
 
-            <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
+          <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
 
-                <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
+              <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
 
-                    <v-text-field v-show="show_controls" v-model="trialName" label="Trial name" class="flex-grow-0"
-                        :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
-                </ValidationProvider>
+                  <v-text-field v-show="show_controls" v-model="trialName" label="Trial name" class="flex-grow-0"
+                      :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
+              </ValidationProvider>
 
                 <v-btn class="mb-4 w-100" v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
@@ -45,103 +45,19 @@
                           <v-list-item link v-if="t.name !== 'neutral'" @click="renameTrialDialog(t)">
                             <v-list-item-title>Rename</v-list-item-title>
                           </v-list-item>
-                          <v-list-item link v-if="!t.trashed && t.name !== 'neutral'">
-                            <v-dialog
-                                    v-model="showAnalysisDialog"
-                                    v-click-outside="clickOutsideDialogTrialHideMenu"
-                                    max-width="800">
-                                <template v-slot:activator="{ on }">
-                                    <v-list-item-title v-on="on">Analysis</v-list-item-title>
-                                </template>
-                                <v-card>
-                                    <v-card-title>Advanced Analysis</v-card-title>
-                                    <v-card-text v-if="analysisFunctions.length > 0">
-
-                                        <v-row v-for="func in analysisFunctionsWithMenu" :key="func.id">
-                                            <v-col cols="3">{{ func.title }}</v-col>
-                                            <v-col cols="3">
-                                              {{ func.title }}
-
-                                              <v-tooltip bottom v-if="func.info.length > 0">
-                                                <template v-slot:activator="{ on }">
-                                                  <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
-                                                </template>
-                                                <p v-html="func.info.replace(/\n/g, '<br>')" />
-                                              </v-tooltip>
-
-                                            </v-col>
-                                            <v-col cols="5">{{ func.description }}</v-col>
-                                            <v-col cols="4">
-                                              <v-btn small v-if="func.trials.includes(t.id)" :disabled="t.id in func.trials">
-                                                  <span >
-                                                      <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
-                                                      Calculating...
-                                                  </span>
-                                              </v-btn>
-
-                                              <v-btn
-                                                  small
-                                                  v-if="!func.trials.includes(t.id) && !(t.id in func.states)"
-                                                  @click="invokeAnalysisFunction(func.id, t.id, t.name)"
-                                                  >
-                                                  Run
-                                              </v-btn>
-                                                <v-btn small v-if="(t.id in func.states) && !func.trials.includes(t.id)">
-                                                    <span :style="func.states[t.id].state == 'failed'? 'color:red' : 'color:green'">{{ func.states[t.id].state }}</span>
-                                                    <v-menu v-model="func.isMenuOpen" offset-y>
-                                                        <template v-slot:activator="{ on, attrs }">
-                                                        <v-btn icon dark v-bind="attrs" v-on="on" >
-                                                            <v-icon>mdi-menu</v-icon>
-                                                        </v-btn>
-                                                        </template>
-                                                        <v-list>
-                                                            <v-list-item link
-                                                                @click="invokeAnalysisFunction(func.id, t.id, t.name)"
-                                                                :disabled="t.id in func.trials">
-                                                                Re-run
-                                                            </v-list-item>
-                                                            <v-list-item
-                                                                @click="goToAnalysisDashboard(func.states[t.id].dashboard_id, t.id)"
-                                                                v-if="func.states[t.id].dashboard_id != null && func.states[t.id].state == 'successfull'"
-                                                                >Analysis Dashboard</v-list-item>
-                                                        </v-list>
-                                                    </v-menu>
-                                                </v-btn>
-
-                                            </v-col>
-                                        </v-row>
-                                    </v-card-text>
-                                    <v-card-text v-else>
-                                        <p>Sorry, there are no available functions.</p>
-                                    </v-card-text>
-                                    <v-card-actions>
-                                    <v-spacer></v-spacer>
-                                    <v-btn
-                                    color="blue darken-1"
-                                    text
-                                    v-if="analysisFunctions.length > 0"
-                                  >
-                                    Reset results
-                                  </v-btn>
-                                  <v-btn
-                                    color="red darken-1"
-                                    text
-                                    @click="t.isMenuOpen = false; showAnalysisDialog = false;"
-                                  >
-                                    Close
-                                  </v-btn>
-                                    </v-card-actions>
-                                </v-card>
-                            </v-dialog>
-
+                          <v-list-item link v-if="!t.trashed && t.name !== 'neutral'" @click="analysisDialog(t)">
+                            <v-list-item-title>Analysis</v-list-item-title>
                           </v-list-item>
-                          <v-list-item link v-if="!t.trashed">
+
+
                             <v-dialog
                                     v-model="remove_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Trash</v-list-item-title>
+                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item-title>Trash</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -177,14 +93,15 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link v-else>
+
                             <v-dialog
                                     v-model="restore_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Restore</v-list-item-title>
+                                <v-list-item link v-if="t.trashed" v-on="on">
+                                  <v-list-item-title>Restore</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -218,14 +135,15 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link v-if="!t.trashed">
+
                             <v-dialog
                                     v-model="permanent_delete_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Delete</v-list-item-title>
+                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item-title >Delete</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -260,7 +178,7 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
+
                         </v-list>
                       </v-menu>
                     </div>
@@ -406,10 +324,10 @@
             </div>
         </div>
 
-        <div class="viewer flex-grow-1">
-            <div v-if="trial" class="d-flex flex-column h-100">
+      <div class="viewer flex-grow-1">
+          <div v-if="trial" class="d-flex flex-column h-100">
 
-                <div id="mocap" ref="mocap" class="flex-grow-1" />
+              <div id="mocap" ref="mocap" class="flex-grow-1" />
 
 
                 <div v-if="!videoControlsDisabled" style="display: flex; flex-wrap: wrap; align-items: center;">
@@ -420,18 +338,18 @@
                 </div>
             </div>
 
-            <div v-else-if="trialLoading" class="flex-grow-1 d-flex align-center justify-center">
-                <v-progress-circular indeterminate color="grey" size="30" width="4" />
-            </div>
-        </div>
+          <div v-else-if="trialLoading" class="flex-grow-1 d-flex align-center justify-center">
+              <v-progress-circular indeterminate color="grey" size="30" width="4" />
+          </div>
+      </div>
 
-        <div class="right d-flex flex-column">
-            <div class="videos flex-grow-1 d-flex flex-column">
-              <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
-              playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
-            </div>
+      <div class="right d-flex flex-column">
+          <div class="videos flex-grow-1 d-flex flex-column">
+            <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
+            playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
+          </div>
 
-            <SpeedControl v-model="playSpeed" />
+          <SpeedControl v-model="playSpeed" />
 
             <VideoNavigation :playing="playing" :value="frame" :maxFrame="frames.length - 1"
                 :disabled="videoControlsDisabled" @play="togglePlay(true)" @pause="togglePlay(false)"
@@ -448,24 +366,24 @@
                 <v-icon x-large color="orange">mdi-rename-box</v-icon>
               </v-col>
               <v-col cols="10">
-                <p v-if="session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'" class="text-orange">
+                <p v-if="session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'" class="text-orange">
                     You can't rename a trial while it's being uploaded or processed. Please wait before attempting to rename the trial.
                 </p>
                 <p v-else>
-                  Insert a new name for trial {{session.trials[trial_rename_index].name}}:
+                  Insert a new name for trial {{session.trials[trial_rename_index]?.name}}:
                 </p>
                 <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr" v-slot="{ invalid }">
                   <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
 
                       <v-text-field v-model="trialNewName" label="Trial new name" class="flex-grow-0"
-                          :disabled="state !== 'ready' || session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'"
+                          :disabled="state !== 'ready' || session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'"
                                     dark
                                     :error="errors.length > 0" :error-messages="errors[0]" />
                   </ValidationProvider>
 
                   <v-spacer></v-spacer>
 
-                  <v-btn class="text-right" :disabled="invalid || session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'"
+                  <v-btn class="text-right" :disabled="invalid || session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'"
                          @click="trial_rename_dialog = false; renameTrial(session.trials[trial_rename_index], trial_rename_index, trialNewName);">
                       Rename Trial
                   </v-btn>
@@ -475,6 +393,100 @@
           </v-card-text>
         </v-card>
       </v-dialog>
+
+  <v-dialog
+      v-model="showAnalysisDialog"
+      v-click-outside="clickOutsideDialogTrialHideMenu"
+      max-width="800">
+    <v-card>
+        <v-card-title>Advanced Analysis</v-card-title>
+        <v-card-text v-if="analysisFunctions.length > 0">
+
+            <v-row v-for="(func, index) in analysisFunctionsWithMenu"
+                    v-bind:item="func"
+                    v-bind:index="index"
+                    v-bind:key="func.id"
+                    :ref="func.id">
+                <v-col cols="3">
+                  {{ func.title }}
+
+                  <v-tooltip bottom v-if="func.info.length > 0">
+                    <template v-slot:activator="{ on }">
+                      <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                    </template>
+                    <p v-html="func.info.replace(/\n/g, '<br>')" />
+                  </v-tooltip>
+
+                </v-col>
+                <v-col cols="5">{{ func.description }}</v-col>
+                <v-col cols="4">
+                  <v-btn small v-if="func.trials.includes(session.trials[trial_analysis_index].id)" :disabled="session.trials[trial_analysis_index].id in func.trials">
+                      <span >
+                          <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
+                          Calculating...
+                      </span>
+                  </v-btn>
+
+                  <v-btn
+                      small
+                      v-if="!func.trials.includes(session.trials[trial_analysis_index].id) && !(session.trials[trial_analysis_index].id in func.states)"
+                      @click="invokeAnalysisFunction(func.id, session.trials[trial_analysis_index].id, session.trials[trial_analysis_index]?.name)"
+                      >
+                      Run
+                  </v-btn>
+                    <v-btn small v-if="(session.trials[trial_analysis_index].id in func.states) && !func.trials.includes(session.trials[trial_analysis_index].id)">
+                        <span :style="func.states[session.trials[trial_analysis_index].id].state == 'failed'? 'color:red' : 'color:green'">{{ func.states[session.trials[trial_analysis_index].id].state }}</span>
+                        <v-menu offset-y>
+                            <template v-slot:activator="{ on, attrs }">
+                            <v-btn icon dark v-bind="attrs" v-on="on" >
+                                <v-icon>mdi-menu</v-icon>
+                            </v-btn>
+                            </template>
+
+                            <v-list>
+                                <v-list-item link
+                                    @click="invokeAnalysisFunction(func.id, session.trials[trial_analysis_index].id, session.trials[trial_analysis_index]?.name)"
+                                    :disabled="trial_analysis_index in func.trials">
+                                    Re-run
+                                </v-list-item>
+                                <v-list-item
+                                    @click="goToAnalysisDashboard(func.states[session.trials[trial_analysis_index].id].dashboard_id, session.trials[trial_analysis_index].id)"
+                                    v-if="func.states[session.trials[trial_analysis_index].id].dashboard_id != null && func.states[session.trials[trial_analysis_index].id].state == 'successfull'"
+                                    >Analysis Dashboard</v-list-item>
+                                 <v-list-item
+                                   v-for="menu_item in func.states[session.trials[trial_analysis_index].id].menu"
+                                   @click="requestDownloadMenuItem(session.trials[trial_analysis_index], menu_item)" :key="menu_item.label"
+                                    >{{ menu_item.label }}</v-list-item>
+                            </v-list>
+
+                        </v-menu>
+                    </v-btn>
+
+                </v-col>
+            </v-row>
+        </v-card-text>
+        <v-card-text v-else>
+            <p>Sorry, there are no available functions.</p>
+        </v-card-text>
+        <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn
+        color="blue darken-1"
+        text
+        v-if="analysisFunctions.length > 0"
+      >
+        Reset results
+      </v-btn>
+      <v-btn
+        color="red darken-1"
+        text
+        @click="session.trials[trial_analysis_index].isMenuOpen = false; showAnalysisDialog = false;"
+      >
+        Close
+      </v-btn>
+        </v-card-actions>
+    </v-card>
+    </v-dialog>
     </div>
 </template>
 
@@ -556,6 +568,7 @@ export default {
 
             showAnalysisDialog: false,
             showAnalysisResultDialog: false,
+            trial_analysis_index: 0,
             // isInvokeInProgress: false,
             // isInvokeDone: false,
             // analysisResult: {analysis_function: {}, result: { meta: {}}},
