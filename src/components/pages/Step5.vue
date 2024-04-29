@@ -1491,7 +1491,7 @@ export default {
         }
       }
       window.alert(`Result with tag "${tag}" not found`);
-    },
+    }
   }
 }
 </script>
