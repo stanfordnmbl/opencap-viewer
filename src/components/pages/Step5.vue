@@ -1,14 +1,14 @@
 <template>
-    <div class="step-5 d-flex">
-        <div class="left d-flex flex-column pa-2">
+  <div class="step-5 d-flex">
+      <div class="left d-flex flex-column pa-2">
 
-            <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
+          <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
 
-                <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
+              <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
 
-                    <v-text-field v-show="show_controls" v-model="trialName" label="Trial name" class="flex-grow-0"
-                        :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
-                </ValidationProvider>
+                  <v-text-field v-show="show_controls" v-model="trialName" label="Trial name" class="flex-grow-0"
+                      :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
+              </ValidationProvider>
 
                 <v-btn class="mb-4 w-100" v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
@@ -48,13 +48,16 @@
                           <v-list-item link v-if="!t.trashed && t.name !== 'neutral'" @click="analysisDialog(t)">
                             <v-list-item-title>Analysis</v-list-item-title>
                           </v-list-item>
-                          <v-list-item link v-if="!t.trashed">
+
+
                             <v-dialog
                                     v-model="remove_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Trash</v-list-item-title>
+                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item-title>Trash</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -90,14 +93,15 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link v-else>
+
                             <v-dialog
                                     v-model="restore_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Restore</v-list-item-title>
+                                <v-list-item link v-if="t.trashed" v-on="on">
+                                  <v-list-item-title>Restore</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -131,14 +135,15 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link v-if="!t.trashed">
+
                             <v-dialog
                                     v-model="permanent_delete_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Delete</v-list-item-title>
+                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item-title >Delete</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -173,7 +178,7 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
+
                         </v-list>
                       </v-menu>
                     </div>
@@ -319,10 +324,10 @@
             </div>
         </div>
 
-        <div class="viewer flex-grow-1">
-            <div v-if="trial" class="d-flex flex-column h-100">
+      <div class="viewer flex-grow-1">
+          <div v-if="trial" class="d-flex flex-column h-100">
 
-                <div id="mocap" ref="mocap" class="flex-grow-1" />
+              <div id="mocap" ref="mocap" class="flex-grow-1" />
 
 
                 <div v-if="!videoControlsDisabled" style="display: flex; flex-wrap: wrap; align-items: center;">
@@ -333,18 +338,18 @@
                 </div>
             </div>
 
-            <div v-else-if="trialLoading" class="flex-grow-1 d-flex align-center justify-center">
-                <v-progress-circular indeterminate color="grey" size="30" width="4" />
-            </div>
-        </div>
+          <div v-else-if="trialLoading" class="flex-grow-1 d-flex align-center justify-center">
+              <v-progress-circular indeterminate color="grey" size="30" width="4" />
+          </div>
+      </div>
 
-        <div class="right d-flex flex-column">
-            <div class="videos flex-grow-1 d-flex flex-column">
-              <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
-              playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
-            </div>
+      <div class="right d-flex flex-column">
+          <div class="videos flex-grow-1 d-flex flex-column">
+            <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
+            playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
+          </div>
 
-            <SpeedControl v-model="playSpeed" />
+          <SpeedControl v-model="playSpeed" />
 
             <VideoNavigation :playing="playing" :value="frame" :maxFrame="frames.length - 1"
                 :disabled="videoControlsDisabled" @play="togglePlay(true)" @pause="togglePlay(false)"
@@ -361,24 +366,24 @@
                 <v-icon x-large color="orange">mdi-rename-box</v-icon>
               </v-col>
               <v-col cols="10">
-                <p v-if="session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'" class="text-orange">
+                <p v-if="session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'" class="text-orange">
                     You can't rename a trial while it's being uploaded or processed. Please wait before attempting to rename the trial.
                 </p>
                 <p v-else>
-                  Insert a new name for trial {{session.trials[trial_rename_index].name}}:
+                  Insert a new name for trial {{session.trials[trial_rename_index]?.name}}:
                 </p>
                 <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr" v-slot="{ invalid }">
                   <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
 
                       <v-text-field v-model="trialNewName" label="Trial new name" class="flex-grow-0"
-                          :disabled="state !== 'ready' || session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'"
+                          :disabled="state !== 'ready' || session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'"
                                     dark
                                     :error="errors.length > 0" :error-messages="errors[0]" />
                   </ValidationProvider>
 
                   <v-spacer></v-spacer>
 
-                  <v-btn class="text-right" :disabled="invalid || session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'"
+                  <v-btn class="text-right" :disabled="invalid || session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'"
                          @click="trial_rename_dialog = false; renameTrial(session.trials[trial_rename_index], trial_rename_index, trialNewName);">
                       Rename Trial
                   </v-btn>
@@ -389,8 +394,7 @@
         </v-card>
       </v-dialog>
 
-
-<v-dialog
+  <v-dialog
       v-model="showAnalysisDialog"
       v-click-outside="clickOutsideDialogTrialHideMenu"
       max-width="800">
