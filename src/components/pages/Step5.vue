@@ -367,24 +367,24 @@
                 <v-icon x-large color="orange">mdi-rename-box</v-icon>
               </v-col>
               <v-col cols="10">
-                <p v-if="session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'" class="text-orange">
+                <p v-if="session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'" class="text-orange">
                     You can't rename a trial while it's being uploaded or processed. Please wait before attempting to rename the trial.
                 </p>
                 <p v-else>
-                  Insert a new name for trial {{session.trials[trial_rename_index].name}}:
+                  Insert a new name for trial {{session.trials[trial_rename_index]?.name}}:
                 </p>
                 <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr" v-slot="{ invalid }">
                   <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
 
                       <v-text-field v-model="trialNewName" label="Trial new name" class="flex-grow-0"
-                          :disabled="state !== 'ready' || session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'"
+                          :disabled="state !== 'ready' || session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'"
                                     dark
                                     :error="errors.length > 0" :error-messages="errors[0]" />
                   </ValidationProvider>
 
                   <v-spacer></v-spacer>
 
-                  <v-btn class="text-right" :disabled="invalid || session.trials[trial_rename_index].status === 'processing' || session.trials[trial_rename_index].status === 'uploading'"
+                  <v-btn class="text-right" :disabled="invalid || session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'"
                          @click="trial_rename_dialog = false; renameTrial(session.trials[trial_rename_index], trial_rename_index, trialNewName);">
                       Rename Trial
                   </v-btn>
