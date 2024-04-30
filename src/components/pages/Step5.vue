@@ -1,14 +1,14 @@
 <template>
-    <div class="step-5 d-flex">
-        <div class="left d-flex flex-column pa-2">
+  <div class="step-5 d-flex">
+      <div class="left d-flex flex-column pa-2">
 
-            <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
+          <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
 
-                <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
+              <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
 
-                    <v-text-field v-show="show_controls" v-model="trialName" label="Trial name" class="flex-grow-0"
-                        :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
-                </ValidationProvider>
+                  <v-text-field v-show="show_controls" v-model="trialName" label="Trial name" class="flex-grow-0"
+                      :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
+              </ValidationProvider>
 
                 <v-btn class="mb-4 w-100" v-show="show_controls" :disabled="busy || invalid" @click="changeState">
                     {{ buttonCaption }}
@@ -94,7 +94,6 @@
                               </v-card>
                             </v-dialog>
 
-
                             <v-dialog
                                     v-model="restore_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
@@ -143,7 +142,7 @@
                                     max-width="500">
                               <template v-slot:activator="{ on }">
                                 <v-list-item link v-if="!t.trashed" v-on="on">
-                                  <v-list-item-title>Delete</v-list-item-title>
+                                  <v-list-item-title >Delete</v-list-item-title>
                                 </v-list-item>
                               </template>
                               <v-card>
@@ -325,10 +324,10 @@
             </div>
         </div>
 
-        <div class="viewer flex-grow-1">
-            <div v-if="trial" class="d-flex flex-column h-100">
+      <div class="viewer flex-grow-1">
+          <div v-if="trial" class="d-flex flex-column h-100">
 
-                <div id="mocap" ref="mocap" class="flex-grow-1" />
+              <div id="mocap" ref="mocap" class="flex-grow-1" />
 
 
                 <div v-if="!videoControlsDisabled" style="display: flex; flex-wrap: wrap; align-items: center;">
@@ -339,18 +338,18 @@
                 </div>
             </div>
 
-            <div v-else-if="trialLoading" class="flex-grow-1 d-flex align-center justify-center">
-                <v-progress-circular indeterminate color="grey" size="30" width="4" />
-            </div>
-        </div>
+          <div v-else-if="trialLoading" class="flex-grow-1 d-flex align-center justify-center">
+              <v-progress-circular indeterminate color="grey" size="30" width="4" />
+          </div>
+      </div>
 
-        <div class="right d-flex flex-column">
-            <div class="videos flex-grow-1 d-flex flex-column">
-              <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
-              playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
-            </div>
+      <div class="right d-flex flex-column">
+          <div class="videos flex-grow-1 d-flex flex-column">
+            <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
+            playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
+          </div>
 
-            <SpeedControl v-model="playSpeed" />
+          <SpeedControl v-model="playSpeed" />
 
             <VideoNavigation :playing="playing" :value="frame" :maxFrame="frames.length - 1"
                 :disabled="videoControlsDisabled" @play="togglePlay(true)" @pause="togglePlay(false)"
@@ -394,7 +393,6 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-
 
   <v-dialog
       v-model="showAnalysisDialog"
@@ -489,7 +487,6 @@
         </v-card-actions>
     </v-card>
     </v-dialog>
-
     </div>
 </template>
 
