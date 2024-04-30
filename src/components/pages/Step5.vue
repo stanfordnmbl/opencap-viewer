@@ -137,13 +137,14 @@
                               </v-card>
                             </v-dialog>
 
-                          <v-list-item link v-if="!t.trashed">
                             <v-dialog
                                     v-model="permanent_delete_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Delete</v-list-item-title>
+                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item-title>Delete</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -178,7 +179,7 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
+
                         </v-list>
                       </v-menu>
                     </div>
