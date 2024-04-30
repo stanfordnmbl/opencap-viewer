@@ -486,12 +486,7 @@
       </v-btn>
         </v-card-actions>
     </v-card>
-</v-dialog>
-
-
-
-
-
+    </v-dialog>
     </div>
 </template>
 
@@ -1496,7 +1491,7 @@ export default {
         }
       }
       window.alert(`Result with tag "${tag}" not found`);
-    },
+    }
   }
 }
 </script>
