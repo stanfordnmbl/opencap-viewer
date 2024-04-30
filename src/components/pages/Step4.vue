@@ -93,7 +93,6 @@
             tag="div"
             class="d-flex flex-column checkbox-box"
             ref="observer"
-            v-slot="{ }"
           >
             <v-checkbox
               v-model="data_sharing_0"
