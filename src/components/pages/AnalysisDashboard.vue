@@ -58,8 +58,54 @@
 
             <div class="left d-flex flex-column pa-2">
               <div v-if="loggedIn" class="left d-flex flex-column">
+
+                  <v-dialog v-model="dialog" width="500">
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn small class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="loggedIn">Share analysis publicly</v-btn>
+                    </template>
+
+                    <v-card>
+                        <v-card-title class="text-h5">
+                            Share analysis publicly
+                        </v-card-title>
+
+                        <v-card-text>
+                            <v-container>
+                                <h3 class="mb-2">Share on</h3>
+                                <ShareNetwork network="facebook" class="mr-2" style="text-decoration: none;"
+                                    :url="dashboardUrl" title="OpenCap session">
+                                    <v-btn><v-icon aria-hidden="false">mdi-facebook</v-icon> &nbsp;Facebook</v-btn>
+                                </ShareNetwork>
+                                <ShareNetwork network="twitter" class="mr-2" style="text-decoration: none;"
+                                    :url="dashboardUrl" title="OpenCap session">
+                                    <v-btn><v-icon aria-hidden="false">mdi-twitter</v-icon> &nbsp;Twitter</v-btn>
+                                </ShareNetwork>
+                                <ShareNetwork network="linkedin" :url="dashboardUrl" style="text-decoration: none;"
+                                    title="OpenCap session">
+                                    <v-btn><v-icon aria-hidden="false">mdi-linkedin</v-icon> &nbsp;LinkedIn</v-btn>
+                                </ShareNetwork>
+
+                                <v-text-field label="Alternatively, copy the session link and share on social media"
+                                    v-model="dashboardUrl" class="mt-5" readonly></v-text-field>
+                            </v-container>
+
+                        </v-card-text>
+
+                        <v-divider></v-divider>
+
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="dialog = false">
+                                Close
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+
+
                 <v-btn class="w-100 mt-4" :to="{ name: 'SelectSession' }">Back to session list
                 </v-btn>
+
               </div>
             </div>
 
@@ -122,6 +168,7 @@ export default {
         time_position: 0,
         result: {},
         show_dashboard: false,
+        dialog: null,
       }
     },
     computed: {
@@ -138,6 +185,10 @@ export default {
       filteredTrials() {
         return this.dashboard.data.trials.filter(trial => this.session_selected && trial.session_id === this.session_selected.id)
       },
+      dashboardUrl() {
+        return "https://app.opencap.ai/analysis-dashboard/" + this.dashboard.id + '?trialId=' + this.trial_selected?.id;
+      },
+
     },
     watch: {
       trial_selected: function (val) {
