@@ -217,6 +217,10 @@
                         <v-card-text>
                             <v-checkbox id="session-public" v-model="session.public" name="session-public"
                                 label="Make session public" @change="setPublic($event)" />
+
+                            <p>Making your session public will make your analysis public too.</p>
+
+
                             <v-container v-show="session.public">
                                 <h3 class="mb-2">Share on</h3>
                                 <ShareNetwork network="facebook" class="mr-2" style="text-decoration: none;"
