@@ -61,7 +61,7 @@
 
                   <v-dialog v-model="dialog" width="500">
                     <template v-slot:activator="{ on, attrs }">
-                        <v-btn small class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="loggedIn">Share analysis publicly</v-btn>
+                        <v-btn small class="mt-4 w-100" v-bind="attrs" v-on="on" v-show="loggedIn && trial_selected">Share analysis publicly</v-btn>
                     </template>
 
                     <v-card>
@@ -70,7 +70,13 @@
                         </v-card-title>
 
                         <v-card-text>
-                            <v-container>
+                          <div v-if="!session_selected?.public">
+                            <v-alert color="error" icon="$error">To make your analysis public, you need to make your session public</v-alert>
+
+                            <v-btn color="primary" text @click="setSessionPublic">Make session public</v-btn>
+                          </div>
+
+                            <v-container v-if="session_selected?.public">
                                 <h3 class="mb-2">Share on</h3>
                                 <ShareNetwork network="facebook" class="mr-2" style="text-decoration: none;"
                                     :url="dashboardUrl" title="OpenCap session">
@@ -169,6 +175,9 @@ export default {
         result: {},
         show_dashboard: false,
         dialog: null,
+
+        share_subject_id: null,
+        share_token: null,
       }
     },
     computed: {
@@ -186,7 +195,10 @@ export default {
         return this.dashboard.data.trials.filter(trial => this.session_selected && trial.session_id === this.session_selected.id)
       },
       dashboardUrl() {
-        return "https://app.opencap.ai/analysis-dashboard/" + this.dashboard.id + '?trialId=' + this.trial_selected?.id;
+        return location.origin + "/analysis-dashboard/" + this.dashboard.id +
+            '?trialId=' + this.trial_selected?.id +
+            '&subjectId=' + this.subject_selected?.id +
+            '&shareToken=' + this.subject_selected?.share_token;
       },
 
     },
@@ -199,10 +211,20 @@ export default {
         this.result = {}
 
         this.loadResult()
+        if (this.share_subject_id && this.share_token) {
+          history.pushState("", "", location.origin + location.pathname + `?trialId=${val.id}&subjectId=${this.share_subject_id}&shareToken=${this.share_token}`);
+        } else {
+          history.pushState("", "", location.origin + location.pathname + '?trialId=' + val.id);
+        }
       },
     },
     async mounted() {
-        await this.loadAnalysisDashboard(this.$route.params.id)
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString)
+        this.share_subject_id = urlParams.get('subjectId')
+        this.share_token = urlParams.get('shareToken')
+
+        await this.loadAnalysisDashboard({id:this.$route.params.id, subject_id:this.share_subject_id, share_token:this.share_token})
         let given_trial_id = this.$route.query.trialId
         if (given_trial_id) {
           let trial_selected = this.dashboard.data.trials.filter(trial => trial.id === given_trial_id)[0]
@@ -255,6 +277,13 @@ export default {
             }
           }
         },
+       setSessionPublic() {
+          axios.patch(`/sessions/${this.session_selected.id}/`, {"public": true}).then(response => {
+            this.session_selected.public = true
+          }).catch(error => {
+            console.error(error);
+          });
+       },
 
         // onSessionSelected(sessionName) {
         //   console.log(sessionName)

@@ -289,12 +289,17 @@ export default {
       let result = res.data.map((dashboard) => ({id: dashboard.id, title: dashboard.title}))
       commit('setAnalysisDahboardList', result)
     },
-    async loadAnalysisDashboard({ state, commit }, id) {
-      const dashboardId = id || state.session.id
+    async loadAnalysisDashboard({ state, commit }, {id, subject_id, share_token}) {
+      const dashboardId = id
 
       let res = await axios.get(`/analysis-dashboards/${dashboardId}/`)
       let result = res.data
-      res = await axios.get(`/analysis-dashboards/${dashboardId}/data/`)
+      let data_url = `/analysis-dashboards/${dashboardId}/data/`
+      console.log('loadAnalysisDashboard', data_url, subject_id, share_token)
+      if (share_token) {
+        data_url += `?subject_id=${subject_id}&share_token=${share_token}`
+      }
+      res = await axios.get(data_url)
       result['data'] = res.data
 
       commit('setAnalysisDahboard', result)
