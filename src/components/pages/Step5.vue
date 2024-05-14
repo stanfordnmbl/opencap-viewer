@@ -217,10 +217,6 @@
                         <v-card-text>
                             <v-checkbox id="session-public" v-model="session.public" name="session-public"
                                 label="Make session public" @change="setPublic($event)" />
-
-                            <p>Making your session public will make your analyses public too.</p>
-
-
                             <v-container v-show="session.public">
                                 <h3 class="mb-2">Share on</h3>
                                 <ShareNetwork network="facebook" class="mr-2" style="text-decoration: none;"
@@ -236,7 +232,7 @@
                                     <v-btn><v-icon aria-hidden="false">mdi-linkedin</v-icon> &nbsp;LinkedIn</v-btn>
                                 </ShareNetwork>
 
-                                <v-text-field label="Alternatively, copy this link"
+                                <v-text-field label="Alternatively, copy the session link and share on social media"
                                     v-model="sessionUrl" class="mt-5" readonly></v-text-field>
                             </v-container>
 
@@ -645,7 +641,7 @@ export default {
           isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
         }),
       sessionUrl() {
-        return location.origin + "/session/" + this.session.id;
+        return "https://app.opencap.ai/session/" + this.session.id;
       },
       analysisFunctionsWithMenu() {
         return this.analysisFunctions.map((func) => ({...func, isMenuOpen: false}))
