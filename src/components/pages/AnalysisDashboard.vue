@@ -91,7 +91,7 @@
                                     <v-btn><v-icon aria-hidden="false">mdi-linkedin</v-icon> &nbsp;LinkedIn</v-btn>
                                 </ShareNetwork>
 
-                                <v-text-field label="Alternatively, copy the session link and share on social media"
+                                <v-text-field label="Alternatively, copy this link"
                                     v-model="dashboardUrl" class="mt-5" readonly></v-text-field>
                             </v-container>
 
