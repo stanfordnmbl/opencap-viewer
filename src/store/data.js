@@ -371,11 +371,41 @@ export default {
         update_sessions = true;
       }
 
-      const res = await axios.post('/sessions/valid/', data)
+      // Experiments with partial loading
+
+      // let start = 0
+      // do {
+      //   data.start = start
+      //   data.quantity = 2
+      //   let res = await axios.post('/sessions/valid/', data)
+      //   console.log('loadExistingSessions', start, res.data)
+      //   start += res.data.sessions.length
+      // } while (start < res.data.total)
+
+      let sessions = []
+      data.start = 0
+      data.quantity = 2
+      let moreDataAvailable = true
+
+      while (moreDataAvailable) {
+        let res = await axios.post('/sessions/valid/', data)
+        sessions = sessions.concat(res.data.sessions)
+        if (res.data.sessions.length < data.quantity) {
+          moreDataAvailable = false
+        } else {
+            data.start += data.quantity
+        }
+      }
+      console.log('loadExistingSessions!!!', sessions)
+
+
+      // old code
+
+      // const res = await axios.post('/sessions/valid/', data)
       if (update_sessions) {
-        commit('updateExistingSessions', res.data)
+        commit('updateExistingSessions', sessions)
       } else {
-        commit('setExistingSessions', res.data)
+        commit('setExistingSessions', sessions)
       }
 
       if (reroute) {
