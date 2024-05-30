@@ -83,7 +83,10 @@
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item link v-on="on">
+                    <v-list-item link v-on="{
+                          ...on,
+                          click: (e) => { on.click(e); item.isMenuOpen = false; rename_dialog = true; }
+                        }">
                       <v-list-item-title>Rename</v-list-item-title>
                     </v-list-item>
                   </template>
@@ -111,7 +114,7 @@
 
                             <v-spacer></v-spacer>
 
-                            <v-btn class="text-right" :disabled="invalid" @click="item.isMenuOpen = false; remove_dialog = false; renameSession(item, sessionNewName);">
+                            <v-btn class="text-right" :disabled="invalid" @click="item.isMenuOpen = false; rename_dialog = false; renameSession(item, sessionNewName);">
                                 Rename Session
                             </v-btn>
                           </ValidationObserver>
@@ -128,7 +131,10 @@
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item link v-if="!item.trashed" v-on="on">
+                    <v-list-item link v-if="!item.trashed" v-on="{
+                          ...on,
+                          click: (e) => { on.click(e); item.isMenuOpen = false; remove_dialog = true; }
+                        }">
                       <v-list-item-title>Trash</v-list-item-title>
                     </v-list-item>
                   </template>
@@ -173,7 +179,10 @@
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item link v-if="item.trashed" v-on="on">
+                    <v-list-item link v-if="item.trashed" v-on="{
+                          ...on,
+                          click: (e) => { on.click(e); item.isMenuOpen = false; restore_dialog = true; }
+                        }">
                       <v-list-item-title v-on="on">Restore</v-list-item-title>
                     </v-list-item>
                   </template>

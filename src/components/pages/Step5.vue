@@ -55,7 +55,10 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                <v-list-item link v-if="!t.trashed" v-on="{
+                                  ...on,
+                                  click: (e) => { on.click(e); t.isMenuOpen = false; remove_dialog = true; }
+                                }">
                                   <v-list-item-title>Trash</v-list-item-title>
                                 </v-list-item>
                               </template>
@@ -99,7 +102,10 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item link v-if="t.trashed" v-on="on">
+                                <v-list-item link v-if="t.trashed" v-on="{
+                                    ...on,
+                                    click: (e) => { on.click(e); t.isMenuOpen = false; restore_dialog = true; }
+                                  }">
                                   <v-list-item-title>Restore</v-list-item-title>
                                 </v-list-item>
                               </template>
@@ -141,7 +147,10 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                <v-list-item link v-if="!t.trashed" v-on="{
+                                    ...on,
+                                    click: (e) => { on.click(e); t.isMenuOpen = false; permanent_delete_dialog = true; }
+                                  }">
                                   <v-list-item-title >Delete</v-list-item-title>
                                 </v-list-item>
                               </template>
