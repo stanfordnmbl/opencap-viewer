@@ -5,7 +5,7 @@
     :step="4"
     :rightDisabled="busy || disabledNextButton"
     :rightSpinner="busy && !imgs"
-    @left="$router.push(`/${session.id}/step2`)"
+    @left="$router.push(`/${session.id}/calibration`)"
     @right="onNext"
   >
     <v-card v-if="imgs" class="step-4-1 pa-2 d-flex flex-column">
@@ -374,7 +374,7 @@ import ExampleImage from "@/components/ui/ExampleImage";
 import DialogComponent from '@/components/ui/SubjectDialog.vue'
 
 export default {
-  name: "Step4",
+  name: "Neutral",
   components: {
     MainLayout,
     ExampleImage,
@@ -552,7 +552,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations("data", ["setStep4", "setStep3"]),
+    ...mapMutations("data", ["setNeutral", "setTrialId"]),
     ...mapActions("data", ["loadSubjects", "loadSession"]),
     isSomeInputInvalid(state, input) {
       setTimeout(() => {
@@ -611,7 +611,7 @@ export default {
           this.lastPolledStatus = "";
           // Record press
           this.busy = true;
-          this.setStep4({
+          this.setNeutral({
               subject: this.subject,
             // identifier: this.identifier,
             // weight: this.weight,
@@ -669,7 +669,7 @@ export default {
                 },
               }
             );
-            this.setStep3(res.data.id); // sets trialID
+            this.setTrialId(res.data.id);
             this.pollStatus();
           } catch (error) {
             apiError(error);

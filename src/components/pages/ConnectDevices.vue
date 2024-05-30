@@ -51,7 +51,7 @@ import { apiInfo } from "@/util/ErrorMessage.js";
 import MainLayout from '@/layout/MainLayout'
 
 export default {
-  name: 'Step1',
+  name: 'ConnectDevices',
   components: {
     MainLayout
   },
@@ -80,14 +80,14 @@ export default {
     })
   },
   methods: {
-    ...mapMutations('data', ['clearAll', 'setStep1']),
+    ...mapMutations('data', ['clearAll', 'setConnectDevices']),
     ...mapActions('data', ['initSession']),
     onNext () {
-      this.setStep1({
+      this.setConnectDevices({
         cameras: this.cameras
       })
       
-      this.$router.push(`/${this.session.id}/step2`)
+      this.$router.push(`/${this.session.id}/calibration`)
     }
   }
 }
