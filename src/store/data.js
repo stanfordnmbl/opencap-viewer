@@ -293,12 +293,17 @@ export default {
       let result = res.data.map((dashboard) => ({id: dashboard.id, title: dashboard.title}))
       commit('setAnalysisDahboardList', result)
     },
-    async loadAnalysisDashboard({ state, commit }, id) {
-      const dashboardId = id || state.session.id
+    async loadAnalysisDashboard({ state, commit }, {id, subject_id, share_token}) {
+      const dashboardId = id
 
       let res = await axios.get(`/analysis-dashboards/${dashboardId}/`)
       let result = res.data
-      res = await axios.get(`/analysis-dashboards/${dashboardId}/data/`)
+      let data_url = `/analysis-dashboards/${dashboardId}/data/`
+      console.log('loadAnalysisDashboard', data_url, subject_id, share_token)
+      if (share_token) {
+        data_url += `?subject_id=${subject_id}&share_token=${share_token}`
+      }
+      res = await axios.get(data_url)
       result['data'] = res.data
 
       commit('setAnalysisDahboard', result)
@@ -399,6 +404,12 @@ export default {
           const tagPromise = axios.get(`/subject-tags/${res.data[i].id}/get_tags_subject/`)
             .then((tags) => {
               res.data[i].subject_tags = tags.data.map(tag => tag.tag);
+            }).catch((error) => {
+              if (error.response && error.response.status === 404) {
+                console.error('Subject tags not found for the given ID:', error);
+              } else {
+                console.error('Error fetching subject tags:', error);
+              }
             });
 
           tagPromises.push(tagPromise);

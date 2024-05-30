@@ -1,6 +1,7 @@
 <template>
   <div class="scalar-wrapper">
-    <div v-for="(row, row_name, row_idx) in result.metrics" :key="row_idx"
+    <div v-for="(row, row_idx) in sortedMetrics"
+         :key="row_idx"
          :class="row.classes">
       <h2 class="h5 plot-caption">
         {{ row.label }}
@@ -36,6 +37,11 @@
 export default {
   props: ["trialID", 'timePosition', 'result', 'block'],
   name: "scalar-plot",
+  computed: {
+    sortedMetrics() {
+      return Object.keys(this.result.metrics).sort().map((x) => this.result.metrics[x]);
+    }
+  },
   methods: {
     buildBarStyles(row, bar_name) {
       let bar_color = 'grey';

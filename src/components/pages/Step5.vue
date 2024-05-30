@@ -59,7 +59,9 @@
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Trash</v-list-item-title>
+                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item-title>Trash</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -95,14 +97,15 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link v-else>
+
                             <v-dialog
                                     v-model="restore_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Restore</v-list-item-title>
+                                <v-list-item link v-if="t.trashed" v-on="on">
+                                  <v-list-item-title>Restore</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -136,14 +139,15 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
-                          <v-list-item link v-if="!t.trashed">
+
                             <v-dialog
                                     v-model="permanent_delete_dialog"
                                     v-click-outside="clickOutsideDialogTrialHideMenu"
                                     max-width="500">
                               <template v-slot:activator="{ on }">
-                                <v-list-item-title v-on="on">Delete</v-list-item-title>
+                                <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item-title >Delete</v-list-item-title>
+                                </v-list-item>
                               </template>
                               <v-card>
                                 <v-card-text class="pt-4">
@@ -178,7 +182,7 @@
                                 </v-card-actions>
                               </v-card>
                             </v-dialog>
-                          </v-list-item>
+
                         </v-list>
                       </v-menu>
                     </div>
@@ -217,6 +221,10 @@
                         <v-card-text>
                             <v-checkbox id="session-public" v-model="session.public" name="session-public"
                                 label="Make session public" @change="setPublic($event)" />
+
+                            <p>Making your session public will make your analyses public too.</p>
+
+
                             <v-container v-show="session.public">
                                 <h3 class="mb-2">Share on</h3>
                                 <ShareNetwork network="facebook" class="mr-2" style="text-decoration: none;"
@@ -232,7 +240,7 @@
                                     <v-btn><v-icon aria-hidden="false">mdi-linkedin</v-icon> &nbsp;LinkedIn</v-btn>
                                 </ShareNetwork>
 
-                                <v-text-field label="Alternatively, copy the session link and share on social media"
+                                <v-text-field label="Alternatively, copy this link"
                                     v-model="sessionUrl" class="mt-5" readonly></v-text-field>
                             </v-container>
 
@@ -534,12 +542,7 @@
       </v-btn>
         </v-card-actions>
     </v-card>
-</v-dialog>
-
-
-
-
-
+    </v-dialog>
     </div>
 </template>
 
@@ -680,57 +683,57 @@ export default {
         }
     },
     computed: {
-        ...mapState({
-            session: state => state.data.session,
-            sessions: state => state.data.sessions,
-            analysisFunctions: state => state.data.analysisFunctions,
-            trialTagsList: state => state.data.trialTags,
+      ...mapState({
+          session: state => state.data.session,
+          sessions: state => state.data.sessions,
+          analysisFunctions: state => state.data.analysisFunctions,
+          trialTagsList: state => state.data.trialTags,
 
-          user_id: state => state.auth.user_id,
+        user_id: state => state.auth.user_id,
 
-          // step 2 data
-          rows: state => state.data.rows,
-          cols: state => state.data.cols,
-          squareSize: state => state.data.squareSize,
+        // step 2 data
+        rows: state => state.data.rows,
+        cols: state => state.data.cols,
+        squareSize: state => state.data.squareSize,
 
-          // step 4 data
-          identifier: state => state.data.identifier,
-          weight: state => state.data.weight,
-          height: state => state.data.height,
-          gender: state => state.data.gender,
-          isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
-        }),
-        sessionUrl() {
-            return "https://app.opencap.ai/session/" + this.session.id;
-        },
-        analysisFunctionsWithMenu(){
-            return this.analysisFunctions.map((func) => ({...func, isMenuOpen: false}))
-        },
-        filteredTrialsWithMenu() {
-            return this.filteredTrials.map(trial => ({...trial, isMenuOpen: false}));
-        },
-        filteredTrials() {
-            return this.session.trials.filter(trial => trial.name !== 'calibration' && !(trial.name === 'neutral' && trial.status === 'error')).filter(t => this.show_trashed || !t.trashed)
-        },
-        videoControlsDisabled() {
-            return !this.trial || this.frames.length === 0
-        },
-        buttonCaption() {
-            switch (this.state) {
-                case 'recording': {
-                    const time = moment
-                        .duration(this.recordingTimePassed, 'seconds')
-                        .format('*mm:ss')
-                    return `${this.startButtonCaptions[this.state]} ${time}`
-                }
-                default: {
-                    return this.startButtonCaptions[this.state]
-                }
-            }
-        },
-        tagsOptions () {
-            return Object.entries(this.trialTagsList).map((s) => ({ text: s[1], value: s[0] }))
-        },
+        // step 4 data
+        identifier: state => state.data.identifier,
+        weight: state => state.data.weight,
+        height: state => state.data.height,
+        gender: state => state.data.gender,
+        isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
+      }),
+      sessionUrl() {
+          return location.origin + "/session/" + this.session.id;
+      },
+      analysisFunctionsWithMenu() {
+          return this.analysisFunctions.map((func) => ({...func, isMenuOpen: false}))
+      },
+      filteredTrialsWithMenu() {
+          return this.filteredTrials.map(trial => ({...trial, isMenuOpen: false}));
+      },
+      filteredTrials() {
+          return this.session.trials.filter(trial => trial.name !== 'calibration' && !(trial.name === 'neutral' && trial.status === 'error')).filter(t => this.show_trashed || !t.trashed)
+      },
+      videoControlsDisabled() {
+          return !this.trial || this.frames.length === 0
+      },
+      buttonCaption() {
+          switch (this.state) {
+              case 'recording': {
+                  const time = moment
+                      .duration(this.recordingTimePassed, 'seconds')
+                      .format('*mm:ss')
+                  return `${this.startButtonCaptions[this.state]} ${time}`
+              }
+              default: {
+                  return this.startButtonCaptions[this.state]
+              }
+          }
+      },
+      tagsOptions () {
+          return Object.entries(this.trialTagsList).map((s) => ({ text: s[1], value: s[0] }))
+      },
     },
   async mounted() {
     await this.loadSession(this.$route.params.id)
@@ -1581,7 +1584,7 @@ export default {
         }
       }
       window.alert(`Result with tag "${tag}" not found`);
-    },
+    }
   }
 }
 </script>
