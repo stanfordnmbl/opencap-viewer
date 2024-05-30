@@ -188,8 +188,8 @@
                             v-model="email"
                             class="ma-0"
                             dark
-                            v-bind:readonly="true"
-                            v-bind:disabled="true"
+                            v-bind:readonly="false"
+                            v-bind:disabled="false"
                             :error="errors.length > 0"
                             :error-messages="errors[0]"/>
                         </ValidationProvider>
@@ -594,6 +594,7 @@ export default {
           await this.updateProfile({
             username: this.username,
             first_name: this.first_name,
+            email: this.email,
             last_name: this.last_name,
             country: this.country,
             institution: this.institution,
