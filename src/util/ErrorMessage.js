@@ -46,7 +46,7 @@ function processErrorMessage (err, operation) {
         }
       })
     } else {
-      res += `${error.toString()}`
+      res += `${err.toString()}`
     }
 
     // status text and code
@@ -71,6 +71,7 @@ function processErrorMessage (err, operation) {
     }
   }
 
+  console.log(res)
   return res
 }
 

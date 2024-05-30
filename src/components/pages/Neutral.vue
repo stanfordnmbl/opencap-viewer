@@ -34,28 +34,40 @@
         <v-card-title class="justify-center subject-title">
           Session Info
         </v-card-title>
-        <v-card-text>
-          <v-select
-              @click="reloadSubjects"
-              @change="isAllInputsValid"
-              class="cursor-pointer"
+          <v-card-text>
+            <v-row align="center">
+              <v-col cols="11">
+                <v-select
+                    ref="selectSubjectsRef"
+                    @click="reloadSubjects"
+                    @input="isAllInputsValidSelectSubject"
+                    class="cursor-pointer"
+                    required
+                    v-model="subject"
+                    item-text="display_name"
+                    item-value="id"
+                    label="Subject"
+                    :items="subjectSelectorChoices"
+                    return-object
+                ></v-select>
+              </v-col>
+              <v-col cols="1">
+                <v-btn
+                  icon
+                  @click="openNewSubjectPopup">
+                  <v-icon>mdi-plus</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+            <v-text-field
+              v-model="sessionName"
+              label="Session Name (optional)"
+              type="text"
               required
-              v-model="subject"
-              item-text="display_name"
-              item-value="id"
-              label="Subject"
-              :items="subjectSelectorChoices"
-              return-object
-          ></v-select>
-          <v-text-field
-            v-model="sessionName"
-            label="Session Name (optional)"
-            type="text"
-            required
-            :error="formErrors.name != null"
-            :error-messages="formErrors.name"
-          ></v-text-field>
-        </v-card-text>
+              :error="formErrors.name != null"
+              :error-messages="formErrors.name"
+            ></v-text-field>
+          </v-card-text>
       </v-card>
 
       <v-card class="mb-4">
@@ -81,7 +93,6 @@
             tag="div"
             class="d-flex flex-column checkbox-box"
             ref="observer"
-            v-slot="{ }"
           >
             <v-checkbox
               v-model="data_sharing_0"
@@ -347,147 +358,10 @@
       </v-card-text>
     </v-card>
   
-    <v-dialog v-model="new_subject_dialog" width="500">
-      <ValidationObserver
-        tag="form"
-        class="d-flex flex-column"
-        ref="subject_observer"
-        v-slot="{ invalid }">
-      <v-form>
-      <v-card>
-        <v-card-title class="headline" v-if="edited_subject.id">Edit subject "{{ edited_subject.name }}"</v-card-title>
-        <v-card-title class="headline" v-else>Create new subject</v-card-title>
-        <v-card-text class="pt-4">
-          <v-text-field
-            v-model="edited_subject.name"
-            label="Name"
-            required
-            :error="formErrors.name != null"
-            :error-messages="formErrors.name"
-          ></v-text-field>
+    <DialogComponent
+      ref="dialogRef"
+    />
 
-          <v-text-field
-            v-model="edited_subject.weight"
-            label="Weight (kg)"
-            type="number"
-            hide-spin-buttons
-            required
-            :rules="[weightRule]"
-            :error="formErrors.weight != null"
-            :error-messages="formErrors.weight"
-          ></v-text-field>
-
-          <v-text-field
-            v-model="edited_subject.height"
-            label="Height (m)"
-            type="number"
-            hide-spin-buttons
-            required
-            :rules="[heightRule]"
-            :error="formErrors.height != null"
-            :error-messages="formErrors.height"
-          ></v-text-field>
-          <v-text-field
-            v-model="edited_subject.birth_year"
-            label="Birth year (yyyy)"
-            type="number"
-            hide-spin-buttons
-            required
-            :rules="[birthYearRule]"
-            :error="formErrors.birth_year != null"
-            :error-messages="formErrors.birth_year"
-          ></v-text-field>
-          <v-select
-              clearable
-              v-model="edited_subject.sex_at_birth"
-              item-title="text"
-              item-value="value"
-              label="Sex assigned at birth (Optional)"
-              :items="sexesOptions"
-          ></v-select>
-          <v-select
-              clearable
-              v-model="edited_subject.gender"
-              item-title="text"
-              item-value="value"
-              label="Gender (Optional)"
-              :items="gendersOptions"
-          ></v-select>
-          <v-select
-              clearable
-              multiple
-              v-model="edited_subject.subject_tags"
-              item-title="text"
-              item-value="value"
-              label="Subject Tags"
-              :items="tagsOptions"
-              :error="formErrors.subject_tags != null"
-              :error-messages="formErrors.subject_tags"
-          ></v-select>
-          <v-textarea
-            v-model="edited_subject.characteristics"
-            label="Characteristics (Optional)"
-            rows=3
-          ></v-textarea>
-
-          <div class="pt-0">
-            <ValidationProvider :rules="{ required: {allowFalse: false}}" v-slot="{ errors }" name="Informed consent selection">
-              <v-checkbox v-model="edited_subject.terms" class="mt-0 mb-0"
-                          :error="errors.length > 0"
-                          :error-messages="errors[0]">
-                <template v-slot:label>
-                  <div>I, the research Participant, have provided informed consent to the research Investigator conducting this study.
-                    I have read and I agree to the
-                    <v-tooltip location="bottom">
-                      <template v-slot:activator="{ props }">
-                        <a href="https://www.opencap.ai/terms-conditions"
-                           target="_blank"
-                           v-bind="props"
-                           @click.stop>Terms and Conditions</a>
-                      </template>
-                      Opens in new window
-                    </v-tooltip>
-                    and
-                    <v-tooltip location="bottom">
-                      <template v-slot:activator="{ props }">
-                        <a href="https://docs.google.com/document/d/1DBw9LVAuUwgz713037VQjsaD8sj2-AN_hzga_7kXtXI"
-                           target="_blank"
-                           v-bind="props"
-                           @click.stop>Privacy Policy</a>
-                      </template>
-                    </v-tooltip>
-                    of the OpenCap tool.
-                  </div>
-                </template>
-                Opens in new window
-              </v-checkbox>
-            </ValidationProvider>
-          </div>
-
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="blue darken-1"
-            text
-            @click="cancelSubjectForm()"
-          >
-            Cancel
-          </v-btn>
-          <v-btn
-            color="green darken-1"
-            text
-            :disabled="invalid"
-            @click="submitSubjectForm()"
-          >
-            Save
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-      </v-form>
-      </ValidationObserver>
-    </v-dialog>
-    
   </MainLayout>
 </template>
 
@@ -497,12 +371,14 @@ import { mapMutations, mapActions, mapState } from "vuex";
 import { apiError, apiSuccess, apiErrorRes, apiWarning, apiInfo, clearToastMessages } from "@/util/ErrorMessage.js";
 import MainLayout from "@/layout/MainLayout";
 import ExampleImage from "@/components/ui/ExampleImage";
+import DialogComponent from '@/components/ui/SubjectDialog.vue'
 
 export default {
   name: "Neutral",
   components: {
     MainLayout,
     ExampleImage,
+    DialogComponent
   },
   data() {
     return {
@@ -515,10 +391,7 @@ export default {
         subject_tags: null,
       },
       advancedSettingsDialog: false,
-      new_subject_dialog: false,
-      edited_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", subject_tags:"", characteristics:""},
       selected: null,
-      empty_subject: {id: "", name:"", weight:"", height:"", birth_year:"", sex_at_birth:"", gender:"", subject_tags:"", characteristics:""},
 
       sessionName: "",
       subject: null,
@@ -570,25 +443,6 @@ export default {
         error: "Re-record",
         stopped: "Processing",
       },
-      heightRule: (v) => {
-        if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0) return true;
-        if(!isNaN(parseFloat(v)) && v > 3.0) return "It seems unlikely that the subject's height exceeds 3 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
-        if(!isNaN(parseFloat(v)) && v < .1) return "It seems unlikely that the subject's height is less than 0.1 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
-      },
-      weightRule: (v) => {
-        if (!v.trim()) return true;
-        if (!isNaN(parseFloat(v)) && v >= 1 && v <= 200.0) return true;
-        if(!isNaN(parseFloat(v)) && v > 200.0) return "It seems unlikely that the subject's weight exceeds 200 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
-        if(!isNaN(parseFloat(v)) && v < 1) return "It seems unlikely that the subject's weight is less than 1 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
-      },
-      birthYearRule: (v) => {
-        const currentYear = new Date().getFullYear();
-        if (!v) return true;
-        if (!isNaN(parseFloat(v)) && v >= 1900 && v <= currentYear) return true;
-        if(!isNaN(parseFloat(v)) && v > currentYear) return `The subject's birth year cannot be set in the future. Please ensure that you are using the correct units. The birth year should be earlier than the current year ${currentYear} and specified in years (yyyy) format.`;
-        if(!isNaN(parseFloat(v)) && v < 1900) return "It seems unlikely that the subject's birth year predates 1900. Please ensure that you are using the correct units. The birth year should be specified in years (yyyy) format.";
-      },
       checkboxRule: (v) => !!v || 'The subject must agree to continue!',
 
       n_calibrated_cameras: 0,
@@ -603,13 +457,12 @@ export default {
     ...mapState({
       subjects: (state) => state.data.subjects,
       session: (state) => state.data.session,
-      subjectTags: state => state.data.subjectTags,
       trialId: (state) => state.data.trialId,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
     }),
     subjectSelectorChoices() {
-      return [{'id':'new', 'display_name': 'New subject'}].concat(this.subjectsMapped);
+      return this.subjectsMapped;
     },
     subjectsMapped () {
       return this.subjects.map(s => ({
@@ -629,15 +482,6 @@ export default {
         trashed: s.trashed,
         trashed_at: s.trashed_at
       })).filter(s => this.show_trashed || !s.trashed)
-    },
-    sexesOptions () {
-      return Object.entries(this.sexes).map((s) => ({ text: s[1], value: s[0] }))
-    },
-    gendersOptions () {
-      return Object.entries(this.genders).map((s) => ({ text: s[1], value: s[0] }))
-    },
-    tagsOptions () {
-      return Object.entries(this.subjectTags).map((s) => ({ text: s[1], value: s[0] }))
     },
     rightButtonCaption() {
       return this.imgs
@@ -688,6 +532,25 @@ export default {
 
     this.n_calibrated_cameras = res.data.data
   },
+  watch: {
+    subjects(new_val, old_val) {
+      // If no subjects, do nothing.
+      if (old_val.length === 0 & new_val.length === 0) {
+          return
+      // If loading first time and there are subjects, select first.
+      } if (old_val.length === 0 & new_val.length !== 0) {
+          this.subject = new_val[0]
+      // If there are more subjects now than before, that means a new one has been created. Select it.
+      } else if (old_val.length < new_val.length) {
+          const serializedArr1 = new Set(old_val.map(item => JSON.stringify(item)));
+
+          // Find the index by comparing serialized objects
+          this.subject = new_val[new_val.findIndex(item => !serializedArr1.has(JSON.stringify(item)))];
+      // Else, do nothing.
+      } else return
+
+    }
+  },
   methods: {
     ...mapMutations("data", ["setNeutral", "setTrialId"]),
     ...mapActions("data", ["loadSubjects", "loadSession"]),
@@ -697,42 +560,42 @@ export default {
       },0)
     },
     reloadSubjects() {
-      console.log('reloading subjects')
       this.loadSubjects()
     },
+    openNewSubjectPopup() {
+        this.$refs.dialogRef.edit_dialog = true
+    },
+    isAllInputsValidSelectSubject() {
+        this.formErrors = {
+            name: null,
+            weight: null,
+            height: null,
+            birth_year: null,
+            subject_tags: null,
+        }
+
+        let inputsInvalidSecond;
+        if(!this.subject || !this.data_sharing || !this.data_sharing_0 ) {
+            inputsInvalidSecond = true
+        }
+
+        inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
+    },
     isAllInputsValid() {
-        console.log(this.subject)
-      this.formErrors = {
-          name: null,
-          weight: null,
-          height: null,
-          birth_year: null,
-          subject_tags: null,
-      }
-      if(this.subject != null && this.subject.id === 'new') {
-        this.new_subject_dialog = true
-        console.log("!!!")
-        return
-      }
+        this.formErrors = {
+            name: null,
+            weight: null,
+            height: null,
+            birth_year: null,
+            subject_tags: null,
+        }
 
-      const arr = ['subject', 'data_sharing_agreement']
+        let inputsInvalidSecond;
+        if(this.subject === null || this.subject.id === 'new' || !this.subject || !this.data_sharing || !this.data_sharing_0 ) {
+            inputsInvalidSecond = true
+        }
 
-      let inputsInvalidFirst = true;
-      // const inputsInvalidFirst = arr.some(el => {
-      //   return typeof this.formErrors[el] === 'string'
-      // })
-      let inputsInvalidSecond;
-      if(!this.subject || !this.data_sharing || !this.data_sharing_0 ) {
-        inputsInvalidSecond = true
-      }
-
-      console.log(this.subject, this.data_sharing, this.data_sharing_0)
-      console.log(!this.subject || !this.data_sharing || !this.data_sharing_0)
-
-      inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
-      // inputsInvalidFirst || inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
-      // console.log('inputsInvalidFirst', inputsInvalidFirst)
-        console.log(this.disabledNextButton)
+        inputsInvalidSecond ? this.disabledNextButton = true : this.disabledNextButton = false
     },
     async onNext() {
       if (this.imgs) {
@@ -890,68 +753,6 @@ export default {
     openAdvancedSettings() {
       this.advancedSettingsDialog = true;
       this.getAvailableFramerates()
-    },
-    async cancelSubjectForm() {
-      this.new_subject_dialog = false;
-      this.edited_subject = this.empty_subject;
-      this.subject = null;
-      this.formErrors = {
-          name: null,
-          weight: null,
-          height: null,
-          birth_year: null,
-          subject_tags: null,
-      }
-    },
-    async submitSubjectForm() {
-      this.new_subject_dialog = false;
-      this.formErrors = {
-          name: null,
-          weight: null,
-          height: null,
-          birth_year: null,
-          subject_tags: null,
-      }
-      console.log(this.edited_subject)
-
-      let res = null;
-      if(this.edited_subject.id) {
-        res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
-          .catch(error => {
-              if(error.response.status === 400) {
-                for (const [key, value] of Object.entries(error.response.data)) {
-                  this.formErrors[key] = value
-                }
-                this.new_subject_dialog = true;
-              }
-            })
-        // console.log('update subject', res.data)
-      } else {
-        res = await axios.post('/subjects/', this.edited_subject)
-          .catch(error => {
-              if(error.response.status === 400) {
-                for (const [key, value] of Object.entries(error.response.data)) {
-                  this.formErrors[key] = value
-                }
-                this.new_subject_dialog = true;
-              }
-            })
-        // console.log('submit subject', res.data)
-      }
-
-      if (res) {
-        this.edited_subject = this.empty_subject;
-        await this.loadSubjects()
-        // console.log(res.data)
-        for(let i = 0; i < this.subjects.length; i++) {
-            console.log(this.subjects[i].id, '==', res.data.id)
-          if(this.subjects[i].id == res.data.id) {
-            this.subject = this.subjects[i]
-            break;
-          }
-        }
-
-      }
     },
     async getAvailableFramerates() {
       const session_settings = await axios.get(`/sessions/${this.session.id}/get_session_settings/`)
