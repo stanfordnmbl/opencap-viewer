@@ -120,7 +120,7 @@
                 tag="div"
                 class="d-flex flex-column"
                 ref="observer"
-                v-slot="{  }">
+                v-slot="{ invalid }">
 
                   <div class="row">
                     <div class="col-md-12">
@@ -287,7 +287,7 @@
                     <v-btn
                       type="submit"
                       class="white--text mx-0 align-self-center mb-6"
-                      :disabled="loading"
+                      :disabled="(submitted && invalid) || loading"
                       @click="onChangeProfile()">
                         Save Changes
                     </v-btn>
