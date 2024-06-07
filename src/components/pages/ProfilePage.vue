@@ -120,7 +120,7 @@
                 tag="div"
                 class="d-flex flex-column"
                 ref="observer"
-                v-slot="{  }">
+                v-slot="{ invalid }">
 
                   <div class="row">
                     <div class="col-md-12">
@@ -188,8 +188,8 @@
                             v-model="email"
                             class="ma-0"
                             dark
-                            v-bind:readonly="true"
-                            v-bind:disabled="true"
+                            v-bind:readonly="false"
+                            v-bind:disabled="false"
                             :error="errors.length > 0"
                             :error-messages="errors[0]"/>
                         </ValidationProvider>
@@ -287,7 +287,7 @@
                     <v-btn
                       type="submit"
                       class="white--text mx-0 align-self-center mb-6"
-                      :disabled="loading"
+                      :disabled="(submitted && invalid) || loading"
                       @click="onChangeProfile()">
                         Save Changes
                     </v-btn>
@@ -594,6 +594,7 @@ export default {
           await this.updateProfile({
             username: this.username,
             first_name: this.first_name,
+            email: this.email,
             last_name: this.last_name,
             country: this.country,
             institution: this.institution,
