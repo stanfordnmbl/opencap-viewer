@@ -397,7 +397,7 @@ export default {
 
       let sessions = []
       data.start = 0
-      data.quantity = 2
+      data.quantity = 20
       let moreDataAvailable = true
 
       while (moreDataAvailable) {
@@ -438,7 +438,7 @@ export default {
       try {
         let subjects = []
         let start = 0
-        let quantity = 10
+        let quantity = 20
         let moreDataAvailable = true
 
         while (moreDataAvailable) {
