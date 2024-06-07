@@ -134,6 +134,19 @@ export default {
       }
       state.subjects = subjects
     },
+    updateSubjects (state, subjects) {
+      let old_subject_ids = state.subjects.map(s => s.id);
+
+      for(let i = 0; i < subjects.length; i++) {
+        subjects[i].created_at = formatDate(subjects[i].created_at)
+        if(old_subject_ids.includes(subjects[i].id)) {
+          let index = old_subject_ids.indexOf(subjects[i].id);
+          state.subjects.splice(index, 1, subjects[i]);
+        } else {
+          state.subjects.push(subjects[i]);
+        }
+      }
+    },
     setAnalysisFunctions(state, functions){
       state.analysisFunctions = functions.map((func) => (
           {...func, trials: [], results: [],
@@ -423,26 +436,45 @@ export default {
     },
     async loadSubjects({ state, commit }) {
       try {
-        const res = await axios.get('/subjects/');
-        const tagPromises = [];
+        let subjects = []
+        let start = 0
+        let quantity = 10
+        let moreDataAvailable = true
 
-        for (let i = 0; i < res.data.length; i++) {
-          const tagPromise = axios.get(`/subject-tags/${res.data[i].id}/get_tags_subject/`)
-            .then((tags) => {
-              res.data[i].subject_tags = tags.data.map(tag => tag.tag);
-            }).catch((error) => {
-              if (error.response && error.response.status === 404) {
-                console.error('Subject tags not found for the given ID:', error);
-              } else {
-                console.error('Error fetching subject tags:', error);
-              }
-            });
+        while (moreDataAvailable) {
+          let res = await axios.get('/subjects/', {
+            params: {
+              start: start,
+              quantity: quantity
+            }
+          })
 
-          tagPromises.push(tagPromise);
+          let tagPromises = []
+          for (let i = 0; i < res.data.length; i++) {
+            const tagPromise = axios.get(`/subject-tags/${res.data[i].id}/get_tags_subject/`)
+              .then((tags) => {
+                res.data[i].subject_tags = tags.data.map(tag => tag.tag);
+              }).catch((error) => {
+                if (error.response && error.response.status === 404) {
+                  console.error('Subject tags not found for the given ID:', error);
+                } else {
+                  console.error('Error fetching subject tags:', error);
+                }
+              });
+
+            tagPromises.push(tagPromise);
+          }
+
+          subjects = subjects.concat(res.data)
+          if (res.data.length < quantity) {
+            moreDataAvailable = false
+          } else {
+              start += quantity
+          }
         }
 
-        await Promise.all(tagPromises); // Wait for all tag promises to resolve
-        commit('setSubjects', res.data);
+        commit('setSubjects', subjects);
+
       } catch (error) {
         console.error('Error loading subjects:', error);
       }
