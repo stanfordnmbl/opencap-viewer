@@ -133,7 +133,7 @@ import { Line as LineChartGenerator } from 'vue-chartjs/legacy'
 import zoomPlugin from 'chartjs-plugin-zoom';
 
 import ScalarPlot from '@/components/ui/ScalarPlot.vue'
-import SquatAnalysis from '@/components/ui/SquatAnalysis.vue'
+import ScalarValue from '@/components/ui/ScalarValue.vue'
 import LinearChart from '@/components/ui/LinearChart.vue'
 
 import {
@@ -163,7 +163,7 @@ export default {
     components: {
         Visualizer,
         ScalarPlot,
-        SquatAnalysis,
+        ScalarValue,
         LinearChart,
     },
     data() {

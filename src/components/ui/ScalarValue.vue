@@ -1,5 +1,5 @@
 <template>
-  <div class="squat-analysis-wrapper">
+  <div class="scalar-value-wrapper">
     <div v-for="(row, row_idx) in sortedInfoText"
          :key="row_idx"
          :class="row.classes">
@@ -55,14 +55,14 @@ export default {
   margin-bottom: 3rem;
 }
 
-.squat-analysis-wrapper {
+.scalar-value-wrapper {
   padding-left: 2rem;
   padding-right: 2rem;
   padding-top: 2rem;
   padding-bottom: 2rem;
 }
 
-.squat-analysis {
+.scalar-value {
   width: 250px;
   height: 100vh;
   background: black;
