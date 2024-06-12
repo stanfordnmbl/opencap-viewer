@@ -1,7 +1,11 @@
 <template>
   <div class="squat-analysis-wrapper">
-    <div class="squat-type-header">Detected squat type</div>
-    <div class="squat-type-text">{{this.result.squat_type}}</div>
+    <div v-for="(row, row_idx) in sortedInfoText"
+         :key="row_idx"
+         :class="row.classes">
+      <div class="info-label">{{ row.label }}</div>
+      <div class="info-text">{{ row.text }}</div>
+    </div>
     <div v-for="(row, row_idx) in sortedMetrics"
          :key="row_idx"
          :class="row.classes">
@@ -18,6 +22,9 @@ export default {
   computed: {
     sortedMetrics() {
       return Object.keys(this.result.metrics).sort().map((x) => this.result.metrics[x]);
+    },
+    sortedInfoText() {
+      return Object.keys(this.result.info_text).sort().map((x) => this.result.info_text[x]);
     }
   },
   methods: {
@@ -26,13 +33,13 @@ export default {
 </script>
 
 <style>
-.squat-type-header {
+.info-label {
   font-size: 16px;
   text-align: center;
   font-weight: bold;
 }
 
-.squat-type-text {
+.info-text {
   font-size: 28px;
   text-align: center;
   margin-bottom: 3rem;
