@@ -26,8 +26,6 @@ export default {
     sortedInfoText() {
       return Object.keys(this.result.info_text).sort().map((x) => this.result.info_text[x]);
     }
-  },
-  methods: {
   }
 };
 </script>
