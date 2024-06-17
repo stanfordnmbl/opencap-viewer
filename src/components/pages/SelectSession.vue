@@ -319,7 +319,7 @@ export default {
         'restoreTrashedSession',
         'loadAnalysisDashboardList',
     ]),
-    loadValidSessions() {
+    loadValidSessions () {
       this.loading = true
       let data = {
         start: this.session_start,
@@ -371,14 +371,18 @@ export default {
     // },
     async trashSession (id) {
       try {
-        await this.trashExistingSession(id)
+        const res = await axios.post(`/sessions/${id}/trash/`)
+        this.loadValidSessions()
+        // await this.trashExistingSession(id)
       } catch (error) {
         apiError(error)
       }
     },
     async restoreSession (id) {
       try {
-        await this.restoreTrashedSession(id)
+        const res = await axios.post(`/sessions/${id}/restore/`)
+        this.loadValidSessions()
+        // await this.restoreTrashedSession(id)
       } catch (error) {
         apiError(error)
       }
