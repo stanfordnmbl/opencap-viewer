@@ -311,11 +311,18 @@
             <v-data-table
               v-if="selected"
               :headers="sessionHeaders"
-              :items="selectedSessions"
+              :items="valid_sessions"
+              :options.sync="session_options"
               :item-class="itemClasses"
+              :loading="session_loading"
+              :server-items-length="session_total"
+              :footer-props="{
+                showFirstLastPage: false,
+                disableItemsPerPage: true,
+                itemsPerPageOptions: [40]
+              }"
+              fixed-header
               height="80vh"
-              disable-pagination
-              hide-default-footer
               single-select
               class="mx-2"
               @click:row="onRowSessionClick">
@@ -391,6 +398,14 @@ export default {
         { text: 'Subject Tags', value: 'subject_tags' },
         { text: 'Characteristics', value: 'characteristics' }
       ],
+
+      session_loading: true,
+      session_start: 0,
+      session_quantity: 40,
+      session_total: 0,
+      valid_sessions: [],
+      session_options: {},
+
       sessionHeaders: [
         { text: 'Session ID', value: 'id' },
         { text: 'Session Name', value: 'sessionName' },
@@ -408,27 +423,27 @@ export default {
       sexes: state => state.data.sexes,
       isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
     }),
-    subjectsMapped () {
-      return this.subjects.map(s => ({
-        id: s.id,
-        name: s.name,
-        birth_year: s.birth_year,
-        subject_tags: s.subject_tags,
-        characteristics: s.characteristics,
-        gender: s.gender,
-        gender_display: this.genders[s.gender],
-        sex_at_birth: s.sex_at_birth,
-        sex_display: this.sexes[s.sex_at_birth],
-        height: s.height,
-        weight: s.weight,
-        // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
-        // trials: s.trials,
-        created_at: s.created_at,
-        trashed: s.trashed,
-        trashed_at: s.trashed_at,
-        isMenuOpen: false
-      })).filter(s => this.show_trashed || !s.trashed)
-    },
+    // subjectsMapped () {
+    //   return this.subjects.map(s => ({
+    //     id: s.id,
+    //     name: s.name,
+    //     birth_year: s.birth_year,
+    //     subject_tags: s.subject_tags,
+    //     characteristics: s.characteristics,
+    //     gender: s.gender,
+    //     gender_display: this.genders[s.gender],
+    //     sex_at_birth: s.sex_at_birth,
+    //     sex_display: this.sexes[s.sex_at_birth],
+    //     height: s.height,
+    //     weight: s.weight,
+    //     // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
+    //     // trials: s.trials,
+    //     created_at: s.created_at,
+    //     trashed: s.trashed,
+    //     trashed_at: s.trashed_at,
+    //     isMenuOpen: false
+    //   })).filter(s => this.show_trashed || !s.trashed)
+    // },
     selectedSessions () {
       return this.sessions.map(s => ({
         id: s.id,
@@ -469,8 +484,25 @@ export default {
   },
   methods: {
     ...mapActions('data', ['loadExistingSessions', 'loadSubjects', 'trashExistingSubject', 'restoreTrashedSubject']),
+    loadSubjectSessions (subject_id) {
+      this.sessions_loading = true
+      let data = {
+        start: this.session_start,
+        quantity: this.session_quantity,
+        subject_id: subject_id
+      }
+      let res = axios.post('/sessions/valid/', data).then(response => {
+        this.valid_sessions = response.data.sessions
+        this.session_total = response.data.total
+        this.session_loading = false
+      }).catch(error => {
+        apiError(error)
+        this.session_loading = false
+      })
+
+    },
     loadValidSubjects() {
-            this.loading = true
+      this.loading = true
       let data = {
         start: this.subject_start,
         quantity: this.subject_quantity
@@ -488,7 +520,8 @@ export default {
     },
     onSelect ({ item, value }) {
       if (item && value) {
-          this.loadExistingSessions({reroute: false, quantity: -1, subject_id: item.id})
+        this.loadSubjectSessions(item.id)
+          // this.loadExistingSessions({reroute: false, quantity: -1, subject_id: item.id})
       }
       this.selected = value ? item : null
     },
@@ -513,7 +546,7 @@ export default {
     },
     clickOutsideDialogSubjectHideMenu(e) {
       if (e.target.className === 'v-overlay__scrim') {
-          for(let t of this.subjectsMapped) {
+          for(let t of this.valid_subjects) {
             t.isMenuOpen = false;
           }
       }
