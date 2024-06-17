@@ -21,12 +21,18 @@
 
             <v-data-table
               :headers="headers"
-              :items="subjectsMapped"
+              :items="valid_subjects"
+              :options.sync="options"
               :item-class="itemClasses"
+              :loading="loading"
+              :server-items-length="subject_total"
+              :footer-props="{
+                showFirstLastPage: false,
+                disableItemsPerPage: true,
+                itemsPerPageOptions: [40]
+              }"
               height="80vh"
-              disable-pagination
               fixed-header
-              hide-default-footer
               single-select
               class="subjects-table mx-2 mb-4 flex-grow-1"
               @item-selected="onSelect"
@@ -355,6 +361,13 @@ export default {
   created: function () {},
   data () {
     return {
+      loading: true,
+      subject_start: 0,
+      subject_quantity: 40,
+      subject_total: 0,
+      valid_subjects: [],
+      options: {},
+
       remove_dialog: false,
       remove_permanently_dialog: false,
       restore_dialog: false,
@@ -435,7 +448,7 @@ export default {
     }
   },
   mounted () {
-    this.loadSubjects()
+    // this.loadSubjects()
   },
   watch:{
     showArchiveDialog(newShowArchiveDialog, oldShowArchiveDialog){
@@ -444,10 +457,35 @@ export default {
         this.isArchiveInProgress = false;
         this.archiveUrl = "#";
       }
+    },
+    options: {
+      handler () {
+        this.subject_start = (this.options.page - 1) * this.options.itemsPerPage
+        this.loadValidSubjects()
+        console.log("OPTIONS", this.options)
+      },
+      deep: true
     }
   },
   methods: {
     ...mapActions('data', ['loadExistingSessions', 'loadSubjects', 'trashExistingSubject', 'restoreTrashedSubject']),
+    loadValidSubjects() {
+            this.loading = true
+      let data = {
+        start: this.subject_start,
+        quantity: this.subject_quantity
+      }
+      let res = axios.get('/subjects/', {
+        params: data
+      }).then(response => {
+        this.valid_subjects = response.data.subjects
+        this.subject_total = response.data.total
+        this.loading = false
+      }).catch(error => {
+        apiError(error)
+        this.loading = false
+      })
+    },
     onSelect ({ item, value }) {
       if (item && value) {
           this.loadExistingSessions({reroute: false, quantity: -1, subject_id: item.id})
