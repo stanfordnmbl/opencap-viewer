@@ -480,7 +480,13 @@ export default {
         console.log("OPTIONS", this.options)
       },
       deep: true
-    }
+    },
+    show_trashed: {
+      handler () {
+        this.loadValidSubjects()
+      },
+      deep: true
+    },
   },
   methods: {
     ...mapActions('data', ['loadExistingSessions', 'loadSubjects', 'trashExistingSubject', 'restoreTrashedSubject']),
@@ -505,7 +511,8 @@ export default {
       this.loading = true
       let data = {
         start: this.subject_start,
-        quantity: this.subject_quantity
+        quantity: this.subject_quantity,
+        include_trashed: this.show_trashed
       }
       let res = axios.get('/subjects/', {
         params: data
@@ -566,6 +573,7 @@ export default {
     async trashSubject (id) {
       try {
         await this.trashExistingSubject(id)
+        this.loadValidSubjects()
       } catch (error) {
         apiError(error)
       }
@@ -573,6 +581,7 @@ export default {
     async restoreSubject (id) {
       try {
         await this.restoreTrashedSubject(id)
+        this.loadValidSubjects()
       } catch (error) {
         apiError(error)
       }
