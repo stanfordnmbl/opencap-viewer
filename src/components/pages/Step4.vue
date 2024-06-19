@@ -35,6 +35,23 @@
           Session Info
         </v-card-title>
           <v-card-text>
+            <v-row>
+              <v-col col="11">
+                <v-autocomplete
+                  ref="selectSubjectsRef"
+                  required
+                  v-model="subject"
+                  item-text="display_name"
+                  item-value="id"
+                  label="Subject"
+                  :items="loaded_subjects"
+                  :loading="subject_loading"
+                  :search-input.sync="subject_search"
+                  return-object
+                >
+                </v-autocomplete>
+              </v-col>
+            </v-row>
             <v-row align="center">
               <v-col cols="11">
                 <v-select
@@ -393,6 +410,11 @@ export default {
       advancedSettingsDialog: false,
       selected: null,
 
+      subject_search: "",
+      subject_loading: false,
+      subject_start: 0,
+      loaded_subjects: [],
+
       sessionName: "",
       subject: null,
       identifier: "",
@@ -523,7 +545,7 @@ export default {
   async mounted() {
     apiInfo("The default pose model was changed from OpenPose to HRNet on 11/14/23. The default marker augmenter model was upgraded (from v0.2 to v0.3) on 07-30-2023. You can select prior defaults in 'Advanced Settings'.", 8000);
     this.loadSession(this.$route.params.id)
-    this.loadSubjects()
+    // this.loadSubjects()
     if (this.$route.query.autoRecord) {
       this.onNext();
     }
@@ -549,6 +571,10 @@ export default {
       // Else, do nothing.
       } else return
 
+    },
+    subject_search (val) {
+      this.subject_start = 0;
+      this.loadSubjectsList()
     }
   },
   methods: {
@@ -559,8 +585,29 @@ export default {
         this.formErrors[input] = state;
       },0)
     },
+    loadSubjectsList () {
+      console.log('loading subjects:', this.subject_search)
+
+      this.subject_loading = true
+      let data = {
+        search: this.subject_search,
+        start: this.subject_start,
+        limit: 40,
+        simple: 'true'
+      }
+      let res = axios.get('/subjects/', {params: data}).then((res) => {
+        this.loaded_subjects = res.data.subjects
+        // this.subject_loading = false
+        this.subject_loading = false
+      }).catch((error) => {
+        this.subject_loading = false
+        apiError(error)
+      })
+
+    },
     reloadSubjects() {
-      this.loadSubjects()
+      console.log('reloading subjects')
+      // this.loadSubjects()
     },
     openNewSubjectPopup() {
         this.$refs.dialogRef.edit_dialog = true
