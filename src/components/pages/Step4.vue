@@ -35,8 +35,8 @@
           Session Info
         </v-card-title>
           <v-card-text>
-            <v-row>
-              <v-col col="11">
+            <v-row align="center">
+              <v-col cols="11">
                 <v-autocomplete
                   ref="selectSubjectsRef"
                   required
@@ -49,24 +49,24 @@
                   :search-input.sync="subject_search"
                   return-object
                 >
+                  <template v-slot:append-item>
+                    <div v-intersect="loadNextSubjectsListPage" />
+                  </template>
                 </v-autocomplete>
-              </v-col>
-            </v-row>
-            <v-row align="center">
-              <v-col cols="11">
-                <v-select
-                    ref="selectSubjectsRef"
-                    @click="reloadSubjects"
-                    @input="isAllInputsValidSelectSubject"
-                    class="cursor-pointer"
-                    required
-                    v-model="subject"
-                    item-text="display_name"
-                    item-value="id"
-                    label="Subject"
-                    :items="subjectSelectorChoices"
-                    return-object
-                ></v-select>
+
+<!--                <v-select-->
+<!--                    ref="selectSubjectsRef"-->
+<!--                    @click="reloadSubjects"-->
+<!--                    @input="isAllInputsValidSelectSubject"-->
+<!--                    class="cursor-pointer"-->
+<!--                    required-->
+<!--                    v-model="subject"-->
+<!--                    item-text="display_name"-->
+<!--                    item-value="id"-->
+<!--                    label="Subject"-->
+<!--                    :items="subjectSelectorChoices"-->
+<!--                    return-object-->
+<!--                ></v-select>-->
               </v-col>
               <v-col cols="1">
                 <v-btn
@@ -477,7 +477,7 @@ export default {
   },
   computed: {
     ...mapState({
-      subjects: (state) => state.data.subjects,
+      // subjects: (state) => state.data.subjects,
       session: (state) => state.data.session,
       trialId: (state) => state.data.trialId,
       genders: state => state.data.genders,
@@ -585,18 +585,22 @@ export default {
         this.formErrors[input] = state;
       },0)
     },
-    loadSubjectsList () {
+    loadSubjectsList (append_result = false) {
       console.log('loading subjects:', this.subject_search)
 
       this.subject_loading = true
       let data = {
         search: this.subject_search,
         start: this.subject_start,
-        limit: 40,
+        quantity: 40,
         simple: 'true'
       }
       let res = axios.get('/subjects/', {params: data}).then((res) => {
-        this.loaded_subjects = res.data.subjects
+        if (append_result) {
+          this.loaded_subjects = [...this.loaded_subjects, ...res.data.subjects]
+        } else {
+          this.loaded_subjects = res.data.subjects
+        }
         // this.subject_loading = false
         this.subject_loading = false
       }).catch((error) => {
@@ -604,6 +608,12 @@ export default {
         apiError(error)
       })
 
+    },
+    loadNextSubjectsListPage (isIntersecting) {
+      if (isIntersecting) {
+        this.subject_start += 40
+        this.loadSubjectsList(true)
+      }
     },
     reloadSubjects() {
       console.log('reloading subjects')

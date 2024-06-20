@@ -333,7 +333,6 @@ export default {
       try {
         res = await axios.get(`/sessions/${sessionId}/`)
         commit('setSession', res.data)
-        console.log(res.data)
       } catch (e) {
         if (e.response.status === 401) {
           router.push({ name: 'Login' })
