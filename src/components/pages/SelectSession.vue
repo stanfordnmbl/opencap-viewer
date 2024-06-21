@@ -268,6 +268,8 @@ export default {
       session_start: 0,
       session_quantity: 40,
       session_total: 0,
+      session_sort: [],
+      session_sort_desc: [],
       valid_sessions: [],
       options: {},
       remove_dialog: false,
@@ -298,6 +300,9 @@ export default {
     options: {
       handler () {
         this.session_start = (this.options.page - 1) * this.options.itemsPerPage
+        this.session_sort = this.options.sortBy
+        this.session_sort_desc = this.options.sortDesc
+        console.log('options changed', this.options)
         this.loadValidSessions()
       },
       deep: true
@@ -324,7 +329,9 @@ export default {
       let data = {
         start: this.session_start,
         quantity: this.session_quantity,
-        include_trashed: this.show_trashed
+        include_trashed: this.show_trashed,
+        sort: this.session_sort,
+        sort_desc: this.session_sort_desc
       }
       let res = axios.post('/sessions/valid/', data).then(response => {
         this.valid_sessions = response.data.sessions
