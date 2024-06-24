@@ -141,6 +141,27 @@
               <v-card-actions class="justify-end">
                 <v-btn color="primary-dark" @click="advancedSettingsDialog = false">✖</v-btn>
               </v-card-actions>
+
+              <v-card-title class="justify-center data-title">
+                <span class="mr-2">Scaling setup</span>
+                <v-tooltip bottom="" max-width="500px">
+                  <template v-slot:activator="{ on }">
+                    <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                  </template>
+                  OpenCap uses data from the neutral pose to scale the musculoskeletal model to the anthropometry of the subject.
+                  By default, OpenCap assumes that the subject is standing with an upright posture and the feet pointing forward (i.e., straight back and no bending or rotation at the hips, knees, or ankles) as shown in the example neutral pose. These assumptions are modeled in the OpenSim scaling setup.
+                  If the subject cannot adopt this pose, you can select the "Any pose" scaling setup, which does not assume any specific posture. 
+                  We recommend using the default scaling setup unless the subject cannot adopt the neutral pose.
+                </v-tooltip>
+              </v-card-title>
+              <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+                <v-select
+                    v-model="scaling_setup"
+                    label="Select scaling setup"
+                    v-bind:items="scaling_setups"
+                  />
+              </v-card-text>
+
               <v-card-title class="justify-center data-title">
                 <span class="mr-2">Human pose estimation model</span>
                 <v-tooltip bottom="" max-width="500px">
@@ -153,7 +174,6 @@
                   Please ensure that you have the rights to use the model you select. The OpenCap authors deny any responsibility regarding license infringement.
                 </v-tooltip>
               </v-card-title>
-
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="pose_model"
@@ -409,6 +429,11 @@ export default {
         "Share processed data",
         "Share no data",
       ],
+      scaling_setup: 'upright_standing_pose',
+      scaling_setups: [
+        {"text": "Upright standing pose (recommended, default)", "value": "upright_standing_pose"},
+        {"text": "Any pose (in beta, feedback welcome)", "value": "any_pose"},
+      ],
       pose_model: 'hrnet',
       pose_models: [
         {"text": "HRNet (recommended, default)", "value": "hrnet"},
@@ -619,6 +644,7 @@ export default {
             // sex: this.sex,
             // gender: this.gender,
             data_sharing: this.data_sharing,
+            scaling_setup: this.scaling_setup,
             pose_model: this.pose_model,
             framerate: this.framerate,
             openSimModel: this.openSimModel,
@@ -636,6 +662,7 @@ export default {
                   // subject_sex: this.sex,
                   // subject_gender: this.gender,
                   settings_data_sharing: this.data_sharing,
+                  settings_scaling_setup: this.scaling_setup,
                   settings_pose_model: this.pose_model,
                   settings_framerate: this.framerate,
                   settings_session_name: this.sessionName,
