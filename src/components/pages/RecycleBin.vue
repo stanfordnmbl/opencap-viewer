@@ -382,31 +382,12 @@ export default {
     }
   },
   computed: {
-    // ...mapState({
-    //   // sessions: state => state.data.sessions
-    // }),
-    // sessionsMapped () {
-    //   return this.sessions.map(s => ({
-    //     id: s.id,
-    //     sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
-    //     name: s.name,
-    //     trials_count: s.trials_count, // String(s.trials.length),
-    //     // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
-    //     trashed_trials_count: s.trashed_trials_count,
-    //     trials: s.trials,
-    //     created_at: s.created_at,
-    //     trashed: s.trashed,
-    //     trashed_at: s.trashed_at,
-    //     isMenuOpen: false
-    //   })).filter(s => s.trashed || s.trashed_trials_count > 0)
-    // },
     trialsMapped () {
         return this.selected.trials.filter(t => t.trashed || this.selected.trashed).map(t => ({...t, isMenuOpen: false}))
     }
   },
   methods: {
     ...mapActions('data', [
-      // 'loadExistingSessions',
       'loadSession',
       'permanentRemoveExistingSession',
       'trashExistingSession', 'restoreTrashedSession']),
