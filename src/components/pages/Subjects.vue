@@ -374,6 +374,9 @@ export default {
       subject_total: 0,
       valid_subjects: [],
       options: {},
+      subject_sort: [],
+      subject_sort_desc: [],
+
 
       remove_dialog: false,
       remove_permanently_dialog: false,
@@ -395,8 +398,8 @@ export default {
         { text: 'Birth year', value: 'birth_year' },
         { text: 'Sex', value: 'sex_display' },
         { text: 'Gender', value: 'gender_display' },
-        { text: 'Subject Tags', value: 'subject_tags' },
-        { text: 'Characteristics', value: 'characteristics' }
+        { text: 'Subject Tags', value: 'subject_tags', sortable: false},
+        { text: 'Characteristics', value: 'characteristics', sortable: false}
       ],
 
       session_loading: true,
@@ -417,53 +420,10 @@ export default {
   },
     computed: {
     ...mapState({
-      sessions: state => state.data.sessions,
-      subjects: state => state.data.subjects,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
       isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
     }),
-    // subjectsMapped () {
-    //   return this.subjects.map(s => ({
-    //     id: s.id,
-    //     name: s.name,
-    //     birth_year: s.birth_year,
-    //     subject_tags: s.subject_tags,
-    //     characteristics: s.characteristics,
-    //     gender: s.gender,
-    //     gender_display: this.genders[s.gender],
-    //     sex_at_birth: s.sex_at_birth,
-    //     sex_display: this.sexes[s.sex_at_birth],
-    //     height: s.height,
-    //     weight: s.weight,
-    //     // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
-    //     // trials: s.trials,
-    //     created_at: s.created_at,
-    //     trashed: s.trashed,
-    //     trashed_at: s.trashed_at,
-    //     isMenuOpen: false
-    //   })).filter(s => this.show_trashed || !s.trashed)
-    // },
-    selectedSessions () {
-      return this.sessions.map(s => ({
-        id: s.id,
-        sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
-        name: s.name,
-        // trials_count: String(s.trials.length),
-        trials_count: s.trials_count,
-        // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
-        trashed_trials_count: s.trashed_trials_count,
-        trials: s.trials,
-        created_at: s.created_at,
-        trashed: s.trashed,
-        trashed_at: s.trashed_at,
-        isMenuOpen: false,
-        subject: s.subject
-      })).filter((s => s.trashed || s.trashed_trials_count > 0) && (s => s.subject === this.selected.id))
-    }
-  },
-  mounted () {
-    // this.loadSubjects()
   },
   watch:{
     showArchiveDialog(newShowArchiveDialog, oldShowArchiveDialog){
@@ -476,6 +436,8 @@ export default {
     options: {
       handler () {
         this.subject_start = (this.options.page - 1) * this.options.itemsPerPage
+        this.subject_sort = this.options.sortBy
+        this.subject_sort_desc = this.options.sortDesc
         this.loadValidSubjects()
         console.log("OPTIONS", this.options)
       },
@@ -489,13 +451,15 @@ export default {
     },
   },
   methods: {
-    ...mapActions('data', ['loadExistingSessions', 'loadSubjects', 'trashExistingSubject', 'restoreTrashedSubject']),
+    ...mapActions('data', ['trashExistingSubject', 'restoreTrashedSubject']),
     loadValidSubjects() {
       this.loading = true
       let data = {
         start: this.subject_start,
         quantity: this.subject_quantity,
-        include_trashed: this.show_trashed
+        include_trashed: this.show_trashed,
+        sort: this.subject_sort,
+        sort_desc: this.subject_sort_desc
       }
       let res = axios.get('/subjects/', {
         params: data

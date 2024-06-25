@@ -254,13 +254,10 @@ import Vue from 'vue'
 export default {
   name: 'SelectSession',
   created: function () {
-      // this.loadSubjects()
-      // this.loadExistingSessions({reroute: false, quantity: -1})
       this.loadAnalysisDashboardList()
   },
   mounted() {
       this.$toasted.clear()
-      // console.log("MOUNTED")
   },
   data () {
     return {
@@ -333,7 +330,7 @@ export default {
         sort: this.session_sort,
         sort_desc: this.session_sort_desc
       }
-      let res = axios.post('/sessions/valid/', data).then(response => {
+      axios.post('/sessions/valid/', data).then(response => {
         this.valid_sessions = response.data.sessions
         this.session_total = response.data.total
         this.loading = false
@@ -378,18 +375,16 @@ export default {
     // },
     async trashSession (id) {
       try {
-        const res = await axios.post(`/sessions/${id}/trash/`)
+        await axios.post(`/sessions/${id}/trash/`)
         this.loadValidSessions()
-        // await this.trashExistingSession(id)
       } catch (error) {
         apiError(error)
       }
     },
     async restoreSession (id) {
       try {
-        const res = await axios.post(`/sessions/${id}/restore/`)
+        await axios.post(`/sessions/${id}/restore/`)
         this.loadValidSessions()
-        // await this.restoreTrashedSession(id)
       } catch (error) {
         apiError(error)
       }
