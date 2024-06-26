@@ -143,6 +143,7 @@
           <v-btn
             color="primary-dark"
             class="mt-4 mb-4 ml-4 mr-4"
+            x-large
             @click="openAdvancedSettings"
           >
             Advanced Settings
@@ -158,6 +159,27 @@
               <v-card-actions class="justify-end">
                 <v-btn color="primary-dark" @click="advancedSettingsDialog = false">✖</v-btn>
               </v-card-actions>
+
+              <v-card-title class="justify-center data-title">
+                <span class="mr-2">Scaling setup</span>
+                <v-tooltip bottom="" max-width="500px">
+                  <template v-slot:activator="{ on }">
+                    <v-icon v-on="on"> mdi-help-circle-outline </v-icon>
+                  </template>
+                  OpenCap uses data from the neutral pose to scale the musculoskeletal model to the anthropometry of the subject.
+                  By default, OpenCap assumes that the subject is standing with an upright posture and the feet pointing forward (i.e., straight back and no bending or rotation at the hips, knees, or ankles) as shown in the example neutral pose. These assumptions are modeled in the OpenSim scaling setup.
+                  If the subject cannot adopt this pose, you can select the "Any pose" scaling setup, which does not assume any specific posture but still requires all body segments to be visible by at least two cameras.
+                  We recommend using the default scaling setup unless the subject cannot adopt the upright standing neutral pose.
+                </v-tooltip>
+              </v-card-title>
+              <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
+                <v-select
+                    v-model="scaling_setup"
+                    label="Select scaling setup"
+                    v-bind:items="scaling_setups"
+                  />
+              </v-card-text>
+
               <v-card-title class="justify-center data-title">
                 <span class="mr-2">Human pose estimation model</span>
                 <v-tooltip bottom="" max-width="500px">
@@ -170,7 +192,6 @@
                   Please ensure that you have the rights to use the model you select. The OpenCap authors deny any responsibility regarding license infringement.
                 </v-tooltip>
               </v-card-title>
-
               <v-card-text class="d-flex flex-column align-center checkbox-wrapper">
                 <v-select
                     v-model="pose_model"
@@ -277,102 +298,48 @@
     <v-card class="step-4-2 ml-4 d-flex images-box">
 
       <v-card class="mb-0">
-        <v-card-text style="padding-top: 0; padding-bottom: 0">
-        <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded.</p>
+        <v-card-text style="padding-top: 5; padding-bottom: 0; font-size: 16px;">
+        <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded</p>
         </v-card-text>
       </v-card>
 
-
-        <v-card-title class="justify-center">
-          Record a neutral pose
-        </v-card-title>
-
-        <v-card-text class="d-flex flex-column align-center">
+      <v-card-title class="justify-center">
+        Record neutral pose
+      </v-card-title>
+      <v-card-text class="d-flex justify-center align-center">
+        <div class="d-flex flex-column mr-4">
           <ul>
-            <li>The subject should adopt the example neutral pose</li>
-            <li>The subject should stand still</li>
             <li>
-              The subject should be visible by all cameras (nothing in the way
-              of cameras view when hitting Record)
+              The subject should adopt the example neutral pose
+              <ul>
+                <li class="space-above-small">Upright standing posture with feet pointing forward</li>
+                <li class="space-above-small">Straight back and no bending or rotation at the hips, knees, or ankles</li>
+              </ul>
+            </li>
+            <li class="space-above-small">The subject should stand still</li>
+            <li class="space-above-small">
+              The subject should be visible by all cameras 
+              <ul>
+                <li class="space-above-small">Nothing in the way
+                  of cameras view when hitting Record</li>
+              </ul>
             </li>
           </ul>
-        </v-card-text>
-      <v-card-text class="d-flex justify-center">
-        <div class="d-flex flex-column">
-          <div class="d-flex flex-column align-center">
-            <span class="sub-header">Example neutral pose</span>
-
-            <ExampleImage
-              image="/images/step-4/big_good_triangle.jpg"
-              :width="256"
-              :height="341"
-              good
-            />
-          </div>
-
-          <div class="d-flex mt-4">
-            <ExampleImage
-              class="mr-3"
-              image="/images/step-4/bottom_1st_left_bad.jpg"
-              :width="smallWidth"
-              :height="smallHeight"
-            />
-
-            <ExampleImage
-              image="/images/step-4/bottom_1st_right_bad.jpg"
-              :width="smallWidth"
-              :height="smallHeight"
-            />
-          </div>
         </div>
-
-        <div class="d-flex flex-column ml-4">
-          <div class="d-flex mb-3">
-            <ExampleImage
-              class="mr-3"
-              image="/images/step-4/top_left_bad.jpg"
-              :width="smallWidth"
-              :height="smallHeight"
-            />
-
-            <ExampleImage
-              image="/images/step-4/top_right_bad.jpg"
-              :width="smallWidth"
-              :height="smallHeight"
-            />
-          </div>
-
-          <div class="d-flex mb-3">
-            <ExampleImage
-              class="mr-3"
-              image="/images/step-4/middle_left_bad.jpg"
-              :width="smallWidth"
-              :height="smallHeight"
-            />
-
-            <ExampleImage
-              image="/images/step-4/middle_right_bad.jpg"
-              :width="smallWidth"
-              :height="smallHeight"
-            />
-          </div>
-
-          <div class="d-flex">
-            <ExampleImage
-              class="mr-3"
-              image="/images/step-4/bottom_2nd_left_bad.jpg"
-              :width="smallWidth"
-              :height="smallHeight"
-            />
-
-            <ExampleImage
-              image="/images/step-4/bottom_2nd_right_bad.jpg"
-              :width="smallWidth"
-              :height="smallHeight"
-            />
-          </div>
+        <div class="d-flex flex-column align-center ">
+          <span class="sub-header" style="font-size: 18px;">Example neutral pose</span>
+          <ExampleImage
+            image="/images/step-4/big_good_triangle.jpg"
+            :width="256"
+            :height="341"
+            good
+          />
         </div>
       </v-card-text>
+      <v-card-title class="justify-center" style="font-size: 18px; word-break: keep-all;">
+        If the subject cannot adopt the example neutral pose, select "Any pose" scaling setup under Advanced Settings
+      </v-card-title>
+
     </v-card>
   
     <DialogComponent
@@ -430,6 +397,11 @@ export default {
         "Share processed data and de-identified videos",
         "Share processed data",
         "Share no data",
+      ],
+      scaling_setup: 'upright_standing_pose',
+      scaling_setups: [
+        {"text": "Upright standing pose (recommended, default)", "value": "upright_standing_pose"},
+        {"text": "Any pose (in beta, feedback welcome)", "value": "any_pose"},
       ],
       pose_model: 'hrnet',
       pose_models: [
@@ -543,7 +515,7 @@ export default {
     },
   },
   async mounted() {
-    apiInfo("The default pose model was changed from OpenPose to HRNet on 11/14/23. The default marker augmenter model was upgraded (from v0.2 to v0.3) on 07-30-2023. You can select prior defaults in 'Advanced Settings'.", 8000);
+    apiInfo("You can now record a neutral pose different than the upright standing pose (e.g., sitting). Select 'Any pose' 'Advanced Settings'.", 8000);
     this.loadSession(this.$route.params.id)
     // this.loadSubjects()
     if (this.$route.query.autoRecord) {
@@ -676,6 +648,7 @@ export default {
             // sex: this.sex,
             // gender: this.gender,
             data_sharing: this.data_sharing,
+            scaling_setup: this.scaling_setup,
             pose_model: this.pose_model,
             framerate: this.framerate,
             openSimModel: this.openSimModel,
@@ -693,6 +666,7 @@ export default {
                   // subject_sex: this.sex,
                   // subject_gender: this.gender,
                   settings_data_sharing: this.data_sharing,
+                  settings_scaling_setup: this.scaling_setup,
                   settings_pose_model: this.pose_model,
                   settings_framerate: this.framerate,
                   settings_session_name: this.sessionName,
@@ -936,6 +910,16 @@ export default {
     background-color: black;
     opacity: 0.6;
     display: none;
+}
+
+.space-above-small {
+  margin-top: 15px; /* Adjust the value as needed */
+}
+
+.space-above-large {
+  margin-top: 20px; /* Adjust the value as needed */
+  font-size: 20px;  /* Adjust the font size as needed */
+  font-weight: bold;
 }
 
 //.data-title {

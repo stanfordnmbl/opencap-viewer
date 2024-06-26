@@ -41,6 +41,7 @@ export default {
     sex: 'woman',
     gender: 'woman',
     data_sharing: '',
+    scaling_setup: 'upright_standing_pose',
     pose_model: 'hrnet',
     framerate: 60,
     openSimModel: 'LaiUhlrich2022',
@@ -229,7 +230,7 @@ export default {
     setStep3 (state, trialId) {
       state.trialId = trialId
     },
-    setStep4 (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model, filter_frequency }) {
+    setStep4 (state, { subject, data_sharing, scaling_setup, pose_model, openSimModel, augmenter_model, filter_frequency }) {
       // state.identifier = identifier
       // state.weight = weight
       // state.height = height
@@ -237,6 +238,7 @@ export default {
       // state.gender = gender
       state.subject = subject
       state.data_sharing = data_sharing
+      state.scaling_setup = scaling_setup
       state.pose_model = pose_model
       state.openSimModel = openSimModel
       state.augmenter_model = augmenter_model
@@ -261,6 +263,7 @@ export default {
       state.sex = 'woman'
       state.gender = 'woman'
       state.data_sharing = ''
+      state.scaling_setup = 'upright_standing_pose'
       state.pose_model = 'openpose'
       state.openSimModel = 'LaiUhlrich2022'
       state.augmenter_model = 'v0.3'
