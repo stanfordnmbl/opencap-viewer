@@ -336,7 +336,6 @@ export default {
       try {
         res = await axios.get(`/sessions/${sessionId}/`)
         commit('setSession', res.data)
-        console.log(res.data)
       } catch (e) {
         if (e.response.status === 401) {
           router.push({ name: 'Login' })
@@ -378,51 +377,53 @@ export default {
       commit('updateSession', res.data)
     },
     async loadExistingSessions ({ state, commit }, {reroute, quantity = -1, subject_id = null}) {
-      let update_sessions = false;
-      let data = {
-        quantity: quantity
-      }
-      if (subject_id) {
-        data.subject_id = subject_id
-        update_sessions = true;
-      }
+      console.log('loadExistingSessions', reroute, quantity, subject_id)
 
-      // Experiments with partial loading
-
-      // let start = 0
-      // do {
-      //   data.start = start
-      //   data.quantity = 2
+      // let update_sessions = false;
+      // let data = {
+      //   quantity: quantity
+      // }
+      // if (subject_id) {
+      //   data.subject_id = subject_id
+      //   update_sessions = true;
+      // }
+      //
+      // // Experiments with partial loading
+      //
+      // // let start = 0
+      // // do {
+      // //   data.start = start
+      // //   data.quantity = 2
+      // //   let res = await axios.post('/sessions/valid/', data)
+      // //   console.log('loadExistingSessions', start, res.data)
+      // //   start += res.data.sessions.length
+      // // } while (start < res.data.total)
+      //
+      // let sessions = []
+      // data.start = 0
+      // data.quantity = 20
+      // let moreDataAvailable = true
+      //
+      // while (moreDataAvailable) {
       //   let res = await axios.post('/sessions/valid/', data)
-      //   console.log('loadExistingSessions', start, res.data)
-      //   start += res.data.sessions.length
-      // } while (start < res.data.total)
-
-      let sessions = []
-      data.start = 0
-      data.quantity = 20
-      let moreDataAvailable = true
-
-      while (moreDataAvailable) {
-        let res = await axios.post('/sessions/valid/', data)
-        sessions = sessions.concat(res.data.sessions)
-        if (res.data.sessions.length < data.quantity) {
-          moreDataAvailable = false
-        } else {
-            data.start += data.quantity
-        }
-      }
-      console.log('loadExistingSessions!!!', sessions)
-
-
-      // old code
-
-      // const res = await axios.post('/sessions/valid/', data)
-      if (update_sessions) {
-        commit('updateExistingSessions', sessions)
-      } else {
-        commit('setExistingSessions', sessions)
-      }
+      //   sessions = sessions.concat(res.data.sessions)
+      //   if (res.data.sessions.length < data.quantity) {
+      //     moreDataAvailable = false
+      //   } else {
+      //       data.start += data.quantity
+      //   }
+      // }
+      // console.log('loadExistingSessions!!!', sessions)
+      //
+      //
+      // // old code
+      //
+      // // const res = await axios.post('/sessions/valid/', data)
+      // if (update_sessions) {
+      //   commit('updateExistingSessions', sessions)
+      // } else {
+      //   commit('setExistingSessions', sessions)
+      // }
 
       if (reroute) {
         let institutionalUse = localStorage.getItem('institutional_use')

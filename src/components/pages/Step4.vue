@@ -37,19 +37,36 @@
           <v-card-text>
             <v-row align="center">
               <v-col cols="11">
-                <v-select
-                    ref="selectSubjectsRef"
-                    @click="reloadSubjects"
-                    @input="isAllInputsValidSelectSubject"
-                    class="cursor-pointer"
-                    required
-                    v-model="subject"
-                    item-text="display_name"
-                    item-value="id"
-                    label="Subject"
-                    :items="subjectSelectorChoices"
-                    return-object
-                ></v-select>
+                <v-autocomplete
+                  ref="selectSubjectsRef"
+                  required
+                  v-model="subject"
+                  item-text="display_name"
+                  item-value="id"
+                  label="Subject"
+                  :items="loaded_subjects"
+                  :loading="subject_loading"
+                  :search-input.sync="subject_search"
+                  return-object
+                >
+                  <template v-slot:append-item>
+                    <div v-intersect="loadNextSubjectsListPage" />
+                  </template>
+                </v-autocomplete>
+
+<!--                <v-select-->
+<!--                    ref="selectSubjectsRef"-->
+<!--                    @click="reloadSubjects"-->
+<!--                    @input="isAllInputsValidSelectSubject"-->
+<!--                    class="cursor-pointer"-->
+<!--                    required-->
+<!--                    v-model="subject"-->
+<!--                    item-text="display_name"-->
+<!--                    item-value="id"-->
+<!--                    label="Subject"-->
+<!--                    :items="subjectSelectorChoices"-->
+<!--                    return-object-->
+<!--                ></v-select>-->
               </v-col>
               <v-col cols="1">
                 <v-btn
@@ -360,6 +377,11 @@ export default {
       advancedSettingsDialog: false,
       selected: null,
 
+      subject_search: "",
+      subject_loading: false,
+      subject_start: 0,
+      loaded_subjects: [],
+
       sessionName: "",
       subject: null,
       identifier: "",
@@ -427,7 +449,7 @@ export default {
   },
   computed: {
     ...mapState({
-      subjects: (state) => state.data.subjects,
+      // subjects: (state) => state.data.subjects,
       session: (state) => state.data.session,
       trialId: (state) => state.data.trialId,
       genders: state => state.data.genders,
@@ -495,7 +517,7 @@ export default {
   async mounted() {
     apiInfo("You can now record a neutral pose different than the upright standing pose (e.g., sitting). Select 'Any pose' 'Advanced Settings'.", 8000);
     this.loadSession(this.$route.params.id)
-    this.loadSubjects()
+    // this.loadSubjects()
     if (this.$route.query.autoRecord) {
       this.onNext();
     }
@@ -521,6 +543,10 @@ export default {
       // Else, do nothing.
       } else return
 
+    },
+    subject_search (val) {
+      this.subject_start = 0;
+      this.loadSubjectsList()
     }
   },
   methods: {
@@ -531,8 +557,39 @@ export default {
         this.formErrors[input] = state;
       },0)
     },
+    loadSubjectsList (append_result = false) {
+      console.log('loading subjects:', this.subject_search)
+
+      this.subject_loading = true
+      let data = {
+        search: this.subject_search,
+        start: this.subject_start,
+        quantity: 40,
+        simple: 'true'
+      }
+      let res = axios.get('/subjects/', {params: data}).then((res) => {
+        if (append_result) {
+          this.loaded_subjects = [...this.loaded_subjects, ...res.data.subjects]
+        } else {
+          this.loaded_subjects = res.data.subjects
+        }
+        // this.subject_loading = false
+        this.subject_loading = false
+      }).catch((error) => {
+        this.subject_loading = false
+        apiError(error)
+      })
+
+    },
+    loadNextSubjectsListPage (isIntersecting) {
+      if (isIntersecting) {
+        this.subject_start += 40
+        this.loadSubjectsList(true)
+      }
+    },
     reloadSubjects() {
-      this.loadSubjects()
+      console.log('reloading subjects')
+      // this.loadSubjects()
     },
     openNewSubjectPopup() {
         this.$refs.dialogRef.edit_dialog = true

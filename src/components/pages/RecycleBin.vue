@@ -19,10 +19,16 @@
 
             <v-data-table
               :headers="headers"
-              :items="sessionsMapped"
+              :items="trashed_sessions"
+              :options.sync="session_options"
+              :loading="session_loading"
+              :server-items-length="session_total"
+              :footer-props="{
+                showFirstLastPage: false,
+                disableItemsPerPage: true,
+                itemsPerPageOptions: [40]
+              }"
               height="80vh"
-              disable-pagination
-              hide-default-footer
               single-select
               class="sessions-table mx-2 mb-4 flex-grow-1"
               @item-selected="onSelect"
@@ -330,6 +336,20 @@ export default {
   name: 'RecycleBin',
   data () {
     return {
+      session_loading: true,
+      session_start: 0,
+      session_quantity: 40,
+      session_total: 0,
+      trashed_sessions: [],
+      session_options: {},
+
+      trial_loading: true,
+      trial_start: 0,
+      trial_quantity: 40,
+      trial_total: 0,
+      trashed_trials: [],
+      trial_options: {},
+
       restore_session_dialog: false,
       remove_session_dialog: false,
       remove_permanently_session_dialog: false,
@@ -352,37 +372,47 @@ export default {
       selected: null,
     }
   },
+  watch: {
+    session_options: {
+      handler: function (val) {
+        this.session_start = (this.session_options.page - 1) * 40;
+        this.loadTrashedSessions()
+      },
+      deep: true
+    }
+  },
   computed: {
-    ...mapState({
-      sessions: state => state.data.sessions
-    }),
-    sessionsMapped () {
-      return this.sessions.map(s => ({
-        id: s.id,
-        sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
-        name: s.name,
-        trials_count: s.trials_count, // String(s.trials.length),
-        // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
-        trashed_trials_count: s.trashed_trials_count,
-        trials: s.trials,
-        created_at: s.created_at,
-        trashed: s.trashed,
-        trashed_at: s.trashed_at,
-        isMenuOpen: false
-      })).filter(s => s.trashed || s.trashed_trials_count > 0)
-    },
     trialsMapped () {
         return this.selected.trials.filter(t => t.trashed || this.selected.trashed).map(t => ({...t, isMenuOpen: false}))
     }
   },
   methods: {
     ...mapActions('data', [
-      'loadExistingSessions', 'loadSession', 'permanentRemoveExistingSession',
+      'loadSession',
+      'permanentRemoveExistingSession',
       'trashExistingSession', 'restoreTrashedSession']),
+
+    loadTrashedSessions() {
+      this.session_loading = true
+      let data = {
+        start: this.subject_start,
+        quantity: 40,
+        only_trashed: true
+      }
+      let res = axios.post('/sessions/valid/', data).then(response => {
+        this.trashed_sessions = response.data.sessions
+        this.session_total = response.data.total
+        this.session_loading = false
+      }).catch(error => {
+        apiError(error)
+        this.session_loading = false
+      })
+    },
     onSelect({item, value}) {
       if (value) {
-        this.loadSession(item.id).then(() => {
-          this.selected = this.sessions.find(s => s.id === item.id)
+        axios.get(`/sessions/${item.id}/`).then((res) => {
+          console.log(res)
+          this.selected = res.data
         })
       } else {
         this.selected = null
