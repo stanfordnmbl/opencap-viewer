@@ -96,7 +96,6 @@ import { mapState, mapActions } from 'vuex'
 
 export default {
   computed: {
-    ...mapActions('auth', ['logout']),
     ...mapState({
       username: state => state.auth.username,
       profile_picture_url: state => state.auth.profile_picture_url
@@ -109,6 +108,7 @@ export default {
     };
   },
   methods: {
+    ...mapActions('auth', ['logout']),
     toggleDropdown() {
       this.isDropdownOpen = !this.isDropdownOpen;
 

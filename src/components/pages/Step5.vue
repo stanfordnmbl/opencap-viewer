@@ -683,6 +683,8 @@ export default {
       },
     },
   async mounted() {
+    // this.clearAll()
+    // this.setSessionId(this.$route.params.id)
     await this.loadSession(this.$route.params.id)
 
     // Check if something went wrong with loading session. Usually there was a redirect to Login page.
@@ -777,6 +779,7 @@ export default {
       'resetAnalysisFunctionResult'
     ]),
     ...mapActions('data', [
+      'clearSession',
       'loadSession',
       'initSessionSameSetup',
       'loadAnalysisFunctions', 'loadAnalysisFunctionsPending', 'loadAnalysisFunctionsStates']),

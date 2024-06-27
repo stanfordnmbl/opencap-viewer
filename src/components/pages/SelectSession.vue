@@ -58,6 +58,9 @@
       class="sessions-table mx-2 mb-4 flex-grow-1"
       @item-selected="onSelect"
       @click:row="onRowClick">
+      <template v-slot:item.created_at="{ item }">
+        <span>{{ item.created_at|date }}</span>
+      </template>
       <template v-slot:item.id="{ item }">
         <div class="float-right">
           <v-menu
