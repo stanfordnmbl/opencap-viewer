@@ -433,7 +433,7 @@
                 </v-col>
                 <v-col cols="5">{{ func.description }}</v-col>
                 <v-col cols="4">
-                  <v-btn small v-if="func.trials.includes(session.trials[trial_analysis_index].id)" :disabled="session.trials[trial_analysis_index].id in func.trials">
+                  <v-btn small v-if="session.trials.length && func.trials.includes(session.trials[trial_analysis_index].id)" :disabled="session.trials[trial_analysis_index].id in func.trials">
                       <span >
                           <v-progress-circular  indeterminate class="mr-2" color="grey" size="14" width="2" />
                           Calculating...
@@ -442,12 +442,12 @@
 
                   <v-btn
                       small
-                      v-if="!func.trials.includes(session.trials[trial_analysis_index].id) && !(session.trials[trial_analysis_index].id in func.states)"
+                      v-if="session.trials.length && !func.trials.includes(session.trials[trial_analysis_index].id) && !(session.trials[trial_analysis_index].id in func.states)"
                       @click="invokeAnalysisFunction(func.id, session.trials[trial_analysis_index].id, session.trials[trial_analysis_index]?.name)"
                       >
                       Run
                   </v-btn>
-                    <v-btn small v-if="(session.trials[trial_analysis_index].id in func.states) && !func.trials.includes(session.trials[trial_analysis_index].id)">
+                    <v-btn small v-if="session.trials.length && (session.trials[trial_analysis_index].id in func.states) && !func.trials.includes(session.trials[trial_analysis_index].id)">
                         <span :style="func.states[session.trials[trial_analysis_index].id].state == 'failed'? 'color:red' : 'color:green'">{{ func.states[session.trials[trial_analysis_index].id].state }}</span>
                         <v-menu offset-y>
                             <template v-slot:activator="{ on, attrs }">
@@ -683,8 +683,11 @@ export default {
       },
     },
   async mounted() {
-    // this.clearAll()
-    // this.setSessionId(this.$route.params.id)
+    this.clearAll()
+    this.setSessionId(this.$route.params.id)
+
+    await new Promise(resolve => setTimeout(resolve, 3000))
+
     await this.loadSession(this.$route.params.id)
 
     // Check if something went wrong with loading session. Usually there was a redirect to Login page.
@@ -707,9 +710,6 @@ export default {
       this.show_controls = false
       this.showSessionMenuButtons = false
     }
-
-    console.log(this.user_id)
-    console.log(this.session.user)
 
     this.startTrialsPoll()
 
