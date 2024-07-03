@@ -427,11 +427,11 @@ export default {
         if (institutionalUse === '' || institutionalUse === 'patient_care' || institutionalUse === 'sports_performance_assessment' || institutionalUse === 'use_in_company') {
           router.push({name: 'License'})
         } else {
-          if (state.sessions.length > 0) {
+          // if (state.sessions.length > 0) {
             router.push({ name: 'SelectSession' })
-          } else {
-            router.push({ name: 'Step1' })
-          }
+          // } else {
+          //   router.push({ name: 'Step1' })
+          // }
         }
       }
     },

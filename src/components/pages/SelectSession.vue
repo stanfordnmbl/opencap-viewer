@@ -252,6 +252,7 @@ import { mapActions, mapState } from 'vuex'
 import { apiInfo, apiError } from '@/util/ErrorMessage.js'
 import { formatDate } from '@/util/DateFormat.js'
 import axios from 'axios'
+import router from '@/router'
 import Vue from 'vue'
 
 export default {
@@ -337,6 +338,9 @@ export default {
         this.valid_sessions = response.data.sessions
         this.session_total = response.data.total
         this.loading = false
+        if (this.session_total === 0) {
+          router.push({ name: 'Step1' })
+        }
       }).catch(error => {
         apiError(error)
         this.loading = false
