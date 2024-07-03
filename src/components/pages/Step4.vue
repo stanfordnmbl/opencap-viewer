@@ -529,10 +529,10 @@ export default {
   watch: {
     subjects(new_val, old_val) {
       // If no subjects, do nothing.
-      if (old_val.length === 0 & new_val.length === 0) {
+      if (old_val.length === 0 && new_val.length === 0) {
           return
       // If loading first time and there are subjects, select first.
-      } if (old_val.length === 0 & new_val.length !== 0) {
+      } if (old_val.length === 0 && new_val.length !== 0) {
           this.subject = new_val[0]
       // If there are more subjects now than before, that means a new one has been created. Select it.
       } else if (old_val.length < new_val.length) {
