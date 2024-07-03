@@ -91,19 +91,16 @@ export default {
     setSession (state, session) {
       session.created_at = formatDate(session.created_at); 
       state.session = session;
-      const sessionIds = state.sessions.map(session => session.id);
-      if(!sessionIds.includes(session.id)){
-        state.sessions.unshift(session);
-      } else {
-        const index = state.sessions.findIndex(s => s.id === session.id);
-        state.sessions.splice(index, 1, session);
-      }
+      // const sessionIds = state.sessions.map(session => session.id);
+      // if(!sessionIds.includes(session.id)){
+      //   state.sessions.unshift(session);
+      // } else {
+      //   const index = state.sessions.findIndex(s => s.id === session.id);
+      //   state.sessions.splice(index, 1, session);
+      // }
     },
     setSessionId (state, id) {
-
-      state.session = {
-        id
-      }
+      state.session.id = id
     },
     setExistingSessions (state, sessions) {
 
@@ -249,7 +246,7 @@ export default {
     },
     clearAll (state) {
       // session
-      state.session = null
+      state.session = { trials: [] }
       // step 1
       state.cameras = 2
       // step 2
