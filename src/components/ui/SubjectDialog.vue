@@ -246,6 +246,7 @@ export default {
         }
     },
     mounted () {
+      console.log('SubjectDialog mounted')
       this.loadSubjectTags()
     },
     methods: {
@@ -301,6 +302,9 @@ export default {
                 }
             } else {
                 const res = await axios.post('/subjects/', this.edited_subject)
+                    .then(response => {
+                        this.$emit('subject-added', response.data)
+                    })
                     .catch(error => {
                         if(error.response.status === 400) {
                             for (const [key, value] of Object.entries(error.response.data)) {
@@ -316,7 +320,8 @@ export default {
                 }
             }
 
-            await this.loadSubjects();
+
+            // await this.loadSubjects();
         },
         clearEditedSubject() {
             this.edited_subject.id = "";

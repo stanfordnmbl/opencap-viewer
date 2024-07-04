@@ -298,7 +298,7 @@
     <v-card class="step-4-2 ml-4 d-flex images-box">
 
       <v-card class="mb-0">
-        <v-card-text style="padding-top: 5; padding-bottom: 0; font-size: 16px;">
+        <v-card-text style="padding-top: 5px; padding-bottom: 0; font-size: 16px;">
         <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded</p>
         </v-card-text>
       </v-card>
@@ -344,6 +344,7 @@
   
     <DialogComponent
       ref="dialogRef"
+      @subject-added="submitAddSubject"
     />
 
   </MainLayout>
@@ -544,7 +545,8 @@ export default {
       } else return
 
     },
-    subject_search (val) {
+    subject_search (newVal, oldVal) {
+      console.log('watch subject_search', newVal, oldVal)
       this.subject_start = 0;
       this.loadSubjectsList()
     }
@@ -558,7 +560,7 @@ export default {
       },0)
     },
     loadSubjectsList (append_result = false) {
-      console.log('loading subjects:', this.subject_search)
+      console.log('loading subjects:', this.subject_search, append_result)
 
       this.subject_loading = true
       let data = {
@@ -586,6 +588,11 @@ export default {
         this.subject_start += 40
         this.loadSubjectsList(true)
       }
+    },
+    submitAddSubject (data) {
+      console.log('submitAddSubject', data)
+      this.loaded_subjects.push(data)
+      this.subject = data
     },
     reloadSubjects() {
       console.log('reloading subjects')
