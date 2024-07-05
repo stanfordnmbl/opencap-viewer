@@ -52,6 +52,7 @@
                   <template v-slot:append-item>
                     <div v-intersect="loadNextSubjectsListPage" />
                   </template>
+                  <template v-slot:selection>{{ subject.display_name }}</template>
                 </v-autocomplete>
 
 <!--                <v-select-->
@@ -84,6 +85,17 @@
               :error="formErrors.name != null"
               :error-messages="formErrors.name"
             ></v-text-field>
+            <div>
+              <ul>
+                <li>loaded_subjects: {{ loaded_subjects }}</li>
+                <li>subject: {{ subject }}</li>
+                <li>subject_loading: {{ subject_loading }}</li>
+                <li>subject_search: {{ subject_search }}</li>
+
+                <li>sessionName: {{ sessionName }}</li>
+              </ul>
+
+            </div>
           </v-card-text>
       </v-card>
 
@@ -378,7 +390,8 @@ export default {
       advancedSettingsDialog: false,
       selected: null,
 
-      subject_search: "",
+      subject_query: "",
+      // subject_search: "",
       subject_loading: false,
       subject_start: 0,
       loaded_subjects: [],
@@ -459,25 +472,25 @@ export default {
     subjectSelectorChoices() {
       return this.subjectsMapped;
     },
-    subjectsMapped () {
-      return this.subjects.map(s => ({
-        id: s.id,
-        display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.birth_year})`,
-        name: s.name,
-        birth_year: s.birth_year,
-        subject_tags: s.subject_tags,
-        characteristics: s.characteristics,
-        gender: s.gender,
-        gender_display: this.genders[s.gender],
-        sex_at_birth: s.sex_at_birth,
-        sex_display: this.sexes[s.sex_at_birth],
-        height: s.height,
-        weight: s.weight,
-        created_at: s.created_at,
-        trashed: s.trashed,
-        trashed_at: s.trashed_at
-      })).filter(s => this.show_trashed || !s.trashed)
-    },
+    // subjectsMapped () {
+    //   return this.subjects.map(s => ({
+    //     id: s.id,
+    //     display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.birth_year})`,
+    //     name: s.name,
+    //     birth_year: s.birth_year,
+    //     subject_tags: s.subject_tags,
+    //     characteristics: s.characteristics,
+    //     gender: s.gender,
+    //     gender_display: this.genders[s.gender],
+    //     sex_at_birth: s.sex_at_birth,
+    //     sex_display: this.sexes[s.sex_at_birth],
+    //     height: s.height,
+    //     weight: s.weight,
+    //     created_at: s.created_at,
+    //     trashed: s.trashed,
+    //     trashed_at: s.trashed_at
+    //   })).filter(s => this.show_trashed || !s.trashed)
+    // },
     rightButtonCaption() {
       return this.imgs
         ? "Confirm"
@@ -514,6 +527,18 @@ export default {
     errorsConsole() {
       return this.errors;
     },
+    subject_search: {
+      get() {
+        return this.subject_query
+      },
+      set(value) {
+        if (value !== null) {
+          this.subject_query = value
+          this.subject_start = 0
+          this.loadSubjectsList(false)
+        }
+      }
+    }
   },
   async mounted() {
     apiInfo("You can now record a neutral pose different than the upright standing pose (e.g., sitting). Select 'Any pose' 'Advanced Settings'.", 8000);
@@ -545,11 +570,14 @@ export default {
       } else return
 
     },
-    subject_search (newVal, oldVal) {
-      console.log('watch subject_search', newVal, oldVal)
-      this.subject_start = 0;
-      this.loadSubjectsList()
-    }
+    // subject_search (newVal, oldVal) {
+    //   console.log('watch subject_search', newVal, oldVal)
+    //   this.subject_start = 0;
+    //   if (newVal) {
+    //   // this.loadSubjectsList(false, String(newVal))
+    //     this.loadSubjectsList(false)
+    //   }
+    // }
   },
   methods: {
     ...mapMutations("data", ["setStep4", "setStep3"]),
@@ -560,7 +588,8 @@ export default {
       },0)
     },
     loadSubjectsList (append_result = false) {
-      console.log('loading subjects:', this.subject_search, append_result)
+      console.log('loading subjects:', this.subject_search, ' - ', append_result)
+      console.log('subject=', this.subject)
 
       this.subject_loading = true
       let data = {
@@ -591,8 +620,13 @@ export default {
     },
     submitAddSubject (data) {
       console.log('submitAddSubject', data)
-      this.loaded_subjects.push(data)
-      this.subject = data
+      let obj = {
+        id: data.id,
+        display_name: `${data.name} (${data.weight} Kg, ${data.height} m, ${data.birth_year})`,
+      }
+      this.loaded_subjects.push(obj)
+      this.subject = obj
+      this.$refs.dialogRef.edit_dialog = false
     },
     reloadSubjects() {
       console.log('reloading subjects')
