@@ -85,17 +85,17 @@
               :error="formErrors.name != null"
               :error-messages="formErrors.name"
             ></v-text-field>
-            <div>
-              <ul>
-                <li>loaded_subjects: {{ loaded_subjects }}</li>
-                <li>subject: {{ subject }}</li>
-                <li>subject_loading: {{ subject_loading }}</li>
-                <li>subject_search: {{ subject_search }}</li>
+<!--            <div>-->
+<!--              <ul>-->
+<!--                <li>loaded_subjects: {{ loaded_subjects }}</li>-->
+<!--                <li>subject: {{ subject }}</li>-->
+<!--                <li>subject_loading: {{ subject_loading }}</li>-->
+<!--                <li>subject_search: {{ subject_search }}</li>-->
 
-                <li>sessionName: {{ sessionName }}</li>
-              </ul>
+<!--                <li>sessionName: {{ sessionName }}</li>-->
+<!--              </ul>-->
 
-            </div>
+<!--            </div>-->
           </v-card-text>
       </v-card>
 
@@ -626,7 +626,6 @@ export default {
       }
       this.loaded_subjects.push(obj)
       this.subject = obj
-      this.$refs.dialogRef.edit_dialog = false
     },
     reloadSubjects() {
       console.log('reloading subjects')

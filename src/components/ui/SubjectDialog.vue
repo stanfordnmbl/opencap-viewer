@@ -271,11 +271,11 @@ export default {
         async submitSubjectForm() {
             this.edit_dialog = false;
 
-            if (this.edited_subject.subject_tags == null || this.edited_subject.subject_tags == "") {
-                this.edit_dialog = true;
-                this.formErrors.subject_tags = ["You must add at least one subject tag. For subjects with no conditions, select 'Unimpaired'."]
-                return;
-            }
+            // if (this.edited_subject.subject_tags == null || this.edited_subject.subject_tags == "") {
+            //     this.edit_dialog = true;
+            //     this.formErrors.subject_tags = ["You must add at least one subject tag. For subjects with no conditions, select 'Unimpaired'."]
+            //     return;
+            // }
 
             this.formErrors = {
                 name: null,
@@ -285,6 +285,7 @@ export default {
                 subject_tags: null,
             }
 
+            console.log('edit_dialog=', this.edit_dialog)
             if(this.edited_subject.id) {
                 const res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
                     .catch(error => {
@@ -304,6 +305,7 @@ export default {
                 const res = await axios.post('/subjects/', this.edited_subject)
                     .then(response => {
                         this.$emit('subject-added', response.data)
+                        this.clearEditedSubject();
                     })
                     .catch(error => {
                         if(error.response.status === 400) {
@@ -313,14 +315,15 @@ export default {
                             this.edit_dialog = true;
                         }
                     })
-                if (res && res.data) {
-                    this.clearEditedSubject();
-                } else {
-                    this.edit_dialog = true;
-                }
+                // if (res && res.data) {
+                //     this.clearEditedSubject();
+                // } else {
+                //   console.log('WTF', res)
+                //     this.edit_dialog = true;
+                // }
             }
 
-
+            console.log('edit_dialog=', this.edit_dialog)
             // await this.loadSubjects();
         },
         clearEditedSubject() {
