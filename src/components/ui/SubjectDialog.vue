@@ -187,7 +187,7 @@ export default {
                 subject_tags: null,
             },
             heightRule: (v) => {
-                if (!v.trim())
+                if (typeof v === "string" && !v.trim())
                     return true;
                 if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0)
                     return true;
@@ -197,7 +197,7 @@ export default {
                     return "It seems unlikely that the subject's height is less than 0.1 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
             },
             weightRule: (v) => {
-                if (!v.trim())
+                if (typeof v === "string" && !v.trim())
                     return true;
                 if (!isNaN(parseFloat(v)) && v >= 1 && v <= 200.0)
                     return true;
@@ -271,11 +271,11 @@ export default {
         async submitSubjectForm() {
             this.edit_dialog = false;
 
-            // if (this.edited_subject.subject_tags == null || this.edited_subject.subject_tags == "") {
-            //     this.edit_dialog = true;
-            //     this.formErrors.subject_tags = ["You must add at least one subject tag. For subjects with no conditions, select 'Unimpaired'."]
-            //     return;
-            // }
+            if (this.edited_subject.subject_tags == null || this.edited_subject.subject_tags == "") {
+                this.edit_dialog = true;
+                this.formErrors.subject_tags = ["You must add at least one subject tag. For subjects with no conditions, select 'Unimpaired'."]
+                return;
+            }
 
             this.formErrors = {
                 name: null,
@@ -288,6 +288,10 @@ export default {
             console.log('edit_dialog=', this.edit_dialog)
             if(this.edited_subject.id) {
                 const res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
+                    .then(response => {
+                        this.$emit('subject-updated', response.data)
+                        this.clearEditedSubject();
+                    })
                     .catch(error => {
                         if(error.response.status === 400) {
                             for (const [key, value] of Object.entries(error.response.data)) {
@@ -296,11 +300,11 @@ export default {
                             this.edit_dialog = true;
                         }
                     })
-                if (res && res.data) {
-                    this.clearEditedSubject();
-                } else {
-                    this.edit_dialog = true;
-                }
+                // if (res && res.data) {
+                //     this.clearEditedSubject();
+                // } else {
+                //     this.edit_dialog = true;
+                // }
             } else {
                 const res = await axios.post('/subjects/', this.edited_subject)
                     .then(response => {

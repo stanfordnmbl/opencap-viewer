@@ -686,7 +686,7 @@ export default {
     this.clearAll()
     this.setSessionId(this.$route.params.id)
 
-    await new Promise(resolve => setTimeout(resolve, 3000))
+    // await new Promise(resolve => setTimeout(resolve, 3000))
 
     await this.loadSession(this.$route.params.id)
 

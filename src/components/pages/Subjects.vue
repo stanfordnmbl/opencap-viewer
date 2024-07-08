@@ -348,6 +348,8 @@
 
     <DialogComponent
       ref="dialogRef"
+      @subject-updated="submitEditSubject"
+      @subject-added="loadValidSubjects"
     />
 
   </div>
@@ -516,6 +518,10 @@ export default {
           subject_tags: null,
       }
       console.log('edit subject', subject)
+    },
+    submitEditSubject (data) {
+      console.log('submitEditSubject', data)
+      this.loadValidSubjects()
     },
     async trashSubject (id) {
       try {
