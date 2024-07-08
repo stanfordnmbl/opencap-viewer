@@ -187,7 +187,7 @@ export default {
                 subject_tags: null,
             },
             heightRule: (v) => {
-                if (!v.trim())
+                if (typeof v === "string" && !v.trim())
                     return true;
                 if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0)
                     return true;
@@ -197,7 +197,7 @@ export default {
                     return "It seems unlikely that the subject's height is less than 0.1 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
             },
             weightRule: (v) => {
-                if (!v.trim())
+                if (typeof v === "string" && !v.trim())
                     return true;
                 if (!isNaN(parseFloat(v)) && v >= 1 && v <= 200.0)
                     return true;
@@ -246,6 +246,7 @@ export default {
         }
     },
     mounted () {
+      console.log('SubjectDialog mounted')
       this.loadSubjectTags()
     },
     methods: {
@@ -284,8 +285,13 @@ export default {
                 subject_tags: null,
             }
 
+            console.log('edit_dialog=', this.edit_dialog)
             if(this.edited_subject.id) {
                 const res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
+                    .then(response => {
+                        this.$emit('subject-updated', response.data)
+                        this.clearEditedSubject();
+                    })
                     .catch(error => {
                         if(error.response.status === 400) {
                             for (const [key, value] of Object.entries(error.response.data)) {
@@ -294,13 +300,17 @@ export default {
                             this.edit_dialog = true;
                         }
                     })
-                if (res && res.data) {
-                    this.clearEditedSubject();
-                } else {
-                    this.edit_dialog = true;
-                }
+                // if (res && res.data) {
+                //     this.clearEditedSubject();
+                // } else {
+                //     this.edit_dialog = true;
+                // }
             } else {
                 const res = await axios.post('/subjects/', this.edited_subject)
+                    .then(response => {
+                        this.$emit('subject-added', response.data)
+                        this.clearEditedSubject();
+                    })
                     .catch(error => {
                         if(error.response.status === 400) {
                             for (const [key, value] of Object.entries(error.response.data)) {
@@ -309,14 +319,16 @@ export default {
                             this.edit_dialog = true;
                         }
                     })
-                if (res && res.data) {
-                    this.clearEditedSubject();
-                } else {
-                    this.edit_dialog = true;
-                }
+                // if (res && res.data) {
+                //     this.clearEditedSubject();
+                // } else {
+                //   console.log('WTF', res)
+                //     this.edit_dialog = true;
+                // }
             }
 
-            await this.loadSubjects();
+            console.log('edit_dialog=', this.edit_dialog)
+            // await this.loadSubjects();
         },
         clearEditedSubject() {
             this.edited_subject.id = "";
