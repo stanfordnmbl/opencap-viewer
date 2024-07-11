@@ -614,8 +614,8 @@ export default {
     },
     loadNextSubjectsListPage (isIntersecting) {
       if (isIntersecting) {
-        this.subject_start += 40
         this.loadSubjectsList(true)
+        this.subject_start += 40
       }
     },
     submitAddSubject (data) {
