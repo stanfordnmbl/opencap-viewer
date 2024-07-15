@@ -599,10 +599,6 @@ export default {
         quantity: 40,
         simple: 'true'
       }
-
-      // let t = new Date();
-      // while (new Date() - t <= 1000) { null }
-
       let res = axios.get('/subjects/', {params: data}).then((res) => {
         if (append_result) {
           this.loaded_subjects = [...this.loaded_subjects, ...res.data.subjects]
