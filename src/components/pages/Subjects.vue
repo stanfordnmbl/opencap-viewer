@@ -509,7 +509,7 @@ export default {
     },
     async editSubject(subject) {
       this.$refs.dialogRef.edit_dialog = true;
-      this.$refs.dialogRef.edited_subject = subject;
+      this.$refs.dialogRef.edited_subject = JSON.parse(JSON.stringify(subject));  // A trick to deep copy
       this.$refs.dialogRef.formErrors = {
           name: null,
           weight: null,

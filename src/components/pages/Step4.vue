@@ -551,6 +551,7 @@ export default {
     const res = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
 
     this.n_calibrated_cameras = res.data.data
+    this.loadSubjectsList(false)
   },
   watch: {
     subjects(new_val, old_val) {
