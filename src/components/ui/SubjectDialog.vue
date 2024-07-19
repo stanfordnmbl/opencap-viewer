@@ -44,7 +44,7 @@
             ></v-text-field>
           </ValidationProvider>
 
-          <ValidationProvider rules="required|birthYearRule" v-slot="{ errors }" name="Height" :immediate="true">
+          <ValidationProvider rules="required|birthYearRule" v-slot="{ errors }" name="Birth Year" :immediate="true">
             <v-text-field
               v-model="edited_subject.birth_year"
               label="Birth year (yyyy)"
@@ -56,7 +56,7 @@
             ></v-text-field>
           </ValidationProvider>
 
-          <ValidationProvider rules="required|subjectTagsRule" v-slot="{ errors }" name="Height" :immediate="true">
+          <ValidationProvider rules="required|subjectTagsRule" v-slot="{ errors }" name="Subject Tags" :immediate="true">
             <v-select
                 ref="subjectTagsSelect"
                 clearable
