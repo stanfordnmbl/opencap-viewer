@@ -47,7 +47,6 @@
                   :items="loaded_subjects"
                   :loading="subject_loading"
                   :search-input.sync="subject_search"
-                  @click:clear="clearSubjectSearch"
                   return-object
                 >
                   <template v-slot:append-item>
@@ -580,6 +579,12 @@ export default {
     //     this.loadSubjectsList(false)
     //   }
     // }
+    subject (newVal, oldVal) {
+      console.log('watch subject', newVal, oldVal)
+      if (newVal === null) {
+        this.clearSubjectSearch()
+      }
+    },
   },
   methods: {
     ...mapMutations("data", ["setStep4", "setStep3"]),
