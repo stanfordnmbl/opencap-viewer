@@ -47,6 +47,7 @@
                   :items="loaded_subjects"
                   :loading="subject_loading"
                   :search-input.sync="subject_search"
+                  @click:clear="clearSubjectSearch"
                   return-object
                 >
                   <template v-slot:append-item>
@@ -618,6 +619,11 @@ export default {
         this.loadSubjectsList(true)
         this.subject_start += 40
       }
+    },
+    clearSubjectSearch() {
+      this.subject_search = ""
+      this.subject_start = 0
+      this.loadSubjectsList(false)
     },
     submitAddSubject (data) {
       console.log('submitAddSubject', data)
