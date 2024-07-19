@@ -554,23 +554,23 @@ export default {
     this.loadSubjectsList(false)
   },
   watch: {
-    subjects(new_val, old_val) {
-      // If no subjects, do nothing.
-      if (old_val.length === 0 && new_val.length === 0) {
-          return
-      // If loading first time and there are subjects, select first.
-      } if (old_val.length === 0 && new_val.length !== 0) {
-          this.subject = new_val[0]
-      // If there are more subjects now than before, that means a new one has been created. Select it.
-      } else if (old_val.length < new_val.length) {
-          const serializedArr1 = new Set(old_val.map(item => JSON.stringify(item)));
-
-          // Find the index by comparing serialized objects
-          this.subject = new_val[new_val.findIndex(item => !serializedArr1.has(JSON.stringify(item)))];
-      // Else, do nothing.
-      } else return
-
-    },
+    // subjects(new_val, old_val) {
+    //   // If no subjects, do nothing.
+    //   if (old_val.length === 0 && new_val.length === 0) {
+    //       return
+    //   // If loading first time and there are subjects, select first.
+    //   } if (old_val.length === 0 && new_val.length !== 0) {
+    //       this.subject = new_val[0]
+    //   // If there are more subjects now than before, that means a new one has been created. Select it.
+    //   } else if (old_val.length < new_val.length) {
+    //       const serializedArr1 = new Set(old_val.map(item => JSON.stringify(item)));
+    //
+    //       // Find the index by comparing serialized objects
+    //       this.subject = new_val[new_val.findIndex(item => !serializedArr1.has(JSON.stringify(item)))];
+    //   // Else, do nothing.
+    //   } else return
+    //
+    // },
     // subject_search (newVal, oldVal) {
     //   console.log('watch subject_search', newVal, oldVal)
     //   this.subject_start = 0;
