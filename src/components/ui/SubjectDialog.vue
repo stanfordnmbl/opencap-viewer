@@ -20,50 +20,57 @@
             :error-messages="formErrors.name"
           ></v-text-field>
 
-          <v-text-field
-            v-model="edited_subject.weight"
-            label="Weight (kg)"
-            type="number"
-            hide-spin-buttons
-            required
-            :rules="[weightRule]"
-            :error="formErrors.weight != null"
-            :error-messages="formErrors.weight"
-          ></v-text-field>
+          <ValidationProvider rules="required|weightRule" v-slot="{ errors }" name="Weight" :immediate="true">
+            <v-text-field
+              v-model="edited_subject.weight"
+              label="Weight (kg)"
+              type="number"
+              hide-spin-buttons
+              required
+              :error="errors.length > 0"
+              :error-messages="errors[0]"
+            ></v-text-field>
+          </ValidationProvider>
 
-          <v-text-field
-            v-model="edited_subject.height"
-            label="Height (m)"
-            type="number"
-            hide-spin-buttons
-            required
-            :rules="[heightRule]"
-            :error="formErrors.height != null"
-            :error-messages="formErrors.height"
-          ></v-text-field>
-          <v-text-field
-            v-model="edited_subject.birth_year"
-            label="Birth year (yyyy)"
-            type="number"
-            hide-spin-buttons
-            required
-            :rules="[birthYearRule]"
-            :error="formErrors.birth_year != null"
-            :error-messages="formErrors.birth_year"
-          ></v-text-field>
-          <v-select
-              ref="subjectTagsSelect"
-              clearable
-              multiple
-              v-model="edited_subject.subject_tags"
-              item-title="text"
-              item-value="value"
-              label="Subject Tags"
-              :items="tagsOptions"
-              :rules="[subjectTagsRule]"
-              :error="formErrors.subject_tags != null && formErrors.subject_tags.length != 0"
-              :error-messages="formErrors.subject_tags"
-          ></v-select>
+          <ValidationProvider rules="required|heightRule" v-slot="{ errors }" name="Height" :immediate="true">
+            <v-text-field
+              v-model="edited_subject.height"
+              label="Height (m)"
+              type="number"
+              hide-spin-buttons
+              required
+              :error="errors.length > 0"
+              :error-messages="errors[0]"
+            ></v-text-field>
+          </ValidationProvider>
+
+          <ValidationProvider rules="required|birthYearRule" v-slot="{ errors }" name="Birth Year" :immediate="true">
+            <v-text-field
+              v-model="edited_subject.birth_year"
+              label="Birth year (yyyy)"
+              type="number"
+              hide-spin-buttons
+              required
+              :error="errors.length > 0"
+              :error-messages="errors[0]"
+            ></v-text-field>
+          </ValidationProvider>
+
+          <ValidationProvider rules="required|subjectTagsRule" v-slot="{ errors }" name="Subject Tags" :immediate="true">
+            <v-select
+                ref="subjectTagsSelect"
+                clearable
+                multiple
+                v-model="edited_subject.subject_tags"
+                item-title="text"
+                item-value="value"
+                label="Subject Tags"
+                :items="tagsOptions"
+                :error="errors.length > 0"
+                :error-messages="errors[0]"
+            ></v-select>
+          </ValidationProvider>
+
           <v-select
               ref="sexAtBirthSelect"
               clearable
@@ -151,11 +158,13 @@
 <script>
 import axios from 'axios'
 import { mapState, mapActions } from 'vuex'
+import { rules } from '@/validation'
 
 export default {
     name: 'SubjectsDialog',
     data () {
         return {
+            rules,
             edit_dialog: false,
             edited_subject: {
                 id: "",
@@ -186,46 +195,6 @@ export default {
                 birth_year: null,
                 subject_tags: null,
             },
-            heightRule: (v) => {
-                if (!v.trim())
-                    return true;
-                if (!isNaN(parseFloat(v)) && v >= .1 && v <= 3.0)
-                    return true;
-                if(!isNaN(parseFloat(v)) && v > 3.0)
-                    return "It seems unlikely that the subject's height exceeds 3 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
-                if(!isNaN(parseFloat(v)) && v < .1)
-                    return "It seems unlikely that the subject's height is less than 0.1 m. Please ensure that you are using the correct units. The height should be specified in meters (m).";
-            },
-            weightRule: (v) => {
-                if (!v.trim())
-                    return true;
-                if (!isNaN(parseFloat(v)) && v >= 1 && v <= 200.0)
-                    return true;
-                if(!isNaN(parseFloat(v)) && v > 200.0)
-                    return "It seems unlikely that the subject's weight exceeds 200 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
-                if(!isNaN(parseFloat(v)) && v < 1)
-                    return "It seems unlikely that the subject's weight is less than 1 kg. Please ensure that you are using the correct units. The weight should be specified in kilograms (kg).";
-            },
-            birthYearRule: (v) => {
-                const currentYear = new Date().getFullYear();
-                if (!v)
-                    return true;
-                if (!isNaN(parseFloat(v)) && v >= 1900 && v <= currentYear)
-                    return true;
-                if(!isNaN(parseFloat(v)) && v > currentYear)
-                    return `The subject's birth year cannot be set in the future. Please ensure that you are using the correct units. The birth year should be earlier than the current year ${currentYear} and specified in years (yyyy) format.`;
-                if(!isNaN(parseFloat(v)) && v < 1900)
-                    return "It seems unlikely that the subject's birth year predates 1900. Please ensure that you are using the correct units. The birth year should be specified in years (yyyy) format.";
-            },
-            subjectTagsRule: (v) => {
-                if (!v) return true;
-                if (Array.isArray(v) && v.length > 0)
-                    return true;
-                if (!Array.isArray(v))
-                    return "The subject tags must be contained in an array.";
-                if (Array.isArray(v) && v.length == 0)
-                    return "You must add at least one subject tag. For subjects with no conditions, select 'Unimpaired'.";
-            }
         }
     },
     computed: {
@@ -246,6 +215,7 @@ export default {
         }
     },
     mounted () {
+      console.log('SubjectDialog mounted')
       this.loadSubjectTags()
     },
     methods: {
@@ -284,8 +254,13 @@ export default {
                 subject_tags: null,
             }
 
+            console.log('edit_dialog=', this.edit_dialog)
             if(this.edited_subject.id) {
                 const res = await axios.put('/subjects/' + this.edited_subject.id + '/', this.edited_subject)
+                    .then(response => {
+                        this.$emit('subject-updated', response.data)
+                        this.clearEditedSubject();
+                    })
                     .catch(error => {
                         if(error.response.status === 400) {
                             for (const [key, value] of Object.entries(error.response.data)) {
@@ -294,13 +269,17 @@ export default {
                             this.edit_dialog = true;
                         }
                     })
-                if (res && res.data) {
-                    this.clearEditedSubject();
-                } else {
-                    this.edit_dialog = true;
-                }
+                // if (res && res.data) {
+                //     this.clearEditedSubject();
+                // } else {
+                //     this.edit_dialog = true;
+                // }
             } else {
                 const res = await axios.post('/subjects/', this.edited_subject)
+                    .then(response => {
+                        this.$emit('subject-added', response.data)
+                        this.clearEditedSubject();
+                    })
                     .catch(error => {
                         if(error.response.status === 400) {
                             for (const [key, value] of Object.entries(error.response.data)) {
@@ -309,14 +288,16 @@ export default {
                             this.edit_dialog = true;
                         }
                     })
-                if (res && res.data) {
-                    this.clearEditedSubject();
-                } else {
-                    this.edit_dialog = true;
-                }
+                // if (res && res.data) {
+                //     this.clearEditedSubject();
+                // } else {
+                //   console.log('WTF', res)
+                //     this.edit_dialog = true;
+                // }
             }
 
-            await this.loadSubjects();
+            console.log('edit_dialog=', this.edit_dialog)
+            // await this.loadSubjects();
         },
         clearEditedSubject() {
             this.edited_subject.id = "";

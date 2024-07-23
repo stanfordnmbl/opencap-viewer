@@ -21,12 +21,18 @@
 
             <v-data-table
               :headers="headers"
-              :items="subjectsMapped"
+              :items="valid_subjects"
+              :options.sync="options"
               :item-class="itemClasses"
+              :loading="loading"
+              :server-items-length="subject_total"
+              :footer-props="{
+                showFirstLastPage: false,
+                disableItemsPerPage: true,
+                itemsPerPageOptions: [40]
+              }"
               height="80vh"
-              disable-pagination
               fixed-header
-              hide-default-footer
               single-select
               class="subjects-table mx-2 mb-4 flex-grow-1"
               @item-selected="onSelect"
@@ -305,11 +311,18 @@
             <v-data-table
               v-if="selected"
               :headers="sessionHeaders"
-              :items="selectedSessions"
+              :items="valid_sessions"
+              :options.sync="session_options"
               :item-class="itemClasses"
+              :loading="session_loading"
+              :server-items-length="session_total"
+              :footer-props="{
+                showFirstLastPage: false,
+                disableItemsPerPage: true,
+                itemsPerPageOptions: [40]
+              }"
+              fixed-header
               height="80vh"
-              disable-pagination
-              hide-default-footer
               single-select
               class="mx-2"
               @click:row="onRowSessionClick">
@@ -335,6 +348,8 @@
 
     <DialogComponent
       ref="dialogRef"
+      @subject-updated="submitEditSubject"
+      @subject-added="loadValidSubjects"
     />
 
   </div>
@@ -355,6 +370,16 @@ export default {
   created: function () {},
   data () {
     return {
+      loading: true,
+      subject_start: 0,
+      subject_quantity: 40,
+      subject_total: 0,
+      valid_subjects: [],
+      options: {},
+      subject_sort: [],
+      subject_sort_desc: [],
+
+
       remove_dialog: false,
       remove_permanently_dialog: false,
       restore_dialog: false,
@@ -375,9 +400,17 @@ export default {
         { text: 'Birth year', value: 'birth_year' },
         { text: 'Sex', value: 'sex_display' },
         { text: 'Gender', value: 'gender_display' },
-        { text: 'Subject Tags', value: 'subject_tags' },
-        { text: 'Characteristics', value: 'characteristics' }
+        { text: 'Subject Tags', value: 'subject_tags', sortable: false},
+        { text: 'Characteristics', value: 'characteristics', sortable: false}
       ],
+
+      session_loading: true,
+      session_start: 0,
+      session_quantity: 40,
+      session_total: 0,
+      valid_sessions: [],
+      session_options: {},
+
       sessionHeaders: [
         { text: 'Session ID', value: 'id' },
         { text: 'Session Name', value: 'sessionName' },
@@ -389,53 +422,10 @@ export default {
   },
     computed: {
     ...mapState({
-      sessions: state => state.data.sessions,
-      subjects: state => state.data.subjects,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
       isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
     }),
-    subjectsMapped () {
-      return this.subjects.map(s => ({
-        id: s.id,
-        name: s.name,
-        birth_year: s.birth_year,
-        subject_tags: s.subject_tags,
-        characteristics: s.characteristics,
-        gender: s.gender,
-        gender_display: this.genders[s.gender],
-        sex_at_birth: s.sex_at_birth,
-        sex_display: this.sexes[s.sex_at_birth],
-        height: s.height,
-        weight: s.weight,
-        // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
-        // trials: s.trials,
-        created_at: s.created_at,
-        trashed: s.trashed,
-        trashed_at: s.trashed_at,
-        isMenuOpen: false
-      })).filter(s => this.show_trashed || !s.trashed)
-    },
-    selectedSessions () {
-      return this.sessions.map(s => ({
-        id: s.id,
-        sessionName: s.meta["sessionName"] ? s.meta["sessionName"] : "",
-        name: s.name,
-        // trials_count: String(s.trials.length),
-        trials_count: s.trials_count,
-        // trashed_trials_count: String(s.trials.filter(t => t.trashed).length),
-        trashed_trials_count: s.trashed_trials_count,
-        trials: s.trials,
-        created_at: s.created_at,
-        trashed: s.trashed,
-        trashed_at: s.trashed_at,
-        isMenuOpen: false,
-        subject: s.subject
-      })).filter((s => s.trashed || s.trashed_trials_count > 0) && (s => s.subject === this.selected.id))
-    }
-  },
-  mounted () {
-    this.loadSubjects()
   },
   watch:{
     showArchiveDialog(newShowArchiveDialog, oldShowArchiveDialog){
@@ -444,13 +434,50 @@ export default {
         this.isArchiveInProgress = false;
         this.archiveUrl = "#";
       }
-    }
+    },
+    options: {
+      handler () {
+        this.subject_start = (this.options.page - 1) * this.options.itemsPerPage
+        this.subject_sort = this.options.sortBy
+        this.subject_sort_desc = this.options.sortDesc
+        this.loadValidSubjects()
+        console.log("OPTIONS", this.options)
+      },
+      deep: true
+    },
+    show_trashed: {
+      handler () {
+        this.loadValidSubjects()
+      },
+      deep: true
+    },
   },
   methods: {
-    ...mapActions('data', ['loadExistingSessions', 'loadSubjects', 'trashExistingSubject', 'restoreTrashedSubject']),
+    ...mapActions('data', ['trashExistingSubject', 'restoreTrashedSubject']),
+    loadValidSubjects() {
+      this.loading = true
+      let data = {
+        start: this.subject_start,
+        quantity: this.subject_quantity,
+        include_trashed: this.show_trashed,
+        sort: this.subject_sort,
+        sort_desc: this.subject_sort_desc
+      }
+      let res = axios.get('/subjects/', {
+        params: data
+      }).then(response => {
+        this.valid_subjects = response.data.subjects
+        this.subject_total = response.data.total
+        this.loading = false
+      }).catch(error => {
+        apiError(error)
+        this.loading = false
+      })
+    },
     onSelect ({ item, value }) {
       if (item && value) {
-          this.loadExistingSessions({reroute: false, quantity: -1, subject_id: item.id})
+        this.loadSubjectSessions(item.id)
+          // this.loadExistingSessions({reroute: false, quantity: -1, subject_id: item.id})
       }
       this.selected = value ? item : null
     },
@@ -475,14 +502,14 @@ export default {
     },
     clickOutsideDialogSubjectHideMenu(e) {
       if (e.target.className === 'v-overlay__scrim') {
-          for(let t of this.subjectsMapped) {
+          for(let t of this.valid_subjects) {
             t.isMenuOpen = false;
           }
       }
     },
     async editSubject(subject) {
       this.$refs.dialogRef.edit_dialog = true;
-      this.$refs.dialogRef.edited_subject = subject;
+      this.$refs.dialogRef.edited_subject = JSON.parse(JSON.stringify(subject));  // A trick to deep copy
       this.$refs.dialogRef.formErrors = {
           name: null,
           weight: null,
@@ -492,9 +519,14 @@ export default {
       }
       console.log('edit subject', subject)
     },
+    submitEditSubject (data) {
+      console.log('submitEditSubject', data)
+      this.loadValidSubjects()
+    },
     async trashSubject (id) {
       try {
         await this.trashExistingSubject(id)
+        this.loadValidSubjects()
       } catch (error) {
         apiError(error)
       }
@@ -502,6 +534,7 @@ export default {
     async restoreSubject (id) {
       try {
         await this.restoreTrashedSubject(id)
+        this.loadValidSubjects()
       } catch (error) {
         apiError(error)
       }

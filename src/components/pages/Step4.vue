@@ -37,19 +37,37 @@
           <v-card-text>
             <v-row align="center">
               <v-col cols="11">
-                <v-select
-                    ref="selectSubjectsRef"
-                    @click="reloadSubjects"
-                    @input="isAllInputsValidSelectSubject"
-                    class="cursor-pointer"
-                    required
-                    v-model="subject"
-                    item-text="display_name"
-                    item-value="id"
-                    label="Subject"
-                    :items="subjectSelectorChoices"
-                    return-object
-                ></v-select>
+                <v-autocomplete
+                  ref="selectSubjectsRef"
+                  required
+                  v-model="subject"
+                  item-text="display_name"
+                  item-value="id"
+                  label="Subject"
+                  :items="loaded_subjects"
+                  :loading="subject_loading"
+                  :search-input.sync="subject_search"
+                  return-object
+                >
+                  <template v-slot:append-item>
+                    <div v-intersect="loadNextSubjectsListPage" />
+                  </template>
+                  <template v-slot:selection>{{ subject.display_name }}</template>
+                </v-autocomplete>
+
+<!--                <v-select-->
+<!--                    ref="selectSubjectsRef"-->
+<!--                    @click="reloadSubjects"-->
+<!--                    @input="isAllInputsValidSelectSubject"-->
+<!--                    class="cursor-pointer"-->
+<!--                    required-->
+<!--                    v-model="subject"-->
+<!--                    item-text="display_name"-->
+<!--                    item-value="id"-->
+<!--                    label="Subject"-->
+<!--                    :items="subjectSelectorChoices"-->
+<!--                    return-object-->
+<!--                ></v-select>-->
               </v-col>
               <v-col cols="1">
                 <v-btn
@@ -67,6 +85,17 @@
               :error="formErrors.name != null"
               :error-messages="formErrors.name"
             ></v-text-field>
+<!--            <div>-->
+<!--              <ul>-->
+<!--                <li>loaded_subjects: {{ loaded_subjects }}</li>-->
+<!--                <li>subject: {{ subject }}</li>-->
+<!--                <li>subject_loading: {{ subject_loading }}</li>-->
+<!--                <li>subject_search: {{ subject_search }}</li>-->
+
+<!--                <li>sessionName: {{ sessionName }}</li>-->
+<!--              </ul>-->
+
+<!--            </div>-->
           </v-card-text>
       </v-card>
 
@@ -281,7 +310,7 @@
     <v-card class="step-4-2 ml-4 d-flex images-box">
 
       <v-card class="mb-0">
-        <v-card-text style="padding-top: 5; padding-bottom: 0; font-size: 16px;">
+        <v-card-text style="padding-top: 5px; padding-bottom: 0; font-size: 16px;">
         <p>{{ n_videos_uploaded }} of {{ n_calibrated_cameras }} videos uploaded</p>
         </v-card-text>
       </v-card>
@@ -327,6 +356,7 @@
   
     <DialogComponent
       ref="dialogRef"
+      @subject-added="submitAddSubject"
     />
 
   </MainLayout>
@@ -359,6 +389,12 @@ export default {
       },
       advancedSettingsDialog: false,
       selected: null,
+
+      subject_query: "",
+      // subject_search: "",
+      subject_loading: false,
+      subject_start: 0,
+      loaded_subjects: [],
 
       sessionName: "",
       subject: null,
@@ -427,7 +463,7 @@ export default {
   },
   computed: {
     ...mapState({
-      subjects: (state) => state.data.subjects,
+      // subjects: (state) => state.data.subjects,
       session: (state) => state.data.session,
       trialId: (state) => state.data.trialId,
       genders: state => state.data.genders,
@@ -436,25 +472,25 @@ export default {
     subjectSelectorChoices() {
       return this.subjectsMapped;
     },
-    subjectsMapped () {
-      return this.subjects.map(s => ({
-        id: s.id,
-        display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.birth_year})`,
-        name: s.name,
-        birth_year: s.birth_year,
-        subject_tags: s.subject_tags,
-        characteristics: s.characteristics,
-        gender: s.gender,
-        gender_display: this.genders[s.gender],
-        sex_at_birth: s.sex_at_birth,
-        sex_display: this.sexes[s.sex_at_birth],
-        height: s.height,
-        weight: s.weight,
-        created_at: s.created_at,
-        trashed: s.trashed,
-        trashed_at: s.trashed_at
-      })).filter(s => this.show_trashed || !s.trashed)
-    },
+    // subjectsMapped () {
+    //   return this.subjects.map(s => ({
+    //     id: s.id,
+    //     display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.birth_year})`,
+    //     name: s.name,
+    //     birth_year: s.birth_year,
+    //     subject_tags: s.subject_tags,
+    //     characteristics: s.characteristics,
+    //     gender: s.gender,
+    //     gender_display: this.genders[s.gender],
+    //     sex_at_birth: s.sex_at_birth,
+    //     sex_display: this.sexes[s.sex_at_birth],
+    //     height: s.height,
+    //     weight: s.weight,
+    //     created_at: s.created_at,
+    //     trashed: s.trashed,
+    //     trashed_at: s.trashed_at
+    //   })).filter(s => this.show_trashed || !s.trashed)
+    // },
     rightButtonCaption() {
       return this.imgs
         ? "Confirm"
@@ -491,11 +527,23 @@ export default {
     errorsConsole() {
       return this.errors;
     },
+    subject_search: {
+      get() {
+        return this.subject_query
+      },
+      set(value) {
+        if (value !== null) {
+          this.subject_query = value
+          this.subject_start = 0
+          this.loadSubjectsList(false)
+        }
+      }
+    }
   },
   async mounted() {
     apiInfo("You can now record a neutral pose different than the upright standing pose (e.g., sitting). Select 'Any pose' 'Advanced Settings'.", 8000);
     this.loadSession(this.$route.params.id)
-    this.loadSubjects()
+    // this.loadSubjects()
     if (this.$route.query.autoRecord) {
       this.onNext();
     }
@@ -503,25 +551,40 @@ export default {
     const res = await axios.get(`/sessions/${this.$route.params.id}/get_n_calibrated_cameras/`, {})
 
     this.n_calibrated_cameras = res.data.data
+    this.loadSubjectsList(false)
   },
   watch: {
-    subjects(new_val, old_val) {
-      // If no subjects, do nothing.
-      if (old_val.length === 0 & new_val.length === 0) {
-          return
-      // If loading first time and there are subjects, select first.
-      } if (old_val.length === 0 & new_val.length !== 0) {
-          this.subject = new_val[0]
-      // If there are more subjects now than before, that means a new one has been created. Select it.
-      } else if (old_val.length < new_val.length) {
-          const serializedArr1 = new Set(old_val.map(item => JSON.stringify(item)));
-
-          // Find the index by comparing serialized objects
-          this.subject = new_val[new_val.findIndex(item => !serializedArr1.has(JSON.stringify(item)))];
-      // Else, do nothing.
-      } else return
-
-    }
+    // subjects(new_val, old_val) {
+    //   // If no subjects, do nothing.
+    //   if (old_val.length === 0 && new_val.length === 0) {
+    //       return
+    //   // If loading first time and there are subjects, select first.
+    //   } if (old_val.length === 0 && new_val.length !== 0) {
+    //       this.subject = new_val[0]
+    //   // If there are more subjects now than before, that means a new one has been created. Select it.
+    //   } else if (old_val.length < new_val.length) {
+    //       const serializedArr1 = new Set(old_val.map(item => JSON.stringify(item)));
+    //
+    //       // Find the index by comparing serialized objects
+    //       this.subject = new_val[new_val.findIndex(item => !serializedArr1.has(JSON.stringify(item)))];
+    //   // Else, do nothing.
+    //   } else return
+    //
+    // },
+    // subject_search (newVal, oldVal) {
+    //   console.log('watch subject_search', newVal, oldVal)
+    //   this.subject_start = 0;
+    //   if (newVal) {
+    //   // this.loadSubjectsList(false, String(newVal))
+    //     this.loadSubjectsList(false)
+    //   }
+    // }
+    subject (newVal, oldVal) {
+      console.log('watch subject', newVal, oldVal)
+      if (newVal === null) {
+        this.clearSubjectSearch()
+      }
+    },
   },
   methods: {
     ...mapMutations("data", ["setStep4", "setStep3"]),
@@ -531,8 +594,54 @@ export default {
         this.formErrors[input] = state;
       },0)
     },
+    loadSubjectsList (append_result = false) {
+      console.log('loading subjects:', this.subject_search, ' - ', append_result)
+      console.log('subject=', this.subject)
+
+      this.subject_loading = true
+      let data = {
+        search: this.subject_search,
+        start: this.subject_start,
+        quantity: 40,
+        simple: 'true'
+      }
+      let res = axios.get('/subjects/', {params: data}).then((res) => {
+        if (append_result) {
+          this.loaded_subjects = [...this.loaded_subjects, ...res.data.subjects]
+        } else {
+          this.loaded_subjects = res.data.subjects
+        }
+        // this.subject_loading = false
+        this.subject_loading = false
+      }).catch((error) => {
+        this.subject_loading = false
+        apiError(error)
+      })
+
+    },
+    loadNextSubjectsListPage (isIntersecting) {
+      if (isIntersecting) {
+        this.loadSubjectsList(true)
+        this.subject_start += 40
+      }
+    },
+    clearSubjectSearch() {
+      this.subject_search = ""
+      this.subject_start = 0
+      this.loadSubjectsList(false)
+    },
+    submitAddSubject (data) {
+      console.log('submitAddSubject', data)
+      let obj = {
+        id: data.id,
+        display_name: `${data.name} (${data.weight} Kg, ${data.height} m, ${data.birth_year})`,
+      }
+      this.loaded_subjects.push(obj)
+      this.subject = obj
+    },
     reloadSubjects() {
-      this.loadSubjects()
+      console.log('reloading subjects')
+      // this.loadSubjects()
     },
     openNewSubjectPopup() {
         this.$refs.dialogRef.edit_dialog = true
