@@ -69,7 +69,8 @@ export default {
       "non-binary": "Non-Binary/Non-Conforming",
       "prefer-not-respond": "Prefer not to respond",
     },
-    tags: {},
+    subjectTags: {},
+    trialTags: {},
     isSyncDownloadAllowed: JSON.parse(localStorage.getItem("isSyncDownloadAllowed")),
     analysis: {}
   },
@@ -294,6 +295,9 @@ export default {
     },
     updateSubjectTags (state, tags) {
       state.subjectTags = tags;
+    },
+    updateTrialTags (state, tags) {
+      state.trialTags = tags;
     }
   },
   actions: {
@@ -524,6 +528,21 @@ export default {
 
       commit("updateSubjectTags", resultObject)
       this.subjectTags = resultObject
+    },
+    async loadTrialTags({ state, commit }) {
+      const response = await fetch('/tags/trialTags.json');
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      const resultObject = {};
+
+      data["trial_tags"].forEach(tag => {
+          resultObject[tag.value] = tag.label;
+      });
+
+      commit("updateTrialTags", resultObject)
+      this.trialTags = resultObject
     }
   }
 
