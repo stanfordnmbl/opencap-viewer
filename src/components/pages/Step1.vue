@@ -47,7 +47,7 @@
 
 <script>
 import { mapMutations, mapActions, mapState } from 'vuex'
-import { apiInfo } from "@/util/ErrorMessage.js";
+import { apiInfo, clearToastMessages} from "@/util/ErrorMessage.js";
 import MainLayout from '@/layout/MainLayout'
 
 export default {
@@ -62,7 +62,7 @@ export default {
     }
   },
   async mounted () {
-    // apiInfo("Please update the iOS app to build 1.6 (29), the previous release contained a bug.");
+    apiInfo("The iOS app is now available on the App Store. Please upgrade.", 20000, {text : "Go to App Store", onClick : () => {window.open("https://apps.apple.com/us/app/opencap/id1630513242", "_blank");}});
     if (this.$router.params != undefined) {
         await this.loadSession(this.$route.params.id)
     } else {
