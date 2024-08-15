@@ -454,6 +454,23 @@ export default {
   },
   methods: {
     ...mapActions('data', ['trashExistingSubject', 'restoreTrashedSubject']),
+    loadSubjectSessions (subject_id) {
+      this.sessions_loading = true
+      let data = {
+        start: this.session_start,
+        quantity: this.session_quantity,
+        subject_id: subject_id
+      }
+      let res = axios.post('/sessions/valid/', data).then(response => {
+        this.valid_sessions = response.data.sessions
+        this.session_total = response.data.total
+        this.session_loading = false
+      }).catch(error => {
+        apiError(error)
+        this.session_loading = false
+      })
+
+    },
     loadValidSubjects() {
       this.loading = true
       let data = {
