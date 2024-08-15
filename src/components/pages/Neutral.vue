@@ -689,6 +689,7 @@ export default {
         });
       } else {
         if (await this.$refs.observer.validate()) {
+          apiInfo("Recording...")
           this.lastPolledStatus = "";
           // Record press
           this.busy = true;
@@ -822,6 +823,7 @@ export default {
               res.data.status === "processing" &&
               res.data.status !== this.lastPolledStatus
             ) {
+              clearToastMessages();
               apiInfo("Processing: the subject can relax.", 5000);
             }
             this.lastPolledStatus = res.data.status;
