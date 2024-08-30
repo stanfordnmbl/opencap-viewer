@@ -350,7 +350,7 @@
         <div class="right d-flex flex-column">
             <div class="videos flex-grow-1 d-flex flex-column">
               <video v-for="(video, index) in videos" :key="`video-${index}`" :ref="`video-${index}`" muted
-              playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
+                  playsinline :src="video.media" crossorigin="anonymous" @ended="onVideoEnded(index)" />
             </div>
   
             <SpeedControl v-model="playSpeed" />
@@ -1119,7 +1119,7 @@
       async loadTrial(trial) {
         console.log('loadTrial')
         this.time = 0
-  
+
         if (!this.trialLoading) {
           this.frame = 0
           this.trial = null
@@ -1164,12 +1164,12 @@
             }
   
             this.videos = data.results.filter(element => element.tag == "video-sync")
-  
+
             if (this.videos.length === 0) {
               this.frame = 0
               this.time = 0
             }
-  
+
             if (this.frames.length > 0) {
               this.$nextTick(() => {
                 try {
@@ -1278,18 +1278,20 @@
                 }
   
                 this.onResize()
-  
+
                 // animate
   
                 function delay(time) {
                   return new Promise(resolve => setTimeout(resolve, time));
                 }
-  
-                delay(1000).then(() => {
+
+                delay(Math.trunc(10000 / navigator.connection.downlink)).then(() => {
                   this.togglePlay(true)
                 });
               })
             }
+
+            this.trialLoading = false  // Fix to unstuck trial loading in case of an issue
           } catch (error) {
             apiError(error)
             this.trialLoading = false
