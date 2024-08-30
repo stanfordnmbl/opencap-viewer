@@ -1285,7 +1285,14 @@
                   return new Promise(resolve => setTimeout(resolve, time));
                 }
 
-                delay(Math.trunc(10000 / navigator.connection.downlink)).then(() => {
+                let timeout = 2000
+                if (navigator.connection) {
+                  console.log('supported: connection', navigator.connection.downlink)
+                  timeout = Math.trunc(10000 / navigator.connection.downlink)
+                }
+
+                delay(timeout).then(() => {
+                  // The fixed number 5 is here as a warkaround for Safari
                   this.togglePlay(true)
                 });
               })
