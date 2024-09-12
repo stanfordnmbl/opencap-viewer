@@ -692,7 +692,7 @@ export default {
           if (this.n_calibrated_cameras < 1)
               apiError("No cameras have been calibrated. Please go back and calibrate your cameras.");
           else if (this.n_calibrated_cameras == 1)
-              apiError("There is only 1 calibrated camera, but >2 are necessary. Please go back and calibrate your cameras.");
+              apiError("There is only 1 calibrated camera, but at least 2 cameras are necessary. Please go back and calibrate your cameras.");
         } else {
           if (await this.$refs.observer.validate()) {
             apiInfo("Recording...")
