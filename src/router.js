@@ -5,11 +5,10 @@ import store from '@/store/store.js'
 import Login from '@/components/pages/Login'
 import Verify from '@/components/pages/Verify'
 import Register from '@/components/pages/Register'
-import Step1 from '@/components/pages/Step1'
-import Step2 from '@/components/pages/Step2'
-import Step3 from '@/components/pages/Step3'
-import Step4 from '@/components/pages/Step4'
-import Step5 from '@/components/pages/Step5'
+import ConnectDevices from '@/components/pages/ConnectDevices'
+import Calibration from '@/components/pages/Calibration'
+import Neutral from '@/components/pages/Neutral'
+import Session from '@/components/pages/Session'
 import SelectSession from '@/components/pages/SelectSession'
 import HelloWorld from '@/components/HelloWorld'
 import Dashboard from '@/components/pages/Dashboard'
@@ -54,34 +53,29 @@ var router = new Router({
       component: SelectSession
     },
     {
-      path: '/:id/step1',
-      name: 'Step1ForId',
-      component: Step1
+      path: '/:id/connect-devices',
+      name: 'ConnectDevicesForId',
+      component: ConnectDevices
     },
     {
-      path: '/step1',
-      name: 'Step1',
-      component: Step1
+      path: '/connect-devices',
+      name: 'ConnectDevices',
+      component: ConnectDevices
     },
     {
-      path: '/:id/step2',
-      name: 'Step2',
-      component: Step2
+      path: '/:id/calibration',
+      name: 'Calibration',
+      component: Calibration
     },
     {
-      path: '/:id/step3',
-      name: 'Step3',
-      component: Step3
-    },
-    {
-      path: '/:id/step4',
-      name: 'Step4',
-      component: Step4
+      path: '/:id/neutral',
+      name: 'Neutral',
+      component: Neutral
     },
     {
       path: '/session/:id',
       name: 'Session',
-      component: Step5
+      component: Session
     },
     {
       path: '/dashboard/:id',
@@ -130,15 +124,13 @@ const routesWithOutAuth = [
   'Dashboard',
   'AnalysisDashboard',
   'ProfilePage'
-  // 'Step4'
   
 ]
 
 const routesRequireSession = [
-  'Step1ForId',
-  'Step2',
-  'Step3',
-  'Step4'
+  'ConnectDevicesForId',
+  'Calibration',
+  'Neutral'
 ]
 
 const acceptedRoutes = [
@@ -147,11 +139,10 @@ const acceptedRoutes = [
   'Register',
   'License',
   'SelectSession',
-  'Step1',
-  'Step1ForId',
-  'Step2',
-  'Step3',
-  'Step4',
+  'ConnectDevices',
+  'ConnectDevicesForId',
+  'Calibration',
+  'Neutral',
   'Session',
   'Dashboard',
   'AnalysisDashboard',
@@ -172,9 +163,9 @@ router.beforeEach((to, from, next) => {
         next({ name: 'License' })
       }
 
-      // If there are no sessions and the next route requires at least one, go to step1 to create a session.
+      // If there are no sessions and the next route requires at least one, go to ConnectDevices to create a session.
       if (!store.state.data.session && routesRequireSession.includes(to.name)) {
-        next({ name: 'Step1' })
+        next({ name: 'ConnectDevices' })
       // If there are sessions, and the next route exist, go to it.
       } else if (acceptedRoutes.includes(to.name)) {
         next()

@@ -5,7 +5,7 @@
     :step="4"
     :rightDisabled="busy || disabledNextButton"
     :rightSpinner="busy && !imgs"
-    @left="$router.push(`/${session.id}/step2`)"
+    @left="$router.push(`/${session.id}/calibration`)"
     @right="onNext"
   >
     <v-card v-if="imgs" class="step-4-1 pa-2 d-flex flex-column">
@@ -371,7 +371,7 @@ import ExampleImage from "@/components/ui/ExampleImage";
 import DialogComponent from '@/components/ui/SubjectDialog.vue'
 
 export default {
-  name: "Step4",
+  name: "Neutral",
   components: {
     MainLayout,
     ExampleImage,
@@ -587,7 +587,7 @@ export default {
     },
   },
   methods: {
-    ...mapMutations("data", ["setStep4", "setStep3"]),
+    ...mapMutations("data", ["setNeutral", "setTrialId"]),
     ...mapActions("data", ["loadSubjects", "loadSession"]),
     isSomeInputInvalid(state, input) {
       setTimeout(() => {
@@ -688,74 +688,82 @@ export default {
           },
         });
       } else {
-        if (await this.$refs.observer.validate()) {
-          this.lastPolledStatus = "";
-          // Record press
-          this.busy = true;
-          this.setStep4({
-              subject: this.subject,
-            // identifier: this.identifier,
-            // weight: this.weight,
-            // height: this.height,
-            // sex: this.sex,
-            // gender: this.gender,
-            data_sharing: this.data_sharing,
-            scaling_setup: this.scaling_setup,
-            pose_model: this.pose_model,
-            framerate: this.framerate,
-            openSimModel: this.openSimModel,
-            augmenter_model: this.augmenter_model,
-            filter_frequency: this.filter_frequency,
-          });
-          try {
-            const resUpdate = await axios.get(
-              `/sessions/${this.session.id}/set_metadata/`,
-              {
-                params: {
-                  // subject_id: this.identifier,
-                  // subject_mass: this.weight,
-                  // subject_height: this.height,
-                  // subject_sex: this.sex,
-                  // subject_gender: this.gender,
-                  settings_data_sharing: this.data_sharing,
-                  settings_scaling_setup: this.scaling_setup,
-                  settings_pose_model: this.pose_model,
-                  settings_framerate: this.framerate,
-                  settings_session_name: this.sessionName,
-                  settings_openSimModel: this.openSimModel,
-                  settings_augmenter_model: this.augmenter_model,
-                  settings_filter_frequency: this.filter_frequency,            
-                },
-              }
-            );
-
-            const resSubject = await axios.get(
-                `/sessions/${this.session.id}/set_subject/`,
+        if (this.n_calibrated_cameras < 2) {
+          if (this.n_calibrated_cameras < 1)
+              apiError("No cameras have been calibrated. Please go back and calibrate your cameras.");
+          else if (this.n_calibrated_cameras == 1)
+              apiError("There is only 1 calibrated camera, but at least 2 cameras are necessary. Please go back and calibrate your cameras.");
+        } else {
+          if (await this.$refs.observer.validate()) {
+            apiInfo("Recording...")
+            this.lastPolledStatus = "";
+            // Record press
+            this.busy = true;
+            this.setNeutral({
+                subject: this.subject,
+              // identifier: this.identifier,
+              // weight: this.weight,
+              // height: this.height,
+              // sex: this.sex,
+              // gender: this.gender,
+              data_sharing: this.data_sharing,
+              scaling_setup: this.scaling_setup,
+              pose_model: this.pose_model,
+              framerate: this.framerate,
+              openSimModel: this.openSimModel,
+              augmenter_model: this.augmenter_model,
+              filter_frequency: this.filter_frequency,
+            });
+            try {
+              const resUpdate = await axios.get(
+                `/sessions/${this.session.id}/set_metadata/`,
                 {
-                    params: {
-                        subject_id: this.subject.id,
-                    }
+                  params: {
+                    // subject_id: this.identifier,
+                    // subject_mass: this.weight,
+                    // subject_height: this.height,
+                    // subject_sex: this.sex,
+                    // subject_gender: this.gender,
+                    settings_data_sharing: this.data_sharing,
+                    settings_scaling_setup: this.scaling_setup,
+                    settings_pose_model: this.pose_model,
+                    settings_framerate: this.framerate,
+                    settings_session_name: this.sessionName,
+                    settings_openSimModel: this.openSimModel,
+                    settings_augmenter_model: this.augmenter_model,
+                    settings_filter_frequency: this.filter_frequency,
+                  },
                 }
-            )
-            const res = await axios.get(
-              `/sessions/${this.session.id}/record/`,
-              {
-                params: {
-                  name: "neutral",
-                  subject_id: this.identifier,
-                  subject_mass: this.weight,
-                  subject_height: this.height,
-                  subject_sex: this.sex,
-                  subject_gender: this.gender,
-                  subject_data_sharing: this.data_sharing,
-                  subject_pose_model: this.pose_model,
-                },
-              }
-            );
-            this.setStep3(res.data.id); // sets trialID
-            this.pollStatus();
-          } catch (error) {
-            apiError(error);
+              );
+
+              const resSubject = await axios.get(
+                  `/sessions/${this.session.id}/set_subject/`,
+                  {
+                      params: {
+                          subject_id: this.subject.id,
+                      }
+                  }
+              )
+              const res = await axios.get(
+                `/sessions/${this.session.id}/record/`,
+                {
+                  params: {
+                    name: "neutral",
+                    subject_id: this.identifier,
+                    subject_mass: this.weight,
+                    subject_height: this.height,
+                    subject_sex: this.sex,
+                    subject_gender: this.gender,
+                    subject_data_sharing: this.data_sharing,
+                    subject_pose_model: this.pose_model,
+                  },
+                }
+              );
+              this.setTrialId(res.data.id);
+              this.pollStatus();
+            } catch (error) {
+              apiError(error);
+            }
           }
         }
       }
@@ -822,6 +830,7 @@ export default {
               res.data.status === "processing" &&
               res.data.status !== this.lastPolledStatus
             ) {
+              clearToastMessages();
               apiInfo("Processing: the subject can relax.", 5000);
             }
             this.lastPolledStatus = res.data.status;
