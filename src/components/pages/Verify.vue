@@ -95,10 +95,10 @@ export default {
           await this.verify(data)
 
           try {
-            await this.loadExistingSessions({reroute: true, quantity:20})      
+            await this.loadExistingSessions({reroute: true, quantity:20})
           } catch (error) {
             apiError(error)
-            this.$router.push({ name: 'Step1' })
+            this.$router.push({ name: 'ConnectDevices' })
           }
         } else {
           if (this.password) {

@@ -98,8 +98,8 @@ function apiSuccess (text) {
  * Shorthand for info toast message
  * @param {String} text - message text
  */
- function apiInfo (text, time=null) {
-  Vue.toasted.info(text, {duration: time})
+ function apiInfo (text, time=null, action={text : 'Close', onClick : (e, toastObject) => {toastObject.goAway(0);}}) {
+  Vue.toasted.info(text, {duration: time, action:action}, )
 }
 /**
  * Shorthand for info toast message

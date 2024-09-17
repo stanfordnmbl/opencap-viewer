@@ -41,6 +41,7 @@ export default {
     sex: 'woman',
     gender: 'woman',
     data_sharing: '',
+    scaling_setup: 'upright_standing_pose',
     pose_model: 'hrnet',
     framerate: 60,
     openSimModel: 'LaiUhlrich2022',
@@ -91,19 +92,16 @@ export default {
     setSession (state, session) {
       session.created_at = formatDate(session.created_at); 
       state.session = session;
-      const sessionIds = state.sessions.map(session => session.id);
-      if(!sessionIds.includes(session.id)){
-        state.sessions.unshift(session);
-      } else {
-        const index = state.sessions.findIndex(s => s.id === session.id);
-        state.sessions.splice(index, 1, session);
-      }
+      // const sessionIds = state.sessions.map(session => session.id);
+      // if(!sessionIds.includes(session.id)){
+      //   state.sessions.unshift(session);
+      // } else {
+      //   const index = state.sessions.findIndex(s => s.id === session.id);
+      //   state.sessions.splice(index, 1, session);
+      // }
     },
     setSessionId (state, id) {
-
-      state.session = {
-        id
-      }
+      state.session.id = id
     },
     setExistingSessions (state, sessions) {
 
@@ -134,6 +132,19 @@ export default {
         subjects[i].created_at = formatDate(subjects[i].created_at);
       }
       state.subjects = subjects
+    },
+    updateSubjects (state, subjects) {
+      let old_subject_ids = state.subjects.map(s => s.id);
+
+      for(let i = 0; i < subjects.length; i++) {
+        subjects[i].created_at = formatDate(subjects[i].created_at)
+        if(old_subject_ids.includes(subjects[i].id)) {
+          let index = old_subject_ids.indexOf(subjects[i].id);
+          state.subjects.splice(index, 1, subjects[i]);
+        } else {
+          state.subjects.push(subjects[i]);
+        }
+      }
     },
     setAnalysisFunctions(state, functions){
       state.analysisFunctions = functions.map((func) => (
@@ -206,18 +217,18 @@ export default {
         // Vue.set(state.analysisFunctions, index, analysisFunction);
       }
     },
-    setStep1 (state, { cameras }) {
+    setConnectDevices (state, { cameras }) {
       state.cameras = cameras
     },
-    setStep2 (state, { rows, cols, squareSize }) {
+    setCalibration (state, { rows, cols, squareSize }) {
       state.rows = rows
       state.cols = cols
       state.squareSize = squareSize
     },
-    setStep3 (state, trialId) {
+    setTrialId (state, trialId) {
       state.trialId = trialId
     },
-    setStep4 (state, { subject, data_sharing, pose_model, openSimModel, augmenter_model, filter_frequency }) {
+    setNeutral (state, { subject, data_sharing, scaling_setup, pose_model, openSimModel, augmenter_model, filter_frequency }) {
       // state.identifier = identifier
       // state.weight = weight
       // state.height = height
@@ -225,17 +236,18 @@ export default {
       // state.gender = gender
       state.subject = subject
       state.data_sharing = data_sharing
+      state.scaling_setup = scaling_setup
       state.pose_model = pose_model
       state.openSimModel = openSimModel
       state.augmenter_model = augmenter_model
       state.filter_frequency = filter_frequency
     },
-    setStep5 (state, { trialName }) {
+    setSessionStep5 (state, { trialName }) {
       state.trialName = trialName
     },
     clearAll (state) {
       // session
-      state.session = null
+      state.session = { trials: [] }
       // step 1
       state.cameras = 2
       // step 2
@@ -249,6 +261,7 @@ export default {
       state.sex = 'woman'
       state.gender = 'woman'
       state.data_sharing = ''
+      state.scaling_setup = 'upright_standing_pose'
       state.pose_model = 'openpose'
       state.openSimModel = 'LaiUhlrich2022'
       state.augmenter_model = 'v0.3'
@@ -324,7 +337,6 @@ export default {
       try {
         res = await axios.get(`/sessions/${sessionId}/`)
         commit('setSession', res.data)
-        console.log(res.data)
       } catch (e) {
         if (e.response.status === 401) {
           router.push({ name: 'Login' })
@@ -366,57 +378,108 @@ export default {
       commit('updateSession', res.data)
     },
     async loadExistingSessions ({ state, commit }, {reroute, quantity = -1, subject_id = null}) {
-      let update_sessions = false;
-      let data = {
-        quantity: quantity
-      }
-      if (subject_id) {
-        data.subject_id = subject_id
-        update_sessions = true;
-      }
+      console.log('loadExistingSessions', reroute, quantity, subject_id)
 
-      const res = await axios.post('/sessions/valid/', data)
-      if (update_sessions) {
-        commit('updateExistingSessions', res.data)
-      } else {
-        commit('setExistingSessions', res.data)
-      }
+      // let update_sessions = false;
+      // let data = {
+      //   quantity: quantity
+      // }
+      // if (subject_id) {
+      //   data.subject_id = subject_id
+      //   update_sessions = true;
+      // }
+      //
+      // // Experiments with partial loading
+      //
+      // // let start = 0
+      // // do {
+      // //   data.start = start
+      // //   data.quantity = 2
+      // //   let res = await axios.post('/sessions/valid/', data)
+      // //   console.log('loadExistingSessions', start, res.data)
+      // //   start += res.data.sessions.length
+      // // } while (start < res.data.total)
+      //
+      // let sessions = []
+      // data.start = 0
+      // data.quantity = 20
+      // let moreDataAvailable = true
+      //
+      // while (moreDataAvailable) {
+      //   let res = await axios.post('/sessions/valid/', data)
+      //   sessions = sessions.concat(res.data.sessions)
+      //   if (res.data.sessions.length < data.quantity) {
+      //     moreDataAvailable = false
+      //   } else {
+      //       data.start += data.quantity
+      //   }
+      // }
+      // console.log('loadExistingSessions!!!', sessions)
+      //
+      //
+      // // old code
+      //
+      // // const res = await axios.post('/sessions/valid/', data)
+      // if (update_sessions) {
+      //   commit('updateExistingSessions', sessions)
+      // } else {
+      //   commit('setExistingSessions', sessions)
+      // }
 
       if (reroute) {
         let institutionalUse = localStorage.getItem('institutional_use')
         if (institutionalUse === '' || institutionalUse === 'patient_care' || institutionalUse === 'sports_performance_assessment' || institutionalUse === 'use_in_company') {
           router.push({name: 'License'})
         } else {
-          if (state.sessions.length > 0) {
+          // if (state.sessions.length > 0) {
             router.push({ name: 'SelectSession' })
-          } else {
-            router.push({ name: 'Step1' })
-          }
+          // } else {
+          //   router.push({ name: 'ConnectDevices' })
+          // }
         }
       }
     },
     async loadSubjects({ state, commit }) {
       try {
-        const res = await axios.get('/subjects/');
-        const tagPromises = [];
+        let subjects = []
+        let start = 0
+        let quantity = 20
+        let moreDataAvailable = true
 
-        for (let i = 0; i < res.data.length; i++) {
-          const tagPromise = axios.get(`/subject-tags/${res.data[i].id}/get_tags_subject/`)
-            .then((tags) => {
-              res.data[i].subject_tags = tags.data.map(tag => tag.tag);
-            }).catch((error) => {
-              if (error.response && error.response.status === 404) {
-                console.error('Subject tags not found for the given ID:', error);
-              } else {
-                console.error('Error fetching subject tags:', error);
-              }
-            });
+        while (moreDataAvailable) {
+          let res = await axios.get('/subjects/', {
+            params: {
+              start: start,
+              quantity: quantity
+            }
+          })
 
-          tagPromises.push(tagPromise);
+          let tagPromises = []
+          for (let i = 0; i < res.data.length; i++) {
+            const tagPromise = axios.get(`/subject-tags/${res.data[i].id}/get_tags_subject/`)
+              .then((tags) => {
+                res.data[i].subject_tags = tags.data.map(tag => tag.tag);
+              }).catch((error) => {
+                if (error.response && error.response.status === 404) {
+                  console.error('Subject tags not found for the given ID:', error);
+                } else {
+                  console.error('Error fetching subject tags:', error);
+                }
+              });
+
+            tagPromises.push(tagPromise);
+          }
+
+          subjects = subjects.concat(res.data)
+          if (res.data.length < quantity) {
+            moreDataAvailable = false
+          } else {
+              start += quantity
+          }
         }
 
-        await Promise.all(tagPromises); // Wait for all tag promises to resolve
-        commit('setSubjects', res.data);
+        commit('setSubjects', subjects);
+
       } catch (error) {
         console.error('Error loading subjects:', error);
       }
