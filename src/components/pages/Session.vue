@@ -49,7 +49,10 @@
                               <v-list-item-title>Analysis</v-list-item-title>
                             </v-list-item>
   
-  
+                            <v-list-item link @click="addTagTrialDialog(t)">
+                              <v-list-item-title>Edit Tags</v-list-item-title>
+                            </v-list-item>
+
                               <v-dialog
                                       v-model="remove_dialog"
                                       v-click-outside="clickOutsideDialogTrialHideMenu"
@@ -397,6 +400,49 @@
             </v-card-text>
           </v-card>
         </v-dialog>
+
+              <v-dialog
+            v-model="trial_modify_tags"
+            max-width="500">
+        <v-card>
+          <v-card-text class="pt-4">
+            <v-row class="m-0">
+              <v-col cols="2">
+                <v-icon x-large color="orange">mdi-rename-box</v-icon>
+              </v-col>
+              <v-col cols="10">
+                <p v-if="session.trials[trial_modify_tags_index]?.status === 'processing' || session.trials[trial_modify_tags_index]?.status === 'uploading'" class="text-orange">
+                    You can't modify trial tags while it's being uploaded or processed. Please wait before attempting to modify the tags.
+                </p>
+                <p v-else>
+                  Insert the tags for trial {{session.trials[trial_modify_tags_index]?.name}}:
+                </p>
+                <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr_tag">
+                  <ValidationProvider v-slot="{ errors }" name="Trial tags">
+                  <v-select
+                      ref="trialTagsSelect"
+                      clearable
+                      multiple
+                      v-model="trialNewTags"
+                      item-title="text"
+                      item-value="value"
+                      label="Trial Tags"
+                      :items="tagsOptions"
+                      :error="errors.length > 0"
+                      :error-messages="errors[0]"
+                  ></v-select>
+                  </ValidationProvider>
+                  <v-spacer></v-spacer>
+                  <v-btn class="text-right" :disabled="trialNewTags.length === 0"
+                         @click="trial_modify_tags = false; modifyTagsTrial(session.trials[trial_modify_tags_index], trial_modify_tags_index, trialNewTags);">
+                      Apply Tags
+                  </v-btn>
+                </ValidationObserver>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
   
     <v-dialog
         v-model="showAnalysisDialog"
@@ -561,6 +607,8 @@
               submitted: false,
               trialName: '',
               trialNewName: '',
+              trialTags: [],
+              trialNewTags: [],
               statusPoll: null,
               downloading: false,
               dialog: null,
@@ -616,7 +664,10 @@
               n_videos_uploaded: 0,
   
               trial_rename_dialog: false,
-              trial_rename_index: 0
+              trial_rename_index: 0,
+
+              trial_modify_tags: false,
+              trial_modify_tags_index: 0,
           }
       },
       filters: {
@@ -629,7 +680,9 @@
             session: state => state.data.session,
             sessions: state => state.data.sessions,
             analysisFunctions: state => state.data.analysisFunctions,
-  
+
+            trialTagsList: state => state.data.trialTags,
+
             user_id: state => state.auth.user_id,
   
             // step Calibration data
@@ -672,10 +725,15 @@
             }
           }
         },
+        tagsOptions () {
+            return Object.entries(this.trialTagsList).map((s) => ({ text: s[1], value: s[0] }))
+        },
       },
     async mounted() {
       await this.loadSession(this.$route.params.id)
-  
+
+      this.loadTrialTags()
+
       // Check if something went wrong with loading session. Usually there was a redirect to Login page.
       if (this.session.id == undefined) {
         return
@@ -770,7 +828,7 @@
       ...mapActions('data', [
         'loadSession',
         'initSessionSameSetup',
-        'loadAnalysisFunctions', 'loadAnalysisFunctionsPending', 'loadAnalysisFunctionsStates']),
+        'loadAnalysisFunctions', 'loadAnalysisFunctionsPending', 'loadAnalysisFunctionsStates', 'loadTrialTags']),
       async changeState() {
         switch (this.state) {
           case 'ready': {
@@ -1063,11 +1121,34 @@
         this.trialNewName = trial.name;
         this.trial_rename_dialog = true;
       },
+      async addTagTrialDialog(trial) {
+        const index = this.session.trials.findIndex(x => x.id === trial.id)
+        this.trial_modify_tags_index = index;
+        this.trial_modify_tags = true;
+        // Load trial tags
+        const res = await axios.get(`/trial-tags/${trial.id}/get_tags_trial/`)
+        this.trialNewTags = []
+        res.data.forEach((tag) => {
+            this.trialNewTags.push(tag.tag)
+        });
+        console.log(res.data)
+        console.log(trial.id)
+      },
       async renameTrial(trial, index, trialNewName) {
         try {
           let oldName = trial.name
           console.log(trial.name + " will be renamed to " + trialNewName);
           const {data} = await axios.post(`/trials/${trial.id}/rename/`, {trialNewName});
+          await this.updateTrialWithData(trial, data.data);
+        } catch (error) {
+          apiError(error)
+        }
+      },
+      async modifyTagsTrial(trial, index, trialNewTags) {
+        try {
+          let oldTags = trial.tags
+          console.log(trial.tags + " will be replaced by " + trialNewTags)
+          const {data} = await axios.post(`/trials/${trial.id}/modifyTags/`, {trialNewTags});
           await this.updateTrialWithData(trial, data.data);
         } catch (error) {
           apiError(error)
