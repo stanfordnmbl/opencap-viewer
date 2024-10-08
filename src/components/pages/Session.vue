@@ -417,8 +417,8 @@
                 <p v-else>
                   Insert the tags for trial {{session.trials[trial_modify_tags_index]?.name}}:
                 </p>
-                <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr">
-                  <ValidationProvider rules="required" v-slot="{ errors }" name="Trial tags">
+                <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr_tag">
+                  <ValidationProvider v-slot="{ errors }" name="Trial tags">
                   <v-select
                       ref="trialTagsSelect"
                       clearable
