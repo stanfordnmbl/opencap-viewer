@@ -63,7 +63,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item link v-if="!item.trashed" v-on="on">
+                            <v-list-item link v-show="!item.trashed" v-on="on">
                               <v-list-item-title>Trash</v-list-item-title>
                             </v-list-item>
                           </template>
@@ -108,7 +108,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item link v-if="item.trashed" v-on="on">
+                            <v-list-item link v-show="item.trashed" v-on="on">
                               <v-list-item-title>Restore</v-list-item-title>
                             </v-list-item>
                           </template>
@@ -151,7 +151,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item link v-if="item.trashed" v-on="on">
+                            <v-list-item link v-show="item.trashed" v-on="on">
                               <v-list-item-title>Delete permanently</v-list-item-title>
                             </v-list-item>
                           </template>
@@ -195,7 +195,7 @@
                                 v-click-outside="clickOutsideDialogSubjectHideMenu"
                                 max-width="500">
                           <template v-slot:activator="{ on }">
-                            <v-list-item link v-if="!item.trashed & isSyncDownloadAllowed" v-on="on">
+                            <v-list-item link v-show="!item.trashed & isSyncDownloadAllowed" v-on="on">
                               <v-list-item-title>Download data (old)</v-list-item-title>
                             </v-list-item>
                           </template>
@@ -360,7 +360,6 @@ import { mapActions, mapState } from 'vuex'
 import axios from 'axios'
 import { apiInfo, apiError } from '@/util/ErrorMessage.js'
 import DialogComponent from '@/components/ui/SubjectDialog.vue'
-
 
 export default {
   components: {
