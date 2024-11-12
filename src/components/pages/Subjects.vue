@@ -31,7 +31,7 @@
                 disableItemsPerPage: true,
                 itemsPerPageOptions: [40]
               }"
-              height="80vh"
+              height="70vh"
               fixed-header
               single-select
               class="subjects-table mx-2 mb-4 flex-grow-1"
