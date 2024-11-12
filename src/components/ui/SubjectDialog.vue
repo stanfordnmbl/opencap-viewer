@@ -20,7 +20,7 @@
             :error-messages="formErrors.name"
           ></v-text-field>
 
-          <ValidationProvider rules="required|weightRule" v-slot="{ errors }" name="Weight" :immediate="true">
+          <ValidationProvider rules="required|weightRule" v-slot="{ errors }" name="Weight" :immediate="false">
             <v-text-field
               v-model="edited_subject.weight"
               label="Weight (kg)"
@@ -32,7 +32,7 @@
             ></v-text-field>
           </ValidationProvider>
 
-          <ValidationProvider rules="required|heightRule" v-slot="{ errors }" name="Height" :immediate="true">
+          <ValidationProvider rules="required|heightRule" v-slot="{ errors }" name="Height" :immediate="false">
             <v-text-field
               v-model="edited_subject.height"
               label="Height (m)"
@@ -44,7 +44,7 @@
             ></v-text-field>
           </ValidationProvider>
 
-          <ValidationProvider rules="required|birthYearRule" v-slot="{ errors }" name="Birth Year" :immediate="true">
+          <ValidationProvider rules="required|birthYearRule" v-slot="{ errors }" name="Birth Year" :immediate="false">
             <v-text-field
               v-model="edited_subject.birth_year"
               label="Birth year (yyyy)"
@@ -56,7 +56,7 @@
             ></v-text-field>
           </ValidationProvider>
 
-          <ValidationProvider rules="required|subjectTagsRule" v-slot="{ errors }" name="Subject Tags" :immediate="true">
+          <ValidationProvider rules="required|subjectTagsRule" v-slot="{ errors }" name="Subject Tags" :immediate="false">
             <v-select
                 ref="subjectTagsSelect"
                 clearable
