@@ -112,6 +112,7 @@
                 <v-btn class="w-100 mt-4" :to="{ name: 'SelectSession' }">Back to session list
                   </v-btn>
 
+                <LinearChart ref="linearChart" />
                 <v-btn class="w-100 mt-4" @click="onResetZoom">
                   Reset Zoom
                 </v-btn>
@@ -304,6 +305,9 @@ export default {
             console.error(error);
           });
        },
+        resetZoom() {
+          this.$refs.linearChart.onResetZoom();
+        },
 
         // onSessionSelected(sessionName) {
         //   console.log(sessionName)
