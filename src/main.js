@@ -47,11 +47,14 @@ extend('alpha_dash_custom', {
   message: 'Only alphanumeric, hyphen and underscore characters allowed.'
 })
 extend('unique_trial_name', {
-  validate (value, { trials }) {
+  validate (value, { trials, ignore_name }) {
     let trial_names = trials.map(trial => trial.name)
+    if (ignore_name && value === ignore_name) {
+      return true
+    }
     return trial_names.indexOf(value) === -1
   },
-  params: ['trials'],
+  params: ['trials', 'ignore_name'],
   message: 'This trial name cannot be used.'
 })
 
