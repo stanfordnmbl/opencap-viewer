@@ -46,6 +46,15 @@ extend('alpha_dash_custom', {
   },
   message: 'Only alphanumeric, hyphen and underscore characters allowed.'
 })
+extend('unique_trial_name', {
+  validate (value, { trials }) {
+    let trial_names = trials.map(trial => trial.name)
+    return trial_names.indexOf(value) === -1
+  },
+  params: ['trials'],
+  message: 'This trial name cannot be used.'
+})
+
 Vue.component("ValidationProvider", ValidationProvider);
 Vue.component("ValidationObserver", ValidationObserver);
 
