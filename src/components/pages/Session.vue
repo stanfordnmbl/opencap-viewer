@@ -4,7 +4,7 @@
   
             <ValidationObserver tag="div" class="d-flex flex-column" ref="observer" v-slot="{ invalid }">
   
-                <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
+                <ValidationProvider :rules="{required:true, alpha_dash_custom:true, unique_trial_name:[session.trials]}" v-slot="{ errors }" name="Trial name">
   
                     <v-text-field v-show="show_controls" v-model="trialName" label="Trial name" class="flex-grow-0"
                         :disabled="state !== 'ready'" dark :error="errors.length > 0" :error-messages="errors[0]" />
@@ -380,7 +380,7 @@
                     Insert a new name for trial {{session.trials[trial_rename_index]?.name}}:
                   </p>
                   <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr" v-slot="{ invalid }">
-                    <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
+                    <ValidationProvider :rules="{required:true, alpha_dash_custom:true, unique_trial_name:[session.trials, session.trials[trial_rename_index]?.name]}" v-slot="{ errors }" name="Trial name">
   
                         <v-text-field v-model="trialNewName" label="Trial new name" class="flex-grow-0"
                             :disabled="state !== 'ready' || session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'"
