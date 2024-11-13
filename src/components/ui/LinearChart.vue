@@ -273,7 +273,13 @@ export default {
       // document.getElementById("chart").style.display = "block";
 
 
-    }
+    },
+    onResetZoom() {
+        const chart = this.$refs.chartRef.getCurrentChart();
+        if (chart) {
+          chart.resetZoom();
+        }
+    },
   }
 };
 </script>

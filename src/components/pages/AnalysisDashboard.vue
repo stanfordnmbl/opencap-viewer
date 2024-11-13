@@ -110,7 +110,23 @@
 
 
                 <v-btn class="w-100 mt-4" :to="{ name: 'SelectSession' }">Back to session list
+                  </v-btn>
+
+                <v-btn class="w-100 mt-4" @click="onResetZoom">
+                  Reset Zoom
                 </v-btn>
+
+                <icon-tooltip
+                  tooltip-text="
+                      Zoom instructions:</br>
+                      - <b>Zoom</b>: Click and Drag over a zone.</br>
+                      - <b>Move</b>: CTRL + Click and move mouse.</br>
+                      - <b>Zoom on X</b>: Mouse wheel on X axis.</br>
+                      - <b>Zoom on Y</b>: Mouse wheel on Y axis.</br>
+                  "
+                  iconClass="fas fa-question-circle"
+                  >
+                </icon-tooltip>
 
               </div>
             </div>
@@ -135,6 +151,7 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import ScalarPlot from '@/components/ui/ScalarPlot.vue'
 import ScalarValue from '@/components/ui/ScalarValue.vue'
 import LinearChart from '@/components/ui/LinearChart.vue'
+import IconTooltip from '@/components/ui/IconTooltip.vue';
 
 import {
   Chart as ChartJS,
@@ -165,6 +182,7 @@ export default {
         ScalarPlot,
         ScalarValue,
         LinearChart,
+        IconTooltip,
     },
     data() {
       return {
