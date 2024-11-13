@@ -419,7 +419,7 @@
                 </p>
                 <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr_tag">
                   <ValidationProvider v-slot="{ errors }" name="Trial tags">
-                  <v-select
+                  <v-autocomplete
                       ref="trialTagsSelect"
                       clearable
                       multiple
@@ -430,7 +430,7 @@
                       :items="tagsOptions"
                       :error="errors.length > 0"
                       :error-messages="errors[0]"
-                  ></v-select>
+                  ></v-autocomplete>
                   </ValidationProvider>
                   <v-spacer></v-spacer>
                   <v-btn class="text-right" :disabled="trialNewTags.length === 0"
