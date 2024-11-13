@@ -57,7 +57,7 @@
           </ValidationProvider>
 
           <ValidationProvider rules="required|subjectTagsRule" v-slot="{ errors }" name="Subject Tags" :immediate="false">
-            <v-select
+            <v-autocomplete
                 ref="subjectTagsSelect"
                 clearable
                 multiple
@@ -68,7 +68,7 @@
                 :items="tagsOptions"
                 :error="errors.length > 0"
                 :error-messages="errors[0]"
-            ></v-select>
+            ></v-autocomplete>
           </ValidationProvider>
 
           <v-select
