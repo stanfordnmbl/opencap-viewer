@@ -112,6 +112,10 @@
                 <v-btn class="w-100 mt-4" :to="{ name: 'SelectSession' }">Back to session list
                 </v-btn>
 
+                <v-btn class="w-100 mt-4" @click="$router.push({ name: 'Session', params: { id: session_selected.id } })">
+                  Go to Visualizer
+                </v-btn>
+
               </div>
             </div>
 
