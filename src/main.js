@@ -55,7 +55,7 @@ extend('unique_trial_name', {
     return trial_names.indexOf(value) === -1
   },
   params: ['trials', 'ignore_name'],
-  message: 'This trial name cannot be used.'
+  message: 'A trial with this name already exists in the session. Please choose a different name.'
 })
 
 Vue.component("ValidationProvider", ValidationProvider);
