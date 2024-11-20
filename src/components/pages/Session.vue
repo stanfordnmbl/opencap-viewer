@@ -430,6 +430,8 @@
                       :items="tagsOptions"
                       :error="errors.length > 0"
                       :error-messages="errors[0]"
+                      :search-input.sync="tag_search_input"
+                      @change="tag_search_input = ''"
                   ></v-autocomplete>
                   </ValidationProvider>
                   <v-spacer></v-spacer>
@@ -612,6 +614,8 @@
               statusPoll: null,
               downloading: false,
               dialog: null,
+
+              tag_search_input: '',
   
               showArchiveDialog: false,
               isArchiveInProgress: false,
