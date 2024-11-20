@@ -112,22 +112,22 @@
                 <v-btn class="w-100 mt-4" :to="{ name: 'SelectSession' }">Back to session list
                   </v-btn>
 
-                <LinearChart ref="linearChart" />
-                <v-btn class="w-100 mt-4" @click="onResetZoom">
-                  Reset Zoom
-                </v-btn>
+<!--                <LinearChart ref="linearChart" />-->
+<!--                <v-btn class="w-100 mt-4" @click="onResetZoom">-->
+<!--                  Reset Zoom-->
+<!--                </v-btn>-->
 
-                <icon-tooltip
-                  tooltip-text="
-                      Zoom instructions:</br>
-                      - <b>Zoom</b>: Click and Drag over a zone.</br>
-                      - <b>Move</b>: CTRL + Click and move mouse.</br>
-                      - <b>Zoom on X</b>: Mouse wheel on X axis.</br>
-                      - <b>Zoom on Y</b>: Mouse wheel on Y axis.</br>
-                  "
-                  iconClass="fas fa-question-circle"
-                  >
-                </icon-tooltip>
+<!--                <icon-tooltip-->
+<!--                  tooltip-text="-->
+<!--                      Zoom instructions:</br>-->
+<!--                      - <b>Zoom</b>: Click and Drag over a zone.</br>-->
+<!--                      - <b>Move</b>: CTRL + Click and move mouse.</br>-->
+<!--                      - <b>Zoom on X</b>: Mouse wheel on X axis.</br>-->
+<!--                      - <b>Zoom on Y</b>: Mouse wheel on Y axis.</br>-->
+<!--                  "-->
+<!--                  iconClass="fas fa-question-circle"-->
+<!--                  >-->
+<!--                </icon-tooltip>-->
 
               </div>
             </div>

@@ -1,6 +1,24 @@
 <template>
   <div class="linear-chart">
       <div class="linear-chart-toolbar">
+        <div style="margin-right: 1rem; margin-top: -15px;">
+        <v-btn class="w-100 mt-4" @click="onResetZoom">
+                  Reset Zoom
+                </v-btn>
+        </div><div style="margin-right: 1rem;">
+                <icon-tooltip
+                  tooltip-text="
+                      Zoom instructions:</br>
+                      - <b>Zoom</b>: Click and Drag over a zone.</br>
+                      - <b>Move</b>: CTRL + Click and move mouse.</br>
+                      - <b>Zoom on X</b>: Mouse wheel on X axis.</br>
+                      - <b>Zoom on Y</b>: Mouse wheel on Y axis.</br>
+                  "
+                  iconClass="fas fa-question-circle"
+                  >
+                </icon-tooltip>
+        </div>
+        <div style="width: 320px;">
         <v-select
           v-model="y_selected"
           @change="drawChart"
@@ -11,7 +29,7 @@
           <template v-slot:selection="{ item, index }">
             <span v-if="index === 0">{{ y_selected.length }} items selected</span>
           </template>
-        </v-select>
+        </v-select></div>
       </div>
 
     <div class="content-chart" style="width: 100%;background-color: black;position: relative;top: 0px;">
@@ -22,6 +40,10 @@
         style="position: relative; width: 100%; height: 100%; background-color: black;"
         ref="chartRef"
       />
+    </div>
+
+    <div>
+
     </div>
   </div>
 </template>
@@ -65,6 +87,7 @@ export default {
   name: "linear-chart",
   components: {
     LineChartGenerator,
+    IconTooltip,
   },
   data() {
     return {
@@ -290,13 +313,14 @@ export default {
 }
 
 .linear-chart-toolbar {
-  width: 300px;
+  width: 500px;
   height: 10px;
   position: relative;
   left: 100%;
   top: -30px;
-  margin-left: -320px;
+  margin-left: -520px;
   z-index: 1;
   background: black;
+  display: flex;
 }
 </style>
