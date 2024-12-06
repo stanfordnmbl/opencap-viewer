@@ -112,6 +112,10 @@
                 <v-btn class="w-100 mt-4" :to="{ name: 'SelectSession' }">Back to session list
                 </v-btn>
 
+                <v-btn class="w-100 mt-4" @click="$router.push({ name: 'Session', params: { id: session_selected.id } })">
+                  Go to Visualizer
+                </v-btn>
+
               </div>
             </div>
 
@@ -135,6 +139,7 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import ScalarPlot from '@/components/ui/ScalarPlot.vue'
 import ScalarValue from '@/components/ui/ScalarValue.vue'
 import LinearChart from '@/components/ui/LinearChart.vue'
+import IconTooltip from '@/components/ui/IconTooltip.vue';
 
 import {
   Chart as ChartJS,
@@ -165,6 +170,7 @@ export default {
         ScalarPlot,
         ScalarValue,
         LinearChart,
+        IconTooltip,
     },
     data() {
       return {

@@ -141,7 +141,7 @@
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item link v-if="!item.trashed" v-on="{
+                    <v-list-item link v-show="!item.trashed" v-on="{
                           ...on,
                           click: (e) => { on.click(e); item.isMenuOpen = false; remove_dialog = true; }
                         }">
@@ -189,7 +189,7 @@
                         v-click-outside="clickOutsideDialogSessionHideMenu"
                         max-width="500">
                   <template v-slot:activator="{ on }">
-                    <v-list-item link v-if="item.trashed" v-on="{
+                    <v-list-item link v-show="item.trashed" v-on="{
                           ...on,
                           click: (e) => { on.click(e); item.isMenuOpen = false; restore_dialog = true; }
                         }">

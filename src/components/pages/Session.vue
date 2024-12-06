@@ -58,7 +58,7 @@
                                       v-click-outside="clickOutsideDialogTrialHideMenu"
                                       max-width="500">
                                 <template v-slot:activator="{ on }">
-                                  <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item link v-show="!t.trashed" v-on="on">
                                     <v-list-item-title>Trash</v-list-item-title>
                                   </v-list-item>
                                 </template>
@@ -102,7 +102,7 @@
                                       v-click-outside="clickOutsideDialogTrialHideMenu"
                                       max-width="500">
                                 <template v-slot:activator="{ on }">
-                                  <v-list-item link v-if="t.trashed" v-on="on">
+                                  <v-list-item link v-show="t.trashed" v-on="on">
                                     <v-list-item-title>Restore</v-list-item-title>
                                   </v-list-item>
                                 </template>
@@ -144,7 +144,7 @@
                                       v-click-outside="clickOutsideDialogTrialHideMenu"
                                       max-width="500">
                                 <template v-slot:activator="{ on }">
-                                  <v-list-item link v-if="!t.trashed" v-on="on">
+                                  <v-list-item link v-show="!t.trashed" v-on="on">
                                     <v-list-item-title >Delete</v-list-item-title>
                                   </v-list-item>
                                 </template>
@@ -380,7 +380,7 @@
                     Insert a new name for trial {{session.trials[trial_rename_index]?.name}}:
                   </p>
                   <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr" v-slot="{ invalid }">
-                    <ValidationProvider rules="required|alpha_dash_custom" v-slot="{ errors }" name="Trial name">
+                    <ValidationProvider :rules="{required:true, alpha_dash_custom:true, unique_trial_name:[session.trials, session.trials[trial_rename_index]?.name]}" v-slot="{ errors }" name="Trial name">
   
                         <v-text-field v-model="trialNewName" label="Trial new name" class="flex-grow-0"
                             :disabled="state !== 'ready' || session.trials[trial_rename_index]?.status === 'processing' || session.trials[trial_rename_index]?.status === 'uploading'"
@@ -419,7 +419,7 @@
                 </p>
                 <ValidationObserver tag="div" class="d-flex flex-column" ref="observer_tr_tag">
                   <ValidationProvider v-slot="{ errors }" name="Trial tags">
-                  <v-select
+                  <v-autocomplete
                       ref="trialTagsSelect"
                       clearable
                       multiple
@@ -430,7 +430,9 @@
                       :items="tagsOptions"
                       :error="errors.length > 0"
                       :error-messages="errors[0]"
-                  ></v-select>
+                      :search-input.sync="tag_search_input"
+                      @change="tag_search_input = ''"
+                  ></v-autocomplete>
                   </ValidationProvider>
                   <v-spacer></v-spacer>
                   <v-btn class="text-right" :disabled="trialNewTags.length === 0"
@@ -612,6 +614,8 @@
               statusPoll: null,
               downloading: false,
               dialog: null,
+
+              tag_search_input: '',
   
               showArchiveDialog: false,
               isArchiveInProgress: false,

@@ -46,6 +46,18 @@ extend('alpha_dash_custom', {
   },
   message: 'Only alphanumeric, hyphen and underscore characters allowed.'
 })
+extend('unique_trial_name', {
+  validate (value, { trials, ignore_name }) {
+    let trial_names = trials.map(trial => trial.name)
+    if (ignore_name && value === ignore_name) {
+      return true
+    }
+    return trial_names.indexOf(value) === -1
+  },
+  params: ['trials', 'ignore_name'],
+  message: 'A trial with this name already exists in the session. Please choose a different name.'
+})
+
 Vue.component("ValidationProvider", ValidationProvider);
 Vue.component("ValidationObserver", ValidationObserver);
 

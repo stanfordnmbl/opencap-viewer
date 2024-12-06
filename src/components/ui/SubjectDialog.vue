@@ -57,7 +57,7 @@
           </ValidationProvider>
 
           <ValidationProvider rules="required|subjectTagsRule" v-slot="{ errors }" name="Subject Tags" :immediate="false">
-            <v-select
+            <v-autocomplete
                 ref="subjectTagsSelect"
                 clearable
                 multiple
@@ -68,7 +68,9 @@
                 :items="tagsOptions"
                 :error="errors.length > 0"
                 :error-messages="errors[0]"
-            ></v-select>
+                :search-input.sync="tag_search_input"
+                @change="tag_search_input = ''"
+            ></v-autocomplete>
           </ValidationProvider>
 
           <v-select
@@ -165,6 +167,7 @@ export default {
     data () {
         return {
             rules,
+            tag_search_input: '',
             edit_dialog: false,
             edited_subject: {
                 id: "",
