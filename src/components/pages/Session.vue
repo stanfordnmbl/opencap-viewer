@@ -320,7 +320,7 @@
                       Download data (old)
                   </v-btn>
   
-                  <v-btn small class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
+                  <v-btn small class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id, trialId: trial.name  } })">
                       Dashboard kinematics
                   </v-btn>
   
