@@ -450,6 +450,7 @@ export default {
         done: "Confirm",
         error: "Re-record",
         stopped: "Processing",
+        processing: "Processing",
       },
       checkboxRule: (v) => !!v || 'The subject must agree to continue!',
 
