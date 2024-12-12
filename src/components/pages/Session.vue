@@ -693,6 +693,7 @@
             rows: state => state.data.rows,
             cols: state => state.data.cols,
             squareSize: state => state.data.squareSize,
+            placement: state => state.data.placement,
   
             // step Neutral data
             identifier: state => state.data.identifier,
