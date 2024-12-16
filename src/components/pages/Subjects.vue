@@ -598,7 +598,7 @@ export default {
     async permanentRemoveSubject (id) {
       try {
         await axios.post('/subjects/' + id + '/permanent_remove/')
-        this.loadSubjects()
+        this.loadValidSubjects()
       } catch (error) {
         apiError(error)
       }
