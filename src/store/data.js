@@ -31,6 +31,7 @@ export default {
     rows: 4,
     cols: 5,
     squareSize: 35,
+    placement: 'Perpendicular',
     // step 3
     trialId: '',
 
@@ -220,10 +221,11 @@ export default {
     setConnectDevices (state, { cameras }) {
       state.cameras = cameras
     },
-    setCalibration (state, { rows, cols, squareSize }) {
+    setCalibration (state, { rows, cols, squareSize, placement }) {
       state.rows = rows
       state.cols = cols
       state.squareSize = squareSize
+      state.placement = placement
     },
     setTrialId (state, trialId) {
       state.trialId = trialId
