@@ -189,20 +189,7 @@ export default {
    },
   // This function is executed once the page has been loaded.
   created: function () {
-      // Indicates if the current logged in user owns the session.
-      this.session_owned = false
 
-      // If the user is logged in, select session from list of sessions.
-      if(this.loggedIn) {
-        // If a session id has been passed as a parameter, set it as the default session.
-        this.sessionsIds.forEach(sessionId => {
-          if (sessionId.includes(this.$route.params.id)) {
-            this.session_selected = sessionId;
-            this.onSessionSelected(this.session_selected);
-            this.session_owned = true
-          }
-        });
-      }
   },
   methods: {
     ...mapActions('data', ['loadSession']),
@@ -521,6 +508,7 @@ export default {
     return {
       current_session_id: "",
       session_selected: "",
+      session_owned: false,
       trial_selected: "",
       trial_names: [],
       trial_ids: [],
@@ -651,7 +639,6 @@ export default {
         return value !== "";
       });
       return filtered_sessions;
-
     },
     sessionsIds() {
       var result_sessions = this.sessions.map(function (obj) {
@@ -677,14 +664,32 @@ export default {
     }
   },
   async mounted () {
-    // Set session as current session.
-    this.current_session_id = this.$route.params.id;
-    // Show spinner and hide chart until finished.
-    document.getElementById("spinner-layer").style.display = "block";
-    document.getElementById("chart").style.display = "None";
+      // Set session as current session.
+      this.current_session_id = this.$route.params.id;
 
-    // If not logged in, load session from params and show trials.
-      await this.loadSession(this.$route.params.id)
+      // First check ownership.
+      // Indicates if the current logged in user owns the session.
+      this.session_owned = false
+
+      // If the user is logged in, select session from list of sessions.
+      if(this.loggedIn) {
+        // If a session id has been passed as a parameter, set it as the default session.
+        this.sessionsIds.forEach(sessionId => {
+          if (sessionId.includes(this.current_session_id)) {
+            this.session_selected = sessionId;
+            this.onSessionSelected(this.session_selected);
+            this.session_owned = true
+          }
+        });
+      }
+
+      // Show spinner and hide chart until finished.
+      document.getElementById("spinner-layer").style.display = "block";
+      document.getElementById("chart").style.display = "None";
+
+      // If not logged in, load session from params and show trials.
+      if (this.$route.params.id)
+        await this.loadSession(this.$route.params.id)
 
       var trials = this.session['trials'];
       // Filter trials by name.
@@ -696,8 +701,11 @@ export default {
             this.trial_names.push(element.name);
             this.trial_ids.push(element.id)
           });
-          this.trial_selected = this.trial_names[0];
-
+          if (this.$route.params.trialId && this.trial_names.includes(this.$route.params.trialId)){
+            this.trial_selected = this.$route.params.trialId;
+          } else {
+            this.trial_selected = this.trial_names[0];
+          }
           // Load data from this trial.
           this.onTrialSelected(this.trial_selected);
 
