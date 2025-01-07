@@ -856,23 +856,38 @@
                 // add to the list
                 this.trialInProcess = res.data
                 this.addTrial(this.trialInProcess)
-  
-  
+
+                // Get n_cameras_connected.
+                const res_status = await axios.get(`/sessions/${this.session.id}/status/`, {})
+                this.n_videos_uploaded = res_status.data.n_videos_uploaded
+                this.n_cameras_connected = res_status.data.n_cameras_connected
+
+                // If no calibrated cameras...
+                if (this.n_calibrated_cameras === 0)
+                  throw new Error("There are no calibrated cameras for this trial.");
+
+                // Check if the appropriate number of cameras is connected.
+                const startTime = Date.now();
+                while (this.n_cameras_connected !== this.n_calibrated_cameras) {
+                    console.log("WAITING CAMERA CONNECTION...")
+                    if (Date.now() - startTime > 5000) { // 5-second timeout
+                        throw new Error("Connected cameras do not match calibrated cameras. Timeout while waiting for cameras to connect.");
+                    }
+
+                    // Retry fetching the status
+                    await new Promise(r => setTimeout(r, 500)); // Wait before retrying
+                    const retryRes = await axios.get(`/sessions/${this.session.id}/status/`, {});
+                    this.n_cameras_connected = retryRes.data.n_cameras_connected;
+                }
+
+                // Start recording timer.
                 this.recordingStarted = moment()
                 this.recordingTimePassed = 0
                 this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
-  
-                this.state = 'recording'
-  
-                // Wait for cameras to start actually recording.
-                await new Promise(r => setTimeout(r, 1500));
-  
-                // Get n_cameras_connected.
-                const res_status = await axios.get(`/sessions/${this.session.id}/status/`, {})
-  
-                this.n_videos_uploaded = res_status.data.n_videos_uploaded
-                this.n_cameras_connected = res_status.data.n_cameras_connected
-  
+
+                // Transition to recording state
+                this.state = 'recording';
+
               } catch (error) {
                 apiError(error)
               }
