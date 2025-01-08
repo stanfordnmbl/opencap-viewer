@@ -866,11 +866,19 @@
                 if (this.n_calibrated_cameras === 0)
                   throw new Error("There are no calibrated cameras for this trial.");
 
+                // Transition to recording state
+                this.state = 'recording';
+
                 // Check if the appropriate number of cameras is connected.
                 const startTime = Date.now();
                 while (this.n_cameras_connected !== this.n_calibrated_cameras) {
                     console.log("WAITING CAMERA CONNECTION...")
                     if (Date.now() - startTime > 5000) { // 5-second timeout
+                        const res_stop = await axios.get(`/sessions/${this.session.id}/stop/`, {})
+                        const res_cancel = await axios.get(`/sessions/${this.session.id}/cancel_trial/`, {})
+                        this.cancelPoll()
+                        this.state = 'ready'
+                        this.trialInProcess.status = "error"
                         throw new Error("Connected cameras do not match calibrated cameras. Timeout while waiting for cameras to connect.");
                     }
 
@@ -884,9 +892,6 @@
                 this.recordingStarted = moment()
                 this.recordingTimePassed = 0
                 this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
-
-                // Transition to recording state
-                this.state = 'recording';
 
               } catch (error) {
                 apiError(error)
