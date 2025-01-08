@@ -548,7 +548,7 @@
   import momentDurationFormatSetup from 'moment-duration-format'
   import axios from 'axios'
   import { mapState, mapMutations, mapActions } from 'vuex'
-  import { apiError, apiErrorRes, apiSuccess } from '@/util/ErrorMessage.js'
+  import { apiError, apiErrorRes, apiSuccess, playSuccessSound } from '@/util/ErrorMessage.js'
   import Status from '@/components/ui/Status'
   import * as THREE from 'three'
   import * as THREE_OC from '@/orbitControls'
@@ -893,6 +893,8 @@
                 this.recordingTimePassed = 0
                 this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
 
+                // Play sound indicating the subject can start motion.
+                playSuccessSound()
               } catch (error) {
                 apiError(error)
               }
