@@ -548,7 +548,8 @@
   import momentDurationFormatSetup from 'moment-duration-format'
   import axios from 'axios'
   import { mapState, mapMutations, mapActions } from 'vuex'
-  import { apiError, apiErrorRes, apiSuccess, playSuccessSound } from '@/util/ErrorMessage.js'
+  import { apiError, apiErrorRes, apiSuccess } from '@/util/ErrorMessage.js'
+  import { playRecordingSound, playRecordingFinishedSound } from "@/util/SoundMessage.js";
   import Status from '@/components/ui/Status'
   import * as THREE from 'three'
   import * as THREE_OC from '@/orbitControls'
@@ -894,7 +895,7 @@
                 this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
 
                 // Play sound indicating the subject can start motion.
-                playSuccessSound()
+                playRecordingSound()
               } catch (error) {
                 apiError(error)
               }
@@ -909,7 +910,10 @@
   
             try {
               const res = await axios.get(`/sessions/${this.session.id}/stop/`, {})
-  
+
+              // Play sound indicating the subject can stop motion.
+              playRecordingFinishedSound();
+
               this.trialInProcess.status = res.data.status
               this.state = 'processing'
   
