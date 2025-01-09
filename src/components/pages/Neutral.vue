@@ -365,7 +365,8 @@
 <script>
 import axios from "axios";
 import { mapMutations, mapActions, mapState } from "vuex";
-import { apiError, apiSuccess, apiErrorRes, apiWarning, apiInfo, clearToastMessages, playSuccessSound } from "@/util/ErrorMessage.js";
+import { apiError, apiSuccess, apiErrorRes, apiWarning, apiInfo, clearToastMessages } from "@/util/ErrorMessage.js";
+import { playNeutralFinishedSound } from "@/util/SoundMessage.js";
 import MainLayout from "@/layout/MainLayout";
 import ExampleImage from "@/components/ui/ExampleImage";
 import DialogComponent from '@/components/ui/SubjectDialog.vue'
@@ -832,7 +833,7 @@ export default {
             ) {
               clearToastMessages();
               apiInfo("Processing: the subject can relax.", 5000);
-              playSuccessSound()
+              playNeutralFinishedSound()
             }
             this.lastPolledStatus = res.data.status;
             window.setTimeout(this.pollStatus, 1000);

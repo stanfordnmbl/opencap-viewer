@@ -124,13 +124,6 @@ function clearToastMessages() {
     Vue.toasted.clear()
 }
 
-function playSuccessSound() {
-  const audio = new Audio('/sounds/success.ogg');
-  audio.play().catch((error) => {
-    console.error('Error playing sound:', error);
-  });
-}
-
 export {
   processErrorMessage,
   apiError,
@@ -138,6 +131,5 @@ export {
   apiWarning,
   apiErrorRes,
   apiInfo,
-  clearToastMessages,
-  playSuccessSound
+  clearToastMessages
 }
