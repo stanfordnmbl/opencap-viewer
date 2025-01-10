@@ -673,6 +673,8 @@
 
               trial_modify_tags: false,
               trial_modify_tags_index: 0,
+
+              isAuditoryFeedbackEnabled: false,
           }
       },
       filters: {
@@ -818,6 +820,11 @@
       //     // }
       // }
     },
+    created() {
+      // Load the initial value from localStorage
+      const storedValue = localStorage.getItem("auditory_feedback");
+      this.isAuditoryFeedbackEnabled = storedValue === "true";
+    },
     methods: {
       ...mapMutations('data', [
         'setSessionStep5',
@@ -895,7 +902,8 @@
                 this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
 
                 // Play sound indicating the subject can start motion.
-                playRecordingSound()
+                if (this.isAuditoryFeedbackEnabled)
+                  playRecordingSound()
               } catch (error) {
                 apiError(error)
               }
@@ -912,7 +920,8 @@
               const res = await axios.get(`/sessions/${this.session.id}/stop/`, {})
 
               // Play sound indicating the subject can stop motion.
-              playRecordingFinishedSound();
+              if (this.isAuditoryFeedbackEnabled)
+                playRecordingFinishedSound();
 
               this.trialInProcess.status = res.data.status
               this.state = 'processing'
