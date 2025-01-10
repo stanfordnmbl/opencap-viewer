@@ -303,6 +303,21 @@
 
         <div v-else-if="editing_settings" class="row">
           <v-col align="center" justify="center" class="mt-8">
+
+            <v-row align="center" justify="center">
+              <p>
+                  <label>
+                    <input
+                      type="checkbox"
+                      v-model="isAuditoryFeedbackEnabled"
+                      @change="updateLocalStorage"
+                    />
+                    Enable Voice Auditory Feedback (audio updates for start and completion events).
+                  </label>
+
+              </p>
+            </v-row>
+
             <v-row align="center" justify="center">
               <p>
                 Remove your account and all associated data. This includes every session, trial, subject, and result that you have ever created. This process is irreversible.
@@ -437,8 +452,14 @@ export default {
       profile_picture: null,
       selectedImageFile: null,
       current_user_page_profile_url: '',
-      confirm_username: ''
+      confirm_username: '',
+      isAuditoryFeedbackEnabled: false,
     };
+  },
+  created() {
+    // Load the initial value from localStorage
+    const storedValue = localStorage.getItem("auditory_feedback");
+    this.isAuditoryFeedbackEnabled = storedValue === "true";
   },
   methods: {
     ...mapActions("auth", ["updateProfile", "updateProfilePicture", "set_profile_picture_url", "logout"]),
@@ -447,6 +468,10 @@ export default {
     },
     handleEditProfile() {
       this.editing_profile = true;
+    },
+    updateLocalStorage() {
+      // Update localStorage when the checkbox changes
+      localStorage.setItem("auditory_feedback", this.isAuditoryFeedbackEnabled);
     },
     handleEditSettings() {
       this.editing_settings = true;

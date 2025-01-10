@@ -460,7 +460,14 @@ export default {
 
       tempFilterFrequency: 'default', // Temporary input holder
       componentKey: 0,
+
+      isAuditoryFeedbackEnabled: false,
     };
+  },
+  created() {
+    // Load the initial value from localStorage
+    const storedValue = localStorage.getItem("auditory_feedback");
+    this.isAuditoryFeedbackEnabled = storedValue === "true";
   },
   computed: {
     ...mapState({
@@ -833,7 +840,9 @@ export default {
             ) {
               clearToastMessages();
               apiInfo("Processing: the subject can relax.", 5000);
-              playNeutralFinishedSound()
+
+              if (this.isAuditoryFeedbackEnabled)
+                playNeutralFinishedSound()
             }
             this.lastPolledStatus = res.data.status;
             window.setTimeout(this.pollStatus, 1000);

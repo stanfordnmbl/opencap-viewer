@@ -120,8 +120,14 @@ export default {
       imgs: null,
       lastPolledStatus: "",
       n_cameras_connected: 0,
-      n_videos_uploaded: 0
+      n_videos_uploaded: 0,
+      isAuditoryFeedbackEnabled: false,
     }
+  },
+  created() {
+    // Load the initial value from localStorage
+    const storedValue = localStorage.getItem("auditory_feedback");
+    this.isAuditoryFeedbackEnabled = storedValue === "true";
   },
   computed: {
     ...mapState({ 
@@ -186,7 +192,8 @@ export default {
               this.busy = false
             } else {
               // Play sound indicating calibration finished.
-              playCalibrationFinishedSound();
+              if (this.isAuditoryFeedbackEnabled)
+                playCalibrationFinishedSound();
 
               apiSuccess(this.n_calibrated_cameras + " devices calibrated successfully.", 5000);
               this.$router.push(`/${this.session.id}/neutral`)
