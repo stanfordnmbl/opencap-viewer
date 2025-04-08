@@ -328,10 +328,9 @@
                 Delete Account
               </v-btn>
             </v-row>
-
             <v-row align="center" justify="center">
-              <router-link class="text-center mt-6" @click.native="handleDiscard" :to="{ name: 'ProfilePage' }">
-                Discard Changes
+              <router-link class="text-center mt-6" @click.native="handleFinished" :to="{ name: 'ProfilePage' }">
+                Go Back
               </router-link>
             </v-row>
           </v-col>
@@ -475,6 +474,9 @@ export default {
     },
     handleEditSettings() {
       this.editing_settings = true;
+    },
+    handleFinished() {
+      this.editing_settings = false;
     },
     handleDiscard() {
       this.editing_profile = false;
