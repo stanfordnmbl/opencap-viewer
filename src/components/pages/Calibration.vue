@@ -21,9 +21,13 @@
 
       <v-card-text class="d-flex align-center">
         <ul class="flex-grow-1">
-          <li>It should be visible by all cameras (nothing in the way of cameras' view when hitting Calibrate)</li>
-          <li>It should be horizontal (longer side on the floor)</li>
-          <li>It should be perpendicular to the floor (not lying on the floor)</li>         
+          <li>It should be visible by all cameras (nothing in the way of cameras' view when hitting Calibrate)</li>          
+          <li>It can be either perpendicular to the floor (default) or lying on the floor (beta feature; select Lying placement below)</li>
+          <li>If perpendicular to the floor, then:
+            <ul>
+              <li>Place it horizontally (longer side on the floor)</li>
+            </ul>
+          </li>
         </ul>
 
         <div class="image-container pa-3">
@@ -51,7 +55,38 @@
 
           <v-text-field
             v-model="squareSize"
-            label="Square size (mm)"/>
+            label="Square size (mm)"
+            class="mr-3"/>
+
+          <v-select
+            v-model="placement"
+            :items="['Perpendicular', 'Lying']"
+            label="Placement on the floor"
+            class="mr-0"/>
+
+          <v-tooltip bottom="" max-width="500px">
+            <template v-slot:activator="{ on }">
+              <v-icon v-on="on" class="ml-0">mdi-help-circle-outline</v-icon>
+            </template>
+            <div>
+              The origin of the world frame is the top-left black-to-black corner of the board (red dot with a blue outline in the picture on the right).
+              <br><br>
+              When positioned perpendicular to the floor, transformations are applied so that in the processed data:
+              <ul>
+                <li>The forward axis of the world frame is perpendicular to the board (coming out).</li>
+                <li>The vertical axis of the world frame is parallel to the board (going up).</li>
+              </ul>
+              <br>
+              When positioned lying on the floor, transformations are applied so that in the processed data:
+              <ul>
+                <li>The forward axis of the world frame is parallel to the board (along the shorter side).</li>
+                <li>The vertical axis of the world frame is perpendicular to the board (going up).</li>
+              </ul>
+              <br>
+              To align movement with the forward axis of the world frame when the board is lying on the floor, place the board such that its forward axis is parallel to the direction of movement. 
+              For example, for walking, place the board with the longer side perpendicular to the walking direction. Note that this alignment is optional, as the system can operate with the board in any orientation.
+            </div>
+          </v-tooltip>
         </div>
 
         <div class="image-container pa-3">
@@ -68,6 +103,7 @@ import axios from 'axios'
 import {mapActions, mapMutations, mapState} from 'vuex'
 import { apiError, apiSuccess, apiErrorRes, apiInfo} from '@/util/ErrorMessage.js'
 import MainLayout from '@/layout/MainLayout'
+import { playCalibrationFinishedSound } from "@/util/SoundMessage.js";
 
 export default {
   name: 'Calibration',
@@ -79,12 +115,19 @@ export default {
       rows: 4,
       cols: 5,
       squareSize: 35,
+      placement: 'Perpendicular',
       busy: false,
       imgs: null,
       lastPolledStatus: "",
       n_cameras_connected: 0,
-      n_videos_uploaded: 0
+      n_videos_uploaded: 0,
+      isAuditoryFeedbackEnabled: false,
     }
+  },
+  created() {
+    // Load the initial value from localStorage
+    const storedValue = localStorage.getItem("auditory_feedback");
+    this.isAuditoryFeedbackEnabled = storedValue === "true";
   },
   computed: {
     ...mapState({ 
@@ -108,7 +151,8 @@ export default {
         this.setCalibration({
           rows: this.rows,
           cols: this.cols,
-          squareSize: this.squareSize
+          squareSize: this.squareSize,
+          placement: this.placement
         })
         try {
           const resUpdate = await axios.get(`/sessions/${this.session.id}/set_metadata/`, {
@@ -116,7 +160,7 @@ export default {
               cb_rows: this.rows,
               cb_cols: this.cols,
               cb_square: this.squareSize,
-              cb_placement: "backWall"
+              cb_placement: this.placement
               }
             })
 
@@ -147,6 +191,10 @@ export default {
               apiError(this.n_calibrated_cameras + " device(s) connected to the session and 2+ devices are required, please re-pair your devices using qr code at top of page.", 10000);
               this.busy = false
             } else {
+              // Play sound indicating calibration finished.
+              if (this.isAuditoryFeedbackEnabled)
+                playCalibrationFinishedSound();
+
               apiSuccess(this.n_calibrated_cameras + " devices calibrated successfully.", 5000);
               this.$router.push(`/${this.session.id}/neutral`)
             }

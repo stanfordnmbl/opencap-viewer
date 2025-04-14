@@ -366,6 +366,7 @@
 import axios from "axios";
 import { mapMutations, mapActions, mapState } from "vuex";
 import { apiError, apiSuccess, apiErrorRes, apiWarning, apiInfo, clearToastMessages } from "@/util/ErrorMessage.js";
+import { playNeutralFinishedSound } from "@/util/SoundMessage.js";
 import MainLayout from "@/layout/MainLayout";
 import ExampleImage from "@/components/ui/ExampleImage";
 import DialogComponent from '@/components/ui/SubjectDialog.vue'
@@ -450,6 +451,7 @@ export default {
         done: "Confirm",
         error: "Re-record",
         stopped: "Processing",
+        processing: "Processing",
       },
       checkboxRule: (v) => !!v || 'The subject must agree to continue!',
 
@@ -459,7 +461,14 @@ export default {
 
       tempFilterFrequency: 'default', // Temporary input holder
       componentKey: 0,
+
+      isAuditoryFeedbackEnabled: false,
     };
+  },
+  created() {
+    // Load the initial value from localStorage
+    const storedValue = localStorage.getItem("auditory_feedback");
+    this.isAuditoryFeedbackEnabled = storedValue === "true";
   },
   computed: {
     ...mapState({
@@ -832,6 +841,9 @@ export default {
             ) {
               clearToastMessages();
               apiInfo("Processing: the subject can relax.", 5000);
+
+              if (this.isAuditoryFeedbackEnabled)
+                playNeutralFinishedSound()
             }
             this.lastPolledStatus = res.data.status;
             window.setTimeout(this.pollStatus, 1000);

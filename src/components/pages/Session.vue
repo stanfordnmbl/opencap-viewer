@@ -320,7 +320,7 @@
                       Download data (old)
                   </v-btn>
   
-                  <v-btn small class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id } })">
+                  <v-btn small class="mt-4 w-100" @click="$router.push({ name: 'Dashboard', params: { id: session.id, trialId: trial.name  } })">
                       Dashboard kinematics
                   </v-btn>
   
@@ -549,6 +549,7 @@
   import axios from 'axios'
   import { mapState, mapMutations, mapActions } from 'vuex'
   import { apiError, apiErrorRes, apiSuccess } from '@/util/ErrorMessage.js'
+  import { playRecordingSound, playRecordingFinishedSound } from "@/util/SoundMessage.js";
   import Status from '@/components/ui/Status'
   import * as THREE from 'three'
   import * as THREE_OC from '@/orbitControls'
@@ -672,6 +673,8 @@
 
               trial_modify_tags: false,
               trial_modify_tags_index: 0,
+
+              isAuditoryFeedbackEnabled: false,
           }
       },
       filters: {
@@ -693,6 +696,7 @@
             rows: state => state.data.rows,
             cols: state => state.data.cols,
             squareSize: state => state.data.squareSize,
+            placement: state => state.data.placement,
   
             // step Neutral data
             identifier: state => state.data.identifier,
@@ -816,6 +820,11 @@
       //     // }
       // }
     },
+    created() {
+      // Load the initial value from localStorage
+      const storedValue = localStorage.getItem("auditory_feedback");
+      this.isAuditoryFeedbackEnabled = storedValue === "true";
+    },
     methods: {
       ...mapMutations('data', [
         'setSessionStep5',
@@ -855,23 +864,46 @@
                 // add to the list
                 this.trialInProcess = res.data
                 this.addTrial(this.trialInProcess)
-  
-  
+
+                // Get n_cameras_connected.
+                const res_status = await axios.get(`/sessions/${this.session.id}/status/`, {})
+                this.n_videos_uploaded = res_status.data.n_videos_uploaded
+                this.n_cameras_connected = res_status.data.n_cameras_connected
+
+                // If no calibrated cameras...
+                if (this.n_calibrated_cameras === 0)
+                  throw new Error("There are no calibrated cameras for this trial.");
+
+                // Transition to recording state
+                this.state = 'recording';
+
+                // Check if the appropriate number of cameras is connected.
+                const startTime = Date.now();
+                while (this.n_cameras_connected !== this.n_calibrated_cameras) {
+                    console.log("WAITING CAMERA CONNECTION...")
+                    if (Date.now() - startTime > 5000) { // 5-second timeout
+                        const res_stop = await axios.get(`/sessions/${this.session.id}/stop/`, {})
+                        const res_cancel = await axios.get(`/sessions/${this.session.id}/cancel_trial/`, {})
+                        this.cancelPoll()
+                        this.state = 'ready'
+                        this.trialInProcess.status = "error"
+                        throw new Error("Connected cameras do not match calibrated cameras. Timeout while waiting for cameras to connect.");
+                    }
+
+                    // Retry fetching the status
+                    await new Promise(r => setTimeout(r, 500)); // Wait before retrying
+                    const retryRes = await axios.get(`/sessions/${this.session.id}/status/`, {});
+                    this.n_cameras_connected = retryRes.data.n_cameras_connected;
+                }
+
+                // Start recording timer.
                 this.recordingStarted = moment()
                 this.recordingTimePassed = 0
                 this.recordingTimer = window.setTimeout(this.recordTimerHandler, 500)
-  
-                this.state = 'recording'
-  
-                // Wait for cameras to start actually recording.
-                await new Promise(r => setTimeout(r, 1500));
-  
-                // Get n_cameras_connected.
-                const res_status = await axios.get(`/sessions/${this.session.id}/status/`, {})
-  
-                this.n_videos_uploaded = res_status.data.n_videos_uploaded
-                this.n_cameras_connected = res_status.data.n_cameras_connected
-  
+
+                // Play sound indicating the subject can start motion.
+                if (this.isAuditoryFeedbackEnabled)
+                  playRecordingSound()
               } catch (error) {
                 apiError(error)
               }
@@ -886,7 +918,11 @@
   
             try {
               const res = await axios.get(`/sessions/${this.session.id}/stop/`, {})
-  
+
+              // Play sound indicating the subject can stop motion.
+              if (this.isAuditoryFeedbackEnabled)
+                playRecordingFinishedSound();
+
               this.trialInProcess.status = res.data.status
               this.state = 'processing'
   

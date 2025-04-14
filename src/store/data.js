@@ -31,6 +31,7 @@ export default {
     rows: 4,
     cols: 5,
     squareSize: 35,
+    placement: 'Perpendicular',
     // step 3
     trialId: '',
 
@@ -220,10 +221,11 @@ export default {
     setConnectDevices (state, { cameras }) {
       state.cameras = cameras
     },
-    setCalibration (state, { rows, cols, squareSize }) {
+    setCalibration (state, { rows, cols, squareSize, placement }) {
       state.rows = rows
       state.cols = cols
       state.squareSize = squareSize
+      state.placement = placement
     },
     setTrialId (state, trialId) {
       state.trialId = trialId
@@ -439,19 +441,23 @@ export default {
         }
       }
     },
-    async loadSubjects({ state, commit }) {
+    async loadSubjects({ state, commit }, {session_id}) {
       try {
         let subjects = []
         let start = 0
-        let quantity = 20
+        let quantity = 100
         let moreDataAvailable = true
 
         while (moreDataAvailable) {
-          let res = await axios.get('/subjects/', {
-            params: {
+          let r_params = {
               start: start,
               quantity: quantity
-            }
+          }
+          if (session_id) {
+            r_params.session_id = session_id
+          }
+          let res = await axios.get('/subjects/', {
+            params: r_params
           })
 
           let tagPromises = []
@@ -470,8 +476,8 @@ export default {
             tagPromises.push(tagPromise);
           }
 
-          subjects = subjects.concat(res.data)
-          if (res.data.length < quantity) {
+          subjects = subjects.concat(res.data.subjects)
+          if (res.data.subjects.length < quantity) {
             moreDataAvailable = false
           } else {
               start += quantity
