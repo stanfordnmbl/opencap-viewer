@@ -2,11 +2,24 @@
   <MainLayout
     column
     leftButton="Back"
-    rightButton="Calibrate"
     :step="2"
     :rightDisabled="busy"
-    @left="$router.push(`/${session.id}/connect-devices`)"
-    @right="onNext">
+    @left="$router.push(`/${session.id}/connect-devices`)">
+
+    <!-- Custom right section with two buttons -->
+    <template v-slot:right>
+      <v-btn
+        v-if="username === 'selimgilon'"
+        class="mr-2"
+        @click="skipToSession">
+        Skip for monocular
+      </v-btn>
+      <v-btn
+        :disabled="busy"
+        @click="onNext">
+        Calibrate
+      </v-btn>
+    </template>
 
     <v-card class="step-2-1">
       <v-card-text class="d-flex align-center">
@@ -132,7 +145,8 @@ export default {
   computed: {
     ...mapState({ 
       session: state => state.data.session,
-      trialId: state => state.data.trialId
+      trialId: state => state.data.trialId,
+      username: state => state.auth.username
     })
   },
   mounted () {
@@ -238,6 +252,10 @@ export default {
       } catch (error) {
         apiError(error);
       }
+    },
+    skipToSession() {
+      // Redirect to session page
+      this.$router.push(`/session/${this.session.id}`);
     },
   }
 }
