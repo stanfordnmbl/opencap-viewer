@@ -94,7 +94,7 @@ export default {
       username: state => state.auth.username,
     }),
     hasMonoAccess() {
-      const allowedUsers = ['selimgilon', 'suhlrich', 'antoine'];
+      const allowedUsers = ['selimgilon', 'suhlrich', 'antoine', 'dev_user'];
       const currentUser = this.username || localStorage.getItem('auth_user');
       return allowedUsers.includes(currentUser);
     },
@@ -118,7 +118,7 @@ export default {
       this.setConnectDevices({
         cameras: this.cameras
       })
-      this.$router.push(`/${this.session.id}/neutral`);
+      this.$router.push({ path: `/${this.session.id}/neutral`, query: { isMono: 'true' } });
     }
   }
 }
