@@ -342,7 +342,7 @@
         </div>
         <div> <!-- Right slot for action buttons -->
           <v-btn
-            v-if="hasMonoAccess"
+            v-if="hasMonoAccess" 
             class="mr-2"
             color="warning"
             :disabled="busy || disabledNextButton"
@@ -350,6 +350,7 @@
             Next to monocular
           </v-btn>
           <v-btn
+            v-if="!isMonocularMode" 
             :disabled="busy || disabledNextButton"
             :loading="busy && !imgs"
             @click="onNext">
