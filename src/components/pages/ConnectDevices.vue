@@ -1,10 +1,25 @@
 <template>
   <MainLayout
-    rightButton="Next"
     column
     :step="1"
-    :rightDisabled="loading"
-    @right="onNext">
+    :rightDisabled="loading">
+
+    <!-- Custom right section with two buttons -->
+    <template v-slot:right>
+      <!-- Only show this button for selimgilon -->
+      <v-btn
+        v-if="isSelimgilon"
+        class="mr-2"
+        :disabled="loading"
+        @click="skipToSession">
+        Next to monocular
+      </v-btn>
+      <v-btn
+        :disabled="loading"
+        @click="onNext">
+        Next
+      </v-btn>
+    </template>
 
     <v-card class="flex-grow-1 d-flex flex-column justify-center">
       <v-card-text class="d-flex flex-column align-center">
@@ -47,7 +62,7 @@
 
 <script>
 import { mapMutations, mapActions, mapState } from 'vuex'
-import { apiInfo, clearToastMessages} from "@/util/ErrorMessage.js";
+import { apiInfo, clearToastMessages, apiError} from "@/util/ErrorMessage.js";
 import MainLayout from '@/layout/MainLayout'
 
 export default {
@@ -76,8 +91,12 @@ export default {
   },
   computed: {
     ...mapState({ 
-      session: state => state.data.session
-    })
+      session: state => state.data.session,
+      username: state => state.auth.username,
+    }),
+    isSelimgilon() {
+      return this.username === 'selimgilon' || localStorage.getItem('auth_user') === 'selimgilon';
+    },
   },
   methods: {
     ...mapMutations('data', ['clearAll', 'setConnectDevices']),
@@ -90,6 +109,19 @@ export default {
       })
       
       this.$router.push(`/${this.session.id}/calibration`)
+    },
+    skipToSession() {
+      if (!this.isSelimgilon) {
+        apiError("This feature is only available for specific users");
+        return;
+      }
+      clearToastMessages();
+      this.setConnectDevices({
+        cameras: this.cameras
+      })
+      
+      // Redirect directly to the session page, bypassing calibration and neutral
+      this.$router.push(`/${this.session.id}/neutral`);
     }
   }
 }

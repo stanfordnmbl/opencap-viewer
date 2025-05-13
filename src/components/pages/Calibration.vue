@@ -9,12 +9,6 @@
     <!-- Custom right section with two buttons -->
     <template v-slot:right>
       <v-btn
-        v-if="username === 'selimgilon'"
-        class="mr-2"
-        @click="skipToSession">
-        Skip for monocular
-      </v-btn>
-      <v-btn
         :disabled="busy"
         @click="onNext">
         Calibrate
@@ -145,8 +139,7 @@ export default {
   computed: {
     ...mapState({ 
       session: state => state.data.session,
-      trialId: state => state.data.trialId,
-      username: state => state.auth.username
+      trialId: state => state.data.trialId
     })
   },
   mounted () {

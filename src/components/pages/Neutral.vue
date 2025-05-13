@@ -1,13 +1,27 @@
 <template>
   <MainLayout
     leftButton="Back"
-    :rightButton="rightButtonCaption"
     :step="4"
     :rightDisabled="busy || disabledNextButton"
-    :rightSpinner="busy && !imgs"
-    @left="$router.push(`/${session.id}/calibration`)"
-    @right="onNext"
-  >
+    @left="$router.push(`/${session.id}/calibration`)">
+
+    <template v-slot:right>
+      <v-btn
+        v-if="isSelimgilon"
+        class="mr-2"
+        color="warning"
+        :disabled="busy || disabledNextButton"
+        @click="skipProcessing">
+        Next to monocular
+      </v-btn>
+      <v-btn
+        :disabled="busy || disabledNextButton"
+        :loading="busy && !imgs"
+        @click="onNext">
+        {{ rightButtonCaption }}
+      </v-btn>
+    </template>
+
     <v-card v-if="imgs" class="step-4-1 pa-2 d-flex flex-column">
       <v-card-title class="justify-center"> Verify neutral pose </v-card-title>
 
@@ -318,6 +332,7 @@
       <v-card-title class="justify-center">
         Record neutral pose
       </v-card-title>
+      
       <v-card-text class="d-flex justify-center align-center">
         <div class="d-flex flex-column mr-4">
           <ul>
@@ -477,6 +492,7 @@ export default {
       trialId: (state) => state.data.trialId,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
+      username: state => state.auth.username,
     }),
     subjectSelectorChoices() {
       return this.subjectsMapped;
@@ -547,7 +563,11 @@ export default {
           this.loadSubjectsList(false)
         }
       }
-    }
+    },
+    isSelimgilon() {
+      console.log('isSelimgilon', this.username, localStorage.getItem('auth_user'))
+      return this.username === 'selimgilon' || localStorage.getItem('auth_user') === 'selimgilon';
+    },
   },
   async mounted() {
     apiInfo("You can now record a neutral pose different than the upright standing pose (e.g., sitting). Select 'Any pose' 'Advanced Settings'.", 8000);
@@ -908,6 +928,58 @@ export default {
       }
       this.tempFilterFrequency = this.filter_frequency;
       this.componentKey += 1;
+    },
+    async skipProcessing() {
+      if (!this.isSelimgilon) {
+        apiError("This feature is only available for specific users");
+        return;
+      }
+
+      if (await this.$refs.observer.validate()) {
+        // Skip camera validation and recording wait
+        this.busy = true;
+        
+        try {
+          // Set metadata without checking cameras
+          const resUpdate = await axios.get(
+            `/sessions/${this.session.id}/set_metadata/`,
+            {
+              params: {
+                settings_data_sharing: this.data_sharing,
+                settings_scaling_setup: this.scaling_setup,
+                settings_pose_model: this.pose_model,
+                settings_framerate: this.framerate,
+                settings_session_name: this.sessionName,
+                settings_openSimModel: this.openSimModel,
+                settings_augmenter_model: this.augmenter_model,
+                settings_filter_frequency: this.filter_frequency,
+              },
+            }
+          );
+
+          // Set subject
+          const resSubject = await axios.get(
+            `/sessions/${this.session.id}/set_subject/`,
+            {
+              params: {
+                subject_id: this.subject.id,
+              }
+            }
+          );
+          
+          // Directly navigate to the session page without waiting for recording
+          apiSuccess("Skipped processing for development", 3000);
+          this.$router.push({
+            name: "Session",
+            params: {
+              id: this.session.id,
+            },
+          });
+        } catch (error) {
+          apiError(error);
+          this.busy = false;
+        }
+      }
     },
   },
 };
