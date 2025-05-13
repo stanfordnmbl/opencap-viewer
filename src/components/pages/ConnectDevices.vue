@@ -6,9 +6,8 @@
 
     <!-- Custom right section with two buttons -->
     <template v-slot:right>
-      <!-- Only show this button for selimgilon -->
       <v-btn
-        v-if="isSelimgilon"
+        v-if="hasMonoAccess"
         class="mr-2"
         :disabled="loading"
         @click="skipToSession">
@@ -62,7 +61,7 @@
 
 <script>
 import { mapMutations, mapActions, mapState } from 'vuex'
-import { apiInfo, clearToastMessages, apiError} from "@/util/ErrorMessage.js";
+import { apiInfo, clearToastMessages, apiError } from "@/util/ErrorMessage.js";
 import MainLayout from '@/layout/MainLayout'
 
 export default {
@@ -78,7 +77,7 @@ export default {
   },
   async mounted () {
     apiInfo("The iOS app is now available on the App Store. Please upgrade.", 20000, {text : "Go to App Store", onClick : () => {window.open("https://apps.apple.com/us/app/opencap/id1630513242", "_blank");}});
-    if (this.$router.params != undefined) {
+    if (this.$route.params && this.$route.params.id) {
         await this.loadSession(this.$route.params.id)
     } else {
       try {
@@ -94,33 +93,31 @@ export default {
       session: state => state.data.session,
       username: state => state.auth.username,
     }),
-    isSelimgilon() {
-      return this.username === 'selimgilon' || localStorage.getItem('auth_user') === 'selimgilon';
+    hasMonoAccess() {
+      const allowedUsers = ['selimgilon', 'suhlrich', 'antoine'];
+      const currentUser = this.username || localStorage.getItem('auth_user');
+      return allowedUsers.includes(currentUser);
     },
   },
   methods: {
     ...mapMutations('data', ['clearAll', 'setConnectDevices']),
-    ...mapActions('data', ['initSession']),
+    ...mapActions('data', ['initSession', 'loadSession']),
     onNext () {
-
       clearToastMessages();
       this.setConnectDevices({
         cameras: this.cameras
       })
-      
       this.$router.push(`/${this.session.id}/calibration`)
     },
     skipToSession() {
-      if (!this.isSelimgilon) {
-        apiError("This feature is only available for specific users");
+      if (!this.hasMonoAccess) {
+        apiError("This feature is restricted.");
         return;
       }
       clearToastMessages();
       this.setConnectDevices({
         cameras: this.cameras
       })
-      
-      // Redirect directly to the session page, bypassing calibration and neutral
       this.$router.push(`/${this.session.id}/neutral`);
     }
   }

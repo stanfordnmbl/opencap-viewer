@@ -7,7 +7,7 @@
 
     <template v-slot:right>
       <v-btn
-        v-if="isSelimgilon"
+        v-if="hasMonoAccess"
         class="mr-2"
         color="warning"
         :disabled="busy || disabledNextButton"
@@ -487,9 +487,8 @@ export default {
   },
   computed: {
     ...mapState({
-      // subjects: (state) => state.data.subjects,
-      session: (state) => state.data.session,
-      trialId: (state) => state.data.trialId,
+      session: state => state.data.session,
+      trialId: state => state.data.trialId,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
       username: state => state.auth.username,
@@ -497,25 +496,6 @@ export default {
     subjectSelectorChoices() {
       return this.subjectsMapped;
     },
-    // subjectsMapped () {
-    //   return this.subjects.map(s => ({
-    //     id: s.id,
-    //     display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.birth_year})`,
-    //     name: s.name,
-    //     birth_year: s.birth_year,
-    //     subject_tags: s.subject_tags,
-    //     characteristics: s.characteristics,
-    //     gender: s.gender,
-    //     gender_display: this.genders[s.gender],
-    //     sex_at_birth: s.sex_at_birth,
-    //     sex_display: this.sexes[s.sex_at_birth],
-    //     height: s.height,
-    //     weight: s.weight,
-    //     created_at: s.created_at,
-    //     trashed: s.trashed,
-    //     trashed_at: s.trashed_at
-    //   })).filter(s => this.show_trashed || !s.trashed)
-    // },
     rightButtonCaption() {
       return this.imgs
         ? "Confirm"
@@ -561,12 +541,13 @@ export default {
           this.subject_query = value
           this.subject_start = 0
           this.loadSubjectsList(false)
-        }
       }
+    }
     },
-    isSelimgilon() {
-      console.log('isSelimgilon', this.username, localStorage.getItem('auth_user'))
-      return this.username === 'selimgilon' || localStorage.getItem('auth_user') === 'selimgilon';
+    hasMonoAccess() {
+      const allowedUsers = ['selimgilon', 'suhlrich', 'antoine'];
+      const currentUser = this.username || localStorage.getItem('auth_user');
+      return allowedUsers.includes(currentUser);
     },
   },
   async mounted() {
@@ -583,31 +564,6 @@ export default {
     this.loadSubjectsList(false)
   },
   watch: {
-    // subjects(new_val, old_val) {
-    //   // If no subjects, do nothing.
-    //   if (old_val.length === 0 && new_val.length === 0) {
-    //       return
-    //   // If loading first time and there are subjects, select first.
-    //   } if (old_val.length === 0 && new_val.length !== 0) {
-    //       this.subject = new_val[0]
-    //   // If there are more subjects now than before, that means a new one has been created. Select it.
-    //   } else if (old_val.length < new_val.length) {
-    //       const serializedArr1 = new Set(old_val.map(item => JSON.stringify(item)));
-    //
-    //       // Find the index by comparing serialized objects
-    //       this.subject = new_val[new_val.findIndex(item => !serializedArr1.has(JSON.stringify(item)))];
-    //   // Else, do nothing.
-    //   } else return
-    //
-    // },
-    // subject_search (newVal, oldVal) {
-    //   console.log('watch subject_search', newVal, oldVal)
-    //   this.subject_start = 0;
-    //   if (newVal) {
-    //   // this.loadSubjectsList(false, String(newVal))
-    //     this.loadSubjectsList(false)
-    //   }
-    // }
     subject (newVal, oldVal) {
       console.log('watch subject', newVal, oldVal)
       if (newVal === null) {
@@ -930,15 +886,12 @@ export default {
       this.componentKey += 1;
     },
     async skipProcessing() {
-      if (!this.isSelimgilon) {
-        apiError("This feature is only available for specific users");
+      if (!this.hasMonoAccess) {
+        apiError("This feature is restricted.");
         return;
       }
-
       if (await this.$refs.observer.validate()) {
-        // Skip camera validation and recording wait
         this.busy = true;
-        
         try {
           // Set metadata without checking cameras
           const resUpdate = await axios.get(
@@ -967,8 +920,7 @@ export default {
             }
           );
           
-          // Directly navigate to the session page without waiting for recording
-          apiSuccess("Skipped processing for development", 3000);
+          apiSuccess("Skipped processing for monocular setup.", 3000);
           this.$router.push({
             name: "Session",
             params: {
