@@ -1,13 +1,27 @@
 <template>
   <MainLayout
     leftButton="Back"
-    :rightButton="rightButtonCaption"
     :step="4"
     :rightDisabled="busy || disabledNextButton"
-    :rightSpinner="busy && !imgs"
-    @left="$router.push(`/${session.id}/calibration`)"
-    @right="onNext"
-  >
+    @left="$router.push(`/${session.id}/calibration`)">
+
+    <template v-slot:right>
+      <v-btn
+        v-if="hasMonoAccess"
+        class="mr-2"
+        color="warning"
+        :disabled="busy || disabledNextButton"
+        @click="skipProcessing">
+        Next to monocular
+      </v-btn>
+      <v-btn
+        :disabled="busy || disabledNextButton"
+        :loading="busy && !imgs"
+        @click="onNext">
+        {{ rightButtonCaption }}
+      </v-btn>
+    </template>
+
     <v-card v-if="imgs" class="step-4-1 pa-2 d-flex flex-column">
       <v-card-title class="justify-center"> Verify neutral pose </v-card-title>
 
@@ -318,6 +332,7 @@
       <v-card-title class="justify-center">
         Record neutral pose
       </v-card-title>
+      
       <v-card-text class="d-flex justify-center align-center">
         <div class="d-flex flex-column mr-4">
           <ul>
@@ -472,34 +487,15 @@ export default {
   },
   computed: {
     ...mapState({
-      // subjects: (state) => state.data.subjects,
-      session: (state) => state.data.session,
-      trialId: (state) => state.data.trialId,
+      session: state => state.data.session,
+      trialId: state => state.data.trialId,
       genders: state => state.data.genders,
       sexes: state => state.data.sexes,
+      username: state => state.auth.username,
     }),
     subjectSelectorChoices() {
       return this.subjectsMapped;
     },
-    // subjectsMapped () {
-    //   return this.subjects.map(s => ({
-    //     id: s.id,
-    //     display_name: `${s.name} (${s.weight} Kg, ${s.height} m, ${s.birth_year})`,
-    //     name: s.name,
-    //     birth_year: s.birth_year,
-    //     subject_tags: s.subject_tags,
-    //     characteristics: s.characteristics,
-    //     gender: s.gender,
-    //     gender_display: this.genders[s.gender],
-    //     sex_at_birth: s.sex_at_birth,
-    //     sex_display: this.sexes[s.sex_at_birth],
-    //     height: s.height,
-    //     weight: s.weight,
-    //     created_at: s.created_at,
-    //     trashed: s.trashed,
-    //     trashed_at: s.trashed_at
-    //   })).filter(s => this.show_trashed || !s.trashed)
-    // },
     rightButtonCaption() {
       return this.imgs
         ? "Confirm"
@@ -545,9 +541,14 @@ export default {
           this.subject_query = value
           this.subject_start = 0
           this.loadSubjectsList(false)
-        }
       }
     }
+    },
+    hasMonoAccess() {
+      const allowedUsers = ['selimgilon', 'suhlrich', 'antoine'];
+      const currentUser = this.username || localStorage.getItem('auth_user');
+      return allowedUsers.includes(currentUser);
+    },
   },
   async mounted() {
     apiInfo("You can now record a neutral pose different than the upright standing pose (e.g., sitting). Select 'Any pose' 'Advanced Settings'.", 8000);
@@ -563,31 +564,6 @@ export default {
     this.loadSubjectsList(false)
   },
   watch: {
-    // subjects(new_val, old_val) {
-    //   // If no subjects, do nothing.
-    //   if (old_val.length === 0 && new_val.length === 0) {
-    //       return
-    //   // If loading first time and there are subjects, select first.
-    //   } if (old_val.length === 0 && new_val.length !== 0) {
-    //       this.subject = new_val[0]
-    //   // If there are more subjects now than before, that means a new one has been created. Select it.
-    //   } else if (old_val.length < new_val.length) {
-    //       const serializedArr1 = new Set(old_val.map(item => JSON.stringify(item)));
-    //
-    //       // Find the index by comparing serialized objects
-    //       this.subject = new_val[new_val.findIndex(item => !serializedArr1.has(JSON.stringify(item)))];
-    //   // Else, do nothing.
-    //   } else return
-    //
-    // },
-    // subject_search (newVal, oldVal) {
-    //   console.log('watch subject_search', newVal, oldVal)
-    //   this.subject_start = 0;
-    //   if (newVal) {
-    //   // this.loadSubjectsList(false, String(newVal))
-    //     this.loadSubjectsList(false)
-    //   }
-    // }
     subject (newVal, oldVal) {
       console.log('watch subject', newVal, oldVal)
       if (newVal === null) {
@@ -908,6 +884,54 @@ export default {
       }
       this.tempFilterFrequency = this.filter_frequency;
       this.componentKey += 1;
+    },
+    async skipProcessing() {
+      if (!this.hasMonoAccess) {
+        apiError("This feature is restricted.");
+        return;
+      }
+      if (await this.$refs.observer.validate()) {
+        this.busy = true;
+        try {
+          // Set metadata without checking cameras
+          const resUpdate = await axios.get(
+            `/sessions/${this.session.id}/set_metadata/`,
+            {
+              params: {
+                settings_data_sharing: this.data_sharing,
+                settings_scaling_setup: this.scaling_setup,
+                settings_pose_model: this.pose_model,
+                settings_framerate: this.framerate,
+                settings_session_name: this.sessionName,
+                settings_openSimModel: this.openSimModel,
+                settings_augmenter_model: this.augmenter_model,
+                settings_filter_frequency: this.filter_frequency,
+              },
+            }
+          );
+
+          // Set subject
+          const resSubject = await axios.get(
+            `/sessions/${this.session.id}/set_subject/`,
+            {
+              params: {
+                subject_id: this.subject.id,
+              }
+            }
+          );
+          
+          apiSuccess("Skipped processing for monocular setup.", 3000);
+          this.$router.push({
+            name: "Session",
+            params: {
+              id: this.session.id,
+            },
+          });
+        } catch (error) {
+          apiError(error);
+          this.busy = false;
+        }
+      }
     },
   },
 };

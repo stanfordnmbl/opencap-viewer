@@ -1,10 +1,24 @@
 <template>
   <MainLayout
-    rightButton="Next"
     column
     :step="1"
-    :rightDisabled="loading"
-    @right="onNext">
+    :rightDisabled="loading">
+
+    <!-- Custom right section with two buttons -->
+    <template v-slot:right>
+      <v-btn
+        v-if="hasMonoAccess"
+        class="mr-2"
+        :disabled="loading"
+        @click="skipToSession">
+        Next to monocular
+      </v-btn>
+      <v-btn
+        :disabled="loading"
+        @click="onNext">
+        Next
+      </v-btn>
+    </template>
 
     <v-card class="flex-grow-1 d-flex flex-column justify-center">
       <v-card-text class="d-flex flex-column align-center">
@@ -47,7 +61,7 @@
 
 <script>
 import { mapMutations, mapActions, mapState } from 'vuex'
-import { apiInfo, clearToastMessages} from "@/util/ErrorMessage.js";
+import { apiInfo, clearToastMessages, apiError } from "@/util/ErrorMessage.js";
 import MainLayout from '@/layout/MainLayout'
 
 export default {
@@ -63,7 +77,7 @@ export default {
   },
   async mounted () {
     apiInfo("The iOS app is now available on the App Store. Please upgrade.", 20000, {text : "Go to App Store", onClick : () => {window.open("https://apps.apple.com/us/app/opencap/id1630513242", "_blank");}});
-    if (this.$router.params != undefined) {
+    if (this.$route.params && this.$route.params.id) {
         await this.loadSession(this.$route.params.id)
     } else {
       try {
@@ -76,20 +90,35 @@ export default {
   },
   computed: {
     ...mapState({ 
-      session: state => state.data.session
-    })
+      session: state => state.data.session,
+      username: state => state.auth.username,
+    }),
+    hasMonoAccess() {
+      const allowedUsers = ['selimgilon', 'suhlrich', 'antoine'];
+      const currentUser = this.username || localStorage.getItem('auth_user');
+      return allowedUsers.includes(currentUser);
+    },
   },
   methods: {
     ...mapMutations('data', ['clearAll', 'setConnectDevices']),
-    ...mapActions('data', ['initSession']),
+    ...mapActions('data', ['initSession', 'loadSession']),
     onNext () {
-
       clearToastMessages();
       this.setConnectDevices({
         cameras: this.cameras
       })
-      
       this.$router.push(`/${this.session.id}/calibration`)
+    },
+    skipToSession() {
+      if (!this.hasMonoAccess) {
+        apiError("This feature is restricted.");
+        return;
+      }
+      clearToastMessages();
+      this.setConnectDevices({
+        cameras: this.cameras
+      })
+      this.$router.push(`/${this.session.id}/neutral`);
     }
   }
 }
