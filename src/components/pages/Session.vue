@@ -1324,7 +1324,7 @@
                   // show3d
                   // add the plane
                   {
-                    const planeSize = 5;
+                    const planeSize = 10;
   
                     const loader = new THREE.TextureLoader();
                     const texture = loader.load('https://threejsfundamentals.org/threejs/resources/images/checker.png');
