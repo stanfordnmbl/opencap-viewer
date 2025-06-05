@@ -1024,4 +1024,15 @@ export default {
   font-size: 20px;  /* Adjust the font size as needed */
   font-weight: bold;
 }
+
+/* Ensure dropdowns appear above navigation buttons */
+.v-select__content,
+.v-autocomplete__content,
+.v-menu__content {
+  z-index: 999 !important;
+}
+
+.custom-navigation {
+  z-index: 10;
+}
 </style>
