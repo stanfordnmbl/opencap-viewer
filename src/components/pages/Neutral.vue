@@ -847,7 +847,7 @@ export default {
               params: {
                 isMono: true,
                 settings_data_sharing: this.data_sharing,
-                settings_scaling_setup: this.scaling_setup,
+                // settings_scaling_setup: this.scaling_setup,
                 // settings_pose_model: this.pose_model,
                 settings_framerate: this.framerate,
                 settings_session_name: this.sessionName,
