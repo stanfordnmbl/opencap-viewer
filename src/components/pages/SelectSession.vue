@@ -39,6 +39,19 @@
       </v-btn>
 
       <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed sessions"></v-checkbox>
+
+      <v-text-field
+        v-model="searchText"
+        class="ml-2"
+        label="Enter text"
+        dense
+      ></v-text-field>
+
+      <v-btn
+        class="ml-2"
+        @click="handleSearch">
+        Submit
+      </v-btn>
     </div>
 
     <v-data-table        
@@ -279,6 +292,7 @@ export default {
       sessionName: '',
       sessionNewName: '',
       show_trashed: false,
+      searchText: '',
       headers: [
         {
           text: 'Session ID',
@@ -325,6 +339,27 @@ export default {
         'restoreTrashedSession',
         'loadAnalysisDashboardList',
     ]),
+    handleSearch() {
+      this.loading = true;
+      const params = new URLSearchParams({ text: this.searchText }).toString();Add commentMore actions
+      axios.get(`/sessions/search_sessions/?${params}`).then(response => {
+        const filteredSessions = response.data.filter(session => {
+          // Count trials that are NOT calibration
+          const nonCalibrationTrials = session.trials.filter(
+            trial => trial.name.toLowerCase() !== 'calibration'
+          );
+          // Keep the session only if there's at least one non-calibration trial
+          return nonCalibrationTrials.length > 0;
+        });
+
+        this.valid_sessions = filteredSessions;
+        this.session_total = filteredSessions.length;
+        this.loading = false;
+      }).catch(error => {
+        apiError(error)
+        this.loading = false
+      })
+    },
     loadValidSessions () {
       this.loading = true
       let data = {
