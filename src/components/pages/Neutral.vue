@@ -128,7 +128,7 @@
             </v-card>
       
             <div class="d-flex justify-center">
-              <template>
+              <template v-if="!isMonocularMode">
                 <div class="text-center">
                   <v-btn
                     color="primary-dark"
@@ -532,7 +532,9 @@ export default {
     if (this.$route.query.isMono === 'true') {
       this.isMonocularMode = true;
     }
-    apiInfo("You can now record a neutral pose different than the upright standing pose (e.g., sitting). Select 'Any pose' 'Advanced Settings'.", 8000);
+    if (!this.isMonocularMode) {
+      apiInfo("You can now record a neutral pose different than the upright standing pose (e.g., sitting). Select 'Any pose' 'Advanced Settings'.", 8000);
+    }
     this.loadSession(this.$route.params.id)
     if (this.$route.query.autoRecord) {
       this.onNext();
