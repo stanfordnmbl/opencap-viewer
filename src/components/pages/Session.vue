@@ -774,6 +774,14 @@
         console.log("Done trials:")
         console.log(doneTrials[0])
         this.loadTrial(doneTrials[0])
+      } else {
+        // If no done trials, try to load any available trial (for monocular mode or when no trials are done yet)
+        const anyTrials = this.filteredTrials
+        if (anyTrials.length > 0) {
+          console.log("Loading any available trial:")
+          console.log(anyTrials[0])
+          this.loadTrial(anyTrials[0])
+        }
       }
     },
     beforeDestroy() {

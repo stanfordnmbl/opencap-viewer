@@ -345,8 +345,9 @@
             class="mr-2"
             color="warning"
             :disabled="busy || disabledNextButton"
+            min-width="280"
             @click="skipProcessing">
-            Next to monocular
+            Next to OpenCap Monocular
           </v-btn>
           <v-btn
             v-if="!isMonocularMode" 
@@ -865,7 +866,6 @@ export default {
             }
           );
           
-          apiSuccess("Skipped processing for monocular setup.", 3000);
           this.$router.push({
             name: "Session",
             params: {
