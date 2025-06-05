@@ -342,7 +342,6 @@
         </div>
         <div> <!-- Right slot for action buttons -->
           <v-btn
-            v-if="hasMonoAccess" 
             class="mr-2"
             color="warning"
             :disabled="busy || disabledNextButton"
@@ -527,11 +526,6 @@ export default {
           this.loadSubjectsList(false)
       }
     }
-    },
-    hasMonoAccess() {
-      const allowedUsers = ['selimgilon', 'suhlrich', 'antoine', 'dev_user'];
-      const currentUser = this.username || localStorage.getItem('auth_user');
-      return allowedUsers.includes(currentUser);
     },
   },
   async mounted() {
@@ -841,10 +835,6 @@ export default {
       this.componentKey += 1;
     },
     async skipProcessing() {
-      if (!this.hasMonoAccess) {
-        apiError("This feature is restricted.");
-        return;
-      }
       if (await this.$refs.observer.validate()) {
         this.busy = true;
         try {
