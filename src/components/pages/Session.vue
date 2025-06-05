@@ -706,15 +706,27 @@
             isSyncDownloadAllowed: state => state.data.isSyncDownloadAllowed
           }),
         sessionUrl() {
+          if (!this.session || !this.session.id) {
+            return '';
+          }
           return location.origin + "/session/" + this.session.id;
         },
         analysisFunctionsWithMenu() {
+          if (!this.analysisFunctions) {
+            return [];
+          }
           return this.analysisFunctions.map((func) => ({...func, isMenuOpen: false}))
         },
         filteredTrialsWithMenu() {
-          return this.filteredTrials.map(trial => ({...trial, isMenuOpen: false}));
+          if (!this.session || !this.session.trials) {
+            return [];
+          }
+          return this.session.trials.filter(trial => trial.name !== 'calibration' && !(trial.name === 'neutral' && trial.status === 'error')).filter(t => this.show_trashed || !t.trashed).map(trial => ({...trial, isMenuOpen: false}));
         },
         filteredTrials() {
+          if (!this.session || !this.session.trials) {
+            return [];
+          }
           return this.session.trials.filter(trial => trial.name !== 'calibration' && !(trial.name === 'neutral' && trial.status === 'error')).filter(t => this.show_trashed || !t.trashed)
         },
         videoControlsDisabled() {
@@ -738,50 +750,56 @@
         },
       },
     async mounted() {
-      await this.loadSession(this.$route.params.id)
+      try {
+        await this.loadSession(this.$route.params.id)
 
-      this.loadTrialTags()
+        this.loadTrialTags()
 
-      // Check if something went wrong with loading session. Usually there was a redirect to Login page.
-      if (this.session.id == undefined) {
-        return
-      }
-      // Get number of expected cameras.
-      const res = await axios.get(`/sessions/${this.session.id}/get_n_calibrated_cameras/`, {})
-      this.n_calibrated_cameras = res.data.data
-  
-      if (this.user_id == this.session.user) {
-        this.show_controls = true
-        this.showSessionMenuButtons = true
-  
-        await this.loadAnalysisFunctions()
-        await this.loadAnalysisFunctionsPending()
-        await this.loadAnalysisFunctionsStates()
-        await this.analysisFunctionsPolls()
-      } else {
-        this.show_controls = false
-        this.showSessionMenuButtons = false
-      }
-  
-      console.log(this.user_id)
-      console.log(this.session.user)
-  
-      this.startTrialsPoll()
-  
-      const doneTrials = this.filteredTrials.filter(trial => trial.status === 'done')
-  
-      if (doneTrials.length > 0) {
-        console.log("Done trials:")
-        console.log(doneTrials[0])
-        this.loadTrial(doneTrials[0])
-      } else {
-        // If no done trials, try to load any available trial (for monocular mode or when no trials are done yet)
-        const anyTrials = this.filteredTrials
-        if (anyTrials.length > 0) {
-          console.log("Loading any available trial:")
-          console.log(anyTrials[0])
-          this.loadTrial(anyTrials[0])
+        // Check if something went wrong with loading session. Usually there was a redirect to Login page.
+        if (!this.session || this.session.id == undefined) {
+          return
         }
+        
+        // Get number of expected cameras.
+        const res = await axios.get(`/sessions/${this.session.id}/get_n_calibrated_cameras/`, {})
+        this.n_calibrated_cameras = res.data.data
+
+        if (this.user_id == this.session.user) {
+          this.show_controls = true
+          this.showSessionMenuButtons = true
+
+          await this.loadAnalysisFunctions()
+          await this.loadAnalysisFunctionsPending()
+          await this.loadAnalysisFunctionsStates()
+          await this.analysisFunctionsPolls()
+        } else {
+          this.show_controls = false
+          this.showSessionMenuButtons = false
+        }
+
+        console.log(this.user_id)
+        console.log(this.session.user)
+
+        this.startTrialsPoll()
+
+        const doneTrials = this.filteredTrials.filter(trial => trial.status === 'done')
+
+        if (doneTrials.length > 0) {
+          console.log("Done trials:")
+          console.log(doneTrials[0])
+          this.loadTrial(doneTrials[0])
+        } else {
+          // If no done trials, try to load any available trial (for monocular mode or when no trials are done yet)
+          const anyTrials = this.filteredTrials
+          if (anyTrials.length > 0) {
+            console.log("Loading any available trial:")
+            console.log(anyTrials[0])
+            this.loadTrial(anyTrials[0])
+          }
+        }
+      } catch (error) {
+        console.error('Error loading session:', error)
+        apiError(error)
       }
     },
     beforeDestroy() {
