@@ -346,7 +346,7 @@
             color="warning"
             :disabled="busy || disabledNextButton"
             min-width="280"
-            @click="skipProcessing">
+            @click="skipProcessingToMonocular">
             Next to OpenCap Monocular
           </v-btn>
           <v-btn
@@ -837,7 +837,7 @@ export default {
       this.tempFilterFrequency = this.filter_frequency;
       this.componentKey += 1;
     },
-    async skipProcessing() {
+    async skipProcessingToMonocular() {
       if (await this.$refs.observer.validate()) {
         this.busy = true;
         try {
