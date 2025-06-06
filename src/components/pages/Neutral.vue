@@ -695,10 +695,11 @@ export default {
                   `/sessions/${this.session.id}/set_subject/`,
                   {
                       params: {
-                          subject_id: this.identifier,
+                          subject_id: this.subject.id,
                       }
                   }
               )
+              
               const res = await axios.get(
                 `/sessions/${this.session.id}/record/`,
                 {
