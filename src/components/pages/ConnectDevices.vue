@@ -43,16 +43,18 @@
       <!-- Custom navigation buttons positioned below the card -->
       <div class="custom-navigation d-flex justify-end mt-4">
         <v-btn
-          v-if="hasMonoAccess"
-          class="mr-2"
+          class="mr-2 large-nav-btn"
           :disabled="loading"
+          min-width="250"
           @click="skipToSession">
-          Next to monocular
+          Next, with 1 camera
         </v-btn>
         <v-btn
+          class="large-nav-btn"
           :disabled="loading"
+          min-width="250"
           @click="onNext">
-          Next
+          Next, with 2+ cameras
         </v-btn>
       </div>
     </div>
@@ -93,11 +95,6 @@ export default {
       session: state => state.data.session,
       username: state => state.auth.username,
     }),
-    hasMonoAccess() {
-      const allowedUsers = ['selimgilon', 'suhlrich', 'antoine', 'dev_user'];
-      const currentUser = this.username || localStorage.getItem('auth_user');
-      return allowedUsers.includes(currentUser);
-    },
   },
   methods: {
     ...mapMutations('data', ['clearAll', 'setConnectDevices']),
@@ -110,10 +107,6 @@ export default {
       this.$router.push(`/${this.session.id}/calibration`)
     },
     skipToSession() {
-      if (!this.hasMonoAccess) {
-        apiError("This feature is restricted.");
-        return;
-      }
       clearToastMessages();
       this.setConnectDevices({
         cameras: this.cameras

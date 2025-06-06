@@ -128,7 +128,7 @@
             </v-card>
       
             <div class="d-flex justify-center">
-              <template>
+              <template v-if="!isMonocularMode">
                 <div class="text-center">
                   <v-btn
                     color="primary-dark"
@@ -342,12 +342,13 @@
         </div>
         <div> <!-- Right slot for action buttons -->
           <v-btn
-            v-if="hasMonoAccess" 
+            v-if="isMonocularMode"
             class="mr-2"
             color="warning"
             :disabled="busy || disabledNextButton"
-            @click="skipProcessing">
-            Next to monocular
+            min-width="280"
+            @click="skipProcessingToMonocular">
+            Next to OpenCap Monocular
           </v-btn>
           <v-btn
             v-if="!isMonocularMode" 
@@ -528,17 +529,14 @@ export default {
       }
     }
     },
-    hasMonoAccess() {
-      const allowedUsers = ['selimgilon', 'suhlrich', 'antoine', 'dev_user'];
-      const currentUser = this.username || localStorage.getItem('auth_user');
-      return allowedUsers.includes(currentUser);
-    },
   },
   async mounted() {
     if (this.$route.query.isMono === 'true') {
       this.isMonocularMode = true;
     }
-    apiInfo("You can now record a neutral pose different than the upright standing pose (e.g., sitting). Select 'Any pose' 'Advanced Settings'.", 8000);
+    if (!this.isMonocularMode) {
+      apiInfo("You can now record a neutral pose different than the upright standing pose (e.g., sitting). Select 'Any pose' 'Advanced Settings'.", 8000);
+    }
     this.loadSession(this.$route.params.id)
     if (this.$route.query.autoRecord) {
       this.onNext();
@@ -698,10 +696,11 @@ export default {
                   `/sessions/${this.session.id}/set_subject/`,
                   {
                       params: {
-                          subject_id: this.identifier,
+                          subject_id: this.subject.id,
                       }
                   }
               )
+              
               const res = await axios.get(
                 `/sessions/${this.session.id}/record/`,
                 {
@@ -840,11 +839,7 @@ export default {
       this.tempFilterFrequency = this.filter_frequency;
       this.componentKey += 1;
     },
-    async skipProcessing() {
-      if (!this.hasMonoAccess) {
-        apiError("This feature is restricted.");
-        return;
-      }
+    async skipProcessingToMonocular() {
       if (await this.$refs.observer.validate()) {
         this.busy = true;
         try {
@@ -852,14 +847,15 @@ export default {
             `/sessions/${this.session.id}/set_metadata/`,
             {
               params: {
+                isMono: true,
                 settings_data_sharing: this.data_sharing,
-                settings_scaling_setup: this.scaling_setup,
-                settings_pose_model: this.pose_model,
+                // settings_scaling_setup: this.scaling_setup,
+                // settings_pose_model: this.pose_model,
                 settings_framerate: this.framerate,
                 settings_session_name: this.sessionName,
                 settings_openSimModel: this.openSimModel,
-                settings_augmenter_model: this.augmenter_model,
-                settings_filter_frequency: this.filter_frequency,
+                // settings_augmenter_model: this.augmenter_model,
+                // settings_filter_frequency: this.filter_frequency,
               },
             }
           );
@@ -873,7 +869,6 @@ export default {
             }
           );
           
-          apiSuccess("Skipped processing for monocular setup.", 3000);
           this.$router.push({
             name: "Session",
             params: {
@@ -1030,5 +1025,16 @@ export default {
   margin-top: 20px; /* Adjust the value as needed */
   font-size: 20px;  /* Adjust the font size as needed */
   font-weight: bold;
+}
+
+/* Ensure dropdowns appear above navigation buttons */
+.v-select__content,
+.v-autocomplete__content,
+.v-menu__content {
+  z-index: 999 !important;
+}
+
+.custom-navigation {
+  z-index: 10;
 }
 </style>
