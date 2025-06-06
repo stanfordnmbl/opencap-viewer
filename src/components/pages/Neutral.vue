@@ -342,6 +342,7 @@
         </div>
         <div> <!-- Right slot for action buttons -->
           <v-btn
+            v-if="isMonocularMode"
             class="mr-2"
             color="warning"
             :disabled="busy || disabledNextButton"
