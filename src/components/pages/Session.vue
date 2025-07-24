@@ -940,6 +940,7 @@
             break
           }
         }
+        await new Promise(r => setTimeout(r, 500));
       },
       recordTimerHandler() {
         this.recordingTimePassed = moment().diff(this.recordingStarted, 'seconds')
