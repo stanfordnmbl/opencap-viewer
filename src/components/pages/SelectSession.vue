@@ -341,7 +341,7 @@ export default {
     ]),
     handleSearch() {
       this.loading = true;
-      const params = new URLSearchParams({ text: this.searchText }).toString();Add commentMore actions
+      const params = new URLSearchParams({ text: this.searchText }).toString();
       axios.get(`/sessions/search_sessions/?${params}`).then(response => {
         const filteredSessions = response.data.filter(session => {
           // Count trials that are NOT calibration
