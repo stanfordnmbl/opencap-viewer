@@ -43,12 +43,13 @@
       <v-text-field
         v-model="searchText"
         class="ml-2"
-        label="Enter text"
+        label="Enter Session ID/Name"
         dense
+        @keyup.enter="handleSearch"
       ></v-text-field>
 
       <v-btn
-        class="ml-2"
+        class="ml-2 submit-btn"
         @click="handleSearch">
         Submit
       </v-btn>
@@ -342,23 +343,47 @@ export default {
     handleSearch() {
       this.loading = true;
       const params = new URLSearchParams({ text: this.searchText }).toString();
-      axios.get(`/sessions/search_sessions/?${params}`).then(response => {
-        const filteredSessions = response.data.filter(session => {
-          // Count trials that are NOT calibration
-          const nonCalibrationTrials = session.trials.filter(
-            trial => trial.name.toLowerCase() !== 'calibration'
-          );
-          // Keep the session only if there's at least one non-calibration trial
-          return nonCalibrationTrials.length > 0;
-        });
 
-        this.valid_sessions = filteredSessions;
-        this.session_total = filteredSessions.length;
-        this.loading = false;
-      }).catch(error => {
-        apiError(error)
-        this.loading = false
-      })
+      let data = {
+        start: this.session_start,
+        quantity: this.session_quantity,
+        include_trashed: this.show_trashed,
+        sort: this.session_sort,
+        sort_desc: this.session_sort_desc
+      }
+      // If empty search text, retrieve everything as normally would do.
+      if(this.searchText === "") {
+        axios.post('/sessions/valid/', data).then(response => {
+          this.valid_sessions = response.data.sessions
+          this.session_total = response.data.total
+          this.loading = false
+          if (this.session_total === 0) {
+            router.push({ name: 'Step1' })
+          }
+        }).catch(error => {
+          apiError(error)
+          this.loading = false
+        })
+      // If search text, filter by it.
+      } else {
+        axios.get(`/sessions/search_sessions/?${params}`).then(response => {
+          const filteredSessions = response.data.filter(session => {
+            // Count trials that are NOT calibration
+            const nonCalibrationTrials = session.trials.filter(
+              trial => trial.name.toLowerCase() !== 'calibration'
+            );
+            // Keep the session only if there's at least one non-calibration trial
+            return nonCalibrationTrials.length > 0;
+          });
+
+          this.valid_sessions = filteredSessions;
+          this.session_total = filteredSessions.length;
+          this.loading = false;
+        }).catch(error => {
+          apiError(error)
+          this.loading = false
+        })
+      }
     },
     loadValidSessions () {
       this.loading = true
@@ -456,6 +481,14 @@ export default {
 </script>
 
 <style lang="scss">
+
+.submit-btn {
+  width: 120px;
+  min-width: unset; /* remove Vuetify’s fixed width */
+  padding-left: 8px; /* optional tighter padding */
+  padding-right: 8px;
+}
+
 .select-session {
   height: calc(98vh - 64px);
 
