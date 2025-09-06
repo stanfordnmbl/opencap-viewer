@@ -40,19 +40,33 @@
 
       <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed sessions"></v-checkbox>
 
-      <v-text-field
-        v-model="searchText"
-        class="ml-2"
-        label="Enter Session ID/Name"
-        dense
-        @keyup.enter="handleSearch"
-      ></v-text-field>
+      <div v-if="!searchSubmitted">
+        <!-- Text field and Search button -->
+        <v-text-field
+          v-model="searchText"
+          class="ml-2"
+          label="Enter Session ID/Name"
+          dense
+          @keyup.enter="handleSearch"
+        ></v-text-field>
+      </div>
 
-      <v-btn
-        class="ml-2 submit-btn"
-        @click="handleSearch">
-        Submit
-      </v-btn>
+      <div v-if="!searchSubmitted">
+        <v-btn
+          class="ml-2 submit-btn"
+          @click="handleSearch">
+          Search
+        </v-btn>
+      </div>
+
+      <!-- Clear Search button -->
+      <div v-else>
+        <v-btn
+          class="ml-2  submit-btn"
+          @click="onClearSearch">
+          Clear Search
+        </v-btn>
+      </div>
     </div>
 
     <v-data-table        
@@ -294,6 +308,7 @@ export default {
       sessionNewName: '',
       show_trashed: false,
       searchText: '',
+      searchSubmitted: false,
       headers: [
         {
           text: 'Session ID',
@@ -340,8 +355,14 @@ export default {
         'restoreTrashedSession',
         'loadAnalysisDashboardList',
     ]),
+    onClearSearch() {
+      this.searchText = ""
+      this.handleSearch();
+      this.searchSubmitted = false;
+    },
     handleSearch() {
       this.loading = true;
+      this.searchSubmitted = true;
       const params = new URLSearchParams({ text: this.searchText }).toString();
 
       let data = {

@@ -843,6 +843,7 @@
         'initSessionSameSetup',
         'loadAnalysisFunctions', 'loadAnalysisFunctionsPending', 'loadAnalysisFunctionsStates', 'loadTrialTags']),
       async changeState() {
+      this.state == "recording"
         switch (this.state) {
           case 'ready': {
             this.submitted = true
