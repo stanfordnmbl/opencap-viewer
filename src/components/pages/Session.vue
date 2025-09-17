@@ -1365,13 +1365,15 @@
                     light.position.set(2, 3, 1.5);
                     light.target.position.set(0, 0, 0);
                     light.castShadow = true;
-                    light.shadow.camera.left = -10
-                    light.shadow.camera.right = 10
-                    light.shadow.camera.top = -10
-                    light.shadow.camera.bottom = 10
-                    light.shadow.camera.near = 0
-                    light.shadow.camera.far = 50
-                    light.shadow.camera.zoom = 8
+                    light.shadow.camera.left = -50;
+                    light.shadow.camera.right = 50;
+                    light.shadow.camera.top = 50;
+                    light.shadow.camera.bottom = -50;
+                    light.shadow.camera.near = 0.1;
+                    light.shadow.camera.far = 200;
+                    light.shadow.camera.zoom = 16
+                    light.shadow.mapSize.width = 2048;
+                    light.shadow.mapSize.height = 2048;
                     this.scene.add(light);
                     this.scene.add(light.target);
   
