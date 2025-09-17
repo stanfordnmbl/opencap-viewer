@@ -40,32 +40,34 @@
 
       <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed sessions"></v-checkbox>
 
-      <div v-if="!searchSubmitted">
-        <!-- Text field and Search button -->
-        <v-text-field
-          v-model="searchText"
-          class="ml-2"
-          label="Enter Session ID/Name"
-          dense
-          @keyup.enter="handleSearch"
-        ></v-text-field>
-      </div>
+      <div class="d-flex align-center ml-auto">
+        <div v-if="!searchSubmitted">
+          <!-- Text field and Search button -->
+          <v-text-field
+            v-model="searchText"
+            class="ml-2"
+            label="Enter Session ID/Name"
+            dense
+            @keyup.enter="handleSearch"
+          ></v-text-field>
+        </div>
 
-      <div v-if="!searchSubmitted">
-        <v-btn
-          class="ml-2 submit-btn"
-          @click="handleSearch">
-          Search
-        </v-btn>
-      </div>
+        <div v-if="!searchSubmitted">
+          <v-btn
+            class="ml-2 submit-btn"
+            @click="handleSearch">
+            Search
+          </v-btn>
+        </div>
 
-      <!-- Clear Search button -->
-      <div v-else>
-        <v-btn
-          class="ml-2  submit-btn"
-          @click="onClearSearch">
-          Clear Search
-        </v-btn>
+        <!-- Clear Search button -->
+        <div v-else>
+          <v-btn
+            class="ml-2  submit-btn"
+            @click="onClearSearch">
+            Clear Search
+          </v-btn>
+        </div>
       </div>
     </div>
 
