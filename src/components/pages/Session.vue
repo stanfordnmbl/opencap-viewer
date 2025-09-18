@@ -1405,6 +1405,8 @@
                         })
                       })
                     }
+                  } else {
+                    apiErrorRes(null, 'Showing uploaded videos (not synchronized).')
                   }
                 } finally {
                   this.trialLoading = false
