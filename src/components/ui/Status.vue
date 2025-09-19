@@ -39,7 +39,8 @@ export default {
         
         case 'error': {
           const res = await axios.get(`/trials/${this.value.id}/`)
-          apiErrorRes(res, 'Error in processing, you may want to re-record this trial.')         
+          apiErrorRes(res, 'Error in processing, you may want to re-record this trial.')
+          this.$emit('click')
           break          
         }
 
