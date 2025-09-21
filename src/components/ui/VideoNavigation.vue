@@ -16,7 +16,6 @@
 
     <v-btn
       icon
-      :disabled="disabled"
       @click="$emit(playing ? 'pause' : 'play')">
       <v-icon>{{ playing ? 'mdi-pause' : 'mdi-play' }}</v-icon>
     </v-btn>

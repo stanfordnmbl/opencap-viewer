@@ -39,6 +39,36 @@
       </v-btn>
 
       <v-checkbox v-model="show_trashed" class="ml-2 mt-0" label="Show removed sessions"></v-checkbox>
+
+      <div class="d-flex align-center ml-auto">
+        <div v-if="!searchSubmitted">
+          <!-- Text field and Search button -->
+          <v-text-field
+            v-model="searchText"
+            class="ml-2"
+            label="Enter Session ID/Name"
+            dense
+            @keyup.enter="handleSearch"
+          ></v-text-field>
+        </div>
+
+        <div v-if="!searchSubmitted">
+          <v-btn
+            class="ml-2 submit-btn"
+            @click="handleSearch">
+            Search
+          </v-btn>
+        </div>
+
+        <!-- Clear Search button -->
+        <div v-else>
+          <v-btn
+            class="ml-2  submit-btn"
+            @click="onClearSearch">
+            Clear Search
+          </v-btn>
+        </div>
+      </div>
     </div>
 
     <v-data-table        
@@ -279,6 +309,8 @@ export default {
       sessionName: '',
       sessionNewName: '',
       show_trashed: false,
+      searchText: '',
+      searchSubmitted: false,
       headers: [
         {
           text: 'Session ID',
@@ -325,6 +357,57 @@ export default {
         'restoreTrashedSession',
         'loadAnalysisDashboardList',
     ]),
+    onClearSearch() {
+      this.searchText = ""
+      this.handleSearch();
+      this.searchSubmitted = false;
+    },
+    handleSearch() {
+      this.loading = true;
+      this.searchSubmitted = true;
+      const params = new URLSearchParams({ text: this.searchText }).toString();
+
+      let data = {
+        start: this.session_start,
+        quantity: this.session_quantity,
+        include_trashed: this.show_trashed,
+        sort: this.session_sort,
+        sort_desc: this.session_sort_desc
+      }
+      // If empty search text, retrieve everything as normally would do.
+      if(this.searchText === "") {
+        axios.post('/sessions/valid/', data).then(response => {
+          this.valid_sessions = response.data.sessions
+          this.session_total = response.data.total
+          this.loading = false
+          if (this.session_total === 0) {
+            router.push({ name: 'Step1' })
+          }
+        }).catch(error => {
+          apiError(error)
+          this.loading = false
+        })
+      // If search text, filter by it.
+      } else {
+        axios.get(`/sessions/search_sessions/?${params}`).then(response => {
+          const filteredSessions = response.data.filter(session => {
+            // Count trials that are NOT calibration
+            const nonCalibrationTrials = session.trials.filter(
+              trial => trial.name.toLowerCase() !== 'calibration'
+            );
+            // Keep the session only if there's at least one non-calibration trial
+            return nonCalibrationTrials.length > 0;
+          });
+
+          this.valid_sessions = filteredSessions;
+          this.session_total = filteredSessions.length;
+          this.loading = false;
+        }).catch(error => {
+          apiError(error)
+          this.loading = false
+        })
+      }
+    },
     loadValidSessions () {
       this.loading = true
       let data = {
@@ -421,6 +504,14 @@ export default {
 </script>
 
 <style lang="scss">
+
+.submit-btn {
+  width: 120px;
+  min-width: unset; /* remove Vuetify’s fixed width */
+  padding-left: 8px; /* optional tighter padding */
+  padding-right: 8px;
+}
+
 .select-session {
   height: calc(98vh - 64px);
 

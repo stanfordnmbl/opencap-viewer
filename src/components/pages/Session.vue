@@ -940,6 +940,7 @@
             break
           }
         }
+        await new Promise(r => setTimeout(r, 500));
       },
       recordTimerHandler() {
         this.recordingTimePassed = moment().diff(this.recordingStarted, 'seconds')
@@ -1246,7 +1247,7 @@
           this.trial = null
           this.synced = false
           this.trialLoading = true
-  
+
           try {
             const {data} = await axios.get(`/trials/${trial.id}/`)
   
@@ -1255,7 +1256,6 @@
   
             // load JSON
             const json = data.results.filter(element => element.tag == "visualizerTransforms-json")
-  
             if (json && json.length > 0) {
               let data
               const url = json[0].media
@@ -1286,18 +1286,26 @@
   
             this.videos = data.results.filter(element => element.tag == "video-sync")
 
+            let render_skeleton = true
+
             if (this.videos.length === 0) {
               this.frame = 0
               this.time = 0
+              this.videos = data.videos
+              this.videos.forEach(videoObj => {
+                videoObj.media = videoObj.video;
+                delete videoObj.video;
+              });
+              render_skeleton = false
             }
 
-            if (this.frames.length > 0) {
+            if (this.frames.length > 0 || this.videos.length > 0) {
               this.$nextTick(() => {
                 try {
                   while (this.$refs.mocap.lastChild) {
                     this.$refs.mocap.removeChild(this.$refs.mocap.lastChild)
                   }
-  
+
                   // setup3d
                   const container = this.$refs.mocap
   
@@ -1357,13 +1365,15 @@
                     light.position.set(2, 3, 1.5);
                     light.target.position.set(0, 0, 0);
                     light.castShadow = true;
-                    light.shadow.camera.left = -10
-                    light.shadow.camera.right = 10
-                    light.shadow.camera.top = -10
-                    light.shadow.camera.bottom = 10
-                    light.shadow.camera.near = 0
-                    light.shadow.camera.far = 50
-                    light.shadow.camera.zoom = 8
+                    light.shadow.camera.left = -50;
+                    light.shadow.camera.right = 50;
+                    light.shadow.camera.top = 50;
+                    light.shadow.camera.bottom = -50;
+                    light.shadow.camera.near = 0.1;
+                    light.shadow.camera.far = 200;
+                    light.shadow.camera.zoom = 16
+                    light.shadow.mapSize.width = 2048;
+                    light.shadow.mapSize.height = 2048;
                     this.scene.add(light);
                     this.scene.add(light.target);
   
@@ -1373,26 +1383,30 @@
                     // const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
                     // this.scene.add(cameraHelper);
                   }
-  
-                  // add bones
-                  for (let body in this.animation_json.bodies) {
-                    let bd = this.animation_json.bodies[body]
-                    bd.attachedGeometries.forEach((geom) => {
-                      let path = 'https://mc-opencap-public.s3.us-west-2.amazonaws.com/geometries/' + geom.substr(0, geom.length - 4) + ".obj";
-                      objLoader.load(path, (root) => {
-                        root.castShadow = true;
-                        root.receiveShadow = true;
-                        root.traverse(function (child) {
-                          if (child instanceof THREE.Mesh) {
-                            //                               child.receiveShadow = true;
-                            child.castShadow = true;
-                          }
-                        });
-                        this.meshes[body + geom] = root;
-                        this.meshes[body + geom].scale.set(bd.scaleFactors[0], bd.scaleFactors[1], bd.scaleFactors[2])
-                        this.scene.add(root);
+
+                  if (render_skeleton) {
+                    // add bones
+                    for (let body in this.animation_json.bodies) {
+                      let bd = this.animation_json.bodies[body]
+                      bd.attachedGeometries.forEach((geom) => {
+                        let path = 'https://mc-opencap-public.s3.us-west-2.amazonaws.com/geometries/' + geom.substr(0, geom.length - 4) + ".obj";
+                        objLoader.load(path, (root) => {
+                          root.castShadow = true;
+                          root.receiveShadow = true;
+                          root.traverse(function (child) {
+                            if (child instanceof THREE.Mesh) {
+                              //                               child.receiveShadow = true;
+                              child.castShadow = true;
+                            }
+                          });
+                          this.meshes[body + geom] = root;
+                          this.meshes[body + geom].scale.set(bd.scaleFactors[0], bd.scaleFactors[1], bd.scaleFactors[2])
+                          this.scene.add(root);
+                        })
                       })
-                    })
+                    }
+                  } else {
+                    apiErrorRes(null, 'Showing uploaded videos (not synchronized).')
                   }
                 } finally {
                   this.trialLoading = false
